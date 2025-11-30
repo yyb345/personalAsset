@@ -1,5 +1,6 @@
 package com.example.finance;
 
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +31,25 @@ public class AssetController {
     private StockService stockService;
 
     private static final BigDecimal SGD_TO_CNY_RATE = new BigDecimal("5.4");
+    
+    private Long getUserIdFromSession(HttpSession session) {
+        Object userId = session.getAttribute("userId");
+        if (userId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return (Long) userId;
+    }
 
     @GetMapping("/months")
-    public List<String> getMonths() {
-        return assetRepository.findDistinctMonths();
+    public List<String> getMonths(HttpSession session) {
+        Long userId = getUserIdFromSession(session);
+        return assetRepository.findDistinctMonthsByUserId(userId);
     }
 
     @GetMapping("/assets")
-    public List<Asset> getAssetsByMonth(@RequestParam(required = false) String month) {
-        logger.info("Fetching assets for month: {}", month);
+    public List<Asset> getAssetsByMonth(@RequestParam(required = false) String month, HttpSession session) {
+        Long userId = getUserIdFromSession(session);
+        logger.info("Fetching assets for month: {} and userId: {}", month, userId);
         if (month == null || month.isEmpty()) {
             logger.warn("Month parameter is null or empty");
             return Collections.emptyList();
@@ -47,8 +58,8 @@ public class AssetController {
             YearMonth yearMonth = YearMonth.parse(month); // Expects "YYYY-MM"
             LocalDate startDate = yearMonth.atDay(1);
             LocalDate endDate = yearMonth.atEndOfMonth();
-            List<Asset> assets = assetRepository.findAllByEntryDateBetween(startDate, endDate);
-            logger.info("Found {} assets for month {}", assets.size(), month);
+            List<Asset> assets = assetRepository.findAllByUserIdAndEntryDateBetween(userId, startDate, endDate);
+            logger.info("Found {} assets for month {} and userId {}", assets.size(), month, userId);
             return assets;
         } catch (DateTimeParseException e) {
             logger.error("Invalid month format: {}", month, e);
@@ -57,8 +68,10 @@ public class AssetController {
     }
 
     @PostMapping("/assets")
-    public Asset addAsset(@RequestBody Asset asset) {
-        logger.info("Adding new asset: {} of type {}", asset.getName(), asset.getType());
+    public Asset addAsset(@RequestBody Asset asset, HttpSession session) {
+        Long userId = getUserIdFromSession(session);
+        logger.info("Adding new asset: {} of type {} for userId: {}", asset.getName(), asset.getType(), userId);
+        asset.setUserId(userId);
         if (asset.getEntryDate() == null) {
             asset.setEntryDate(LocalDate.now());
         }
@@ -71,8 +84,9 @@ public class AssetController {
     }
 
     @PutMapping("/assets/{id}")
-    public ResponseEntity<Asset> updateAsset(@PathVariable Long id, @RequestBody Asset assetDetails) {
-        logger.info("Updating asset with ID: {}", id);
+    public ResponseEntity<Asset> updateAsset(@PathVariable Long id, @RequestBody Asset assetDetails, HttpSession session) {
+        Long userId = getUserIdFromSession(session);
+        logger.info("Updating asset with ID: {} for userId: {}", id, userId);
         Optional<Asset> optionalAsset = assetRepository.findById(id);
         if (!optionalAsset.isPresent()) {
             logger.warn("Asset not found with ID: {}", id);
@@ -80,6 +94,12 @@ public class AssetController {
         }
         
         Asset asset = optionalAsset.get();
+        // 验证资产属于当前用户
+        if (!asset.getUserId().equals(userId)) {
+            logger.warn("User {} attempted to update asset {} owned by user {}", userId, id, asset.getUserId());
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        
         asset.setName(assetDetails.getName());
         asset.setType(assetDetails.getType());
         asset.setValue(assetDetails.getValue());
@@ -92,19 +112,30 @@ public class AssetController {
     }
 
     @DeleteMapping("/assets/{id}")
-    public ResponseEntity<Void> deleteAsset(@PathVariable Long id) {
-        logger.info("Deleting asset with ID: {}", id);
-        if (!assetRepository.existsById(id)) {
+    public ResponseEntity<Void> deleteAsset(@PathVariable Long id, HttpSession session) {
+        Long userId = getUserIdFromSession(session);
+        logger.info("Deleting asset with ID: {} for userId: {}", id, userId);
+        Optional<Asset> optionalAsset = assetRepository.findById(id);
+        if (!optionalAsset.isPresent()) {
             logger.warn("Asset not found for deletion with ID: {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        
+        Asset asset = optionalAsset.get();
+        // 验证资产属于当前用户
+        if (!asset.getUserId().equals(userId)) {
+            logger.warn("User {} attempted to delete asset {} owned by user {}", userId, id, asset.getUserId());
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        
         assetRepository.deleteById(id);
         logger.info("Successfully deleted asset with ID: {}", id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/report")
-    public Map<String, Object> getReport(@RequestParam(required = false) String month) {
+    public Map<String, Object> getReport(@RequestParam(required = false) String month, HttpSession session) {
+        Long userId = getUserIdFromSession(session);
         List<Asset> assets;
         if (month == null || month.isEmpty()) {
             assets = Collections.emptyList();
@@ -113,7 +144,7 @@ public class AssetController {
                 YearMonth yearMonth = YearMonth.parse(month);
                 LocalDate startDate = yearMonth.atDay(1);
                 LocalDate endDate = yearMonth.atEndOfMonth();
-                assets = assetRepository.findAllByEntryDateBetween(startDate, endDate);
+                assets = assetRepository.findAllByUserIdAndEntryDateBetween(userId, startDate, endDate);
             } catch (DateTimeParseException e) {
                 assets = Collections.emptyList();
             }
@@ -137,8 +168,9 @@ public class AssetController {
     }
 
     @GetMapping("/reports/monthly-summary")
-    public List<Map<String, Object>> getMonthlySummary() {
-        List<Asset> allAssets = assetRepository.findAll();
+    public List<Map<String, Object>> getMonthlySummary(HttpSession session) {
+        Long userId = getUserIdFromSession(session);
+        List<Asset> allAssets = assetRepository.findAllByUserId(userId);
 
         Map<YearMonth, BigDecimal> monthlyTotals = allAssets.stream()
                 .collect(Collectors.groupingBy(
@@ -158,8 +190,9 @@ public class AssetController {
     }
 
     @GetMapping("/reports/stacked-bar-data")
-    public List<List<Object>> getStackedBarData() {
-        List<Asset> allAssets = assetRepository.findAll();
+    public List<List<Object>> getStackedBarData(HttpSession session) {
+        Long userId = getUserIdFromSession(session);
+        List<Asset> allAssets = assetRepository.findAllByUserId(userId);
 
         // 1. Group data by month and then by asset type
         Map<YearMonth, Map<String, BigDecimal>> data = allAssets.stream()

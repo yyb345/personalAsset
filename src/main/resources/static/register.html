@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 个人财务管理系统</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 0;
+        }
+
+        .register-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .register-header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .register-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.3rem;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+        .register-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: #666;
+        }
+
+        .register-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-error {
+            background-color: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert-success {
+            background-color: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>创建账号</h1>
+            <p>开始管理您的个人财务</p>
+        </div>
+
+        <div id="alertMessage"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">用户名 *</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+                <small>至少3个字符</small>
+            </div>
+
+            <div class="form-group">
+                <label for="email">邮箱地址 *</label>
+                <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="fullName">姓名</label>
+                <input type="text" id="fullName" name="fullName" autocomplete="name">
+            </div>
+
+            <div class="form-group">
+                <label for="password">密码 *</label>
+                <input type="password" id="password" name="password" required autocomplete="new-password">
+                <small>至少6个字符</small>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">确认密码 *</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn-register">注册</button>
+        </form>
+
+        <div class="register-footer">
+            已有账号？<a href="login.html">立即登录</a>
+        </div>
+    </div>
+
+    <script>
+        const registerForm = document.getElementById('registerForm');
+        const alertMessage = document.getElementById('alertMessage');
+
+        // 检查是否已登录
+        fetch('/api/auth/check')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    window.location.href = '/index.html';
+                }
+            })
+            .catch(err => console.error('检查登录状态失败:', err));
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const fullName = document.getElementById('fullName').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // 前端验证
+            if (username.length < 3) {
+                showAlert('用户名至少需要3个字符', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('密码长度至少为6位', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAlert('两次输入的密码不一致', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, fullName, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('注册成功！正在跳转到登录页...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message || '注册失败，请重试', 'error');
+                }
+            } catch (error) {
+                showAlert('网络错误，请检查连接', 'error');
+                console.error('注册错误:', error);
+            }
+        });
+
+        function showAlert(message, type) {
+            alertMessage.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                if (type !== 'success') {
+                    alertMessage.innerHTML = '';
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
+

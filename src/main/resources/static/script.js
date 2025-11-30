@@ -1,4 +1,33 @@
+// --- 登录状态检查函数 ---
+async function checkAuthStatus() {
+    try {
+        const response = await fetch('/api/auth/check');
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+            // 未登录，跳转到登录页
+            window.location.href = '/login.html';
+            return false;
+        }
+        
+        // 已登录，更新用户信息显示
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement && data.username) {
+            userNameElement.textContent = data.fullName || data.username;
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('检查登录状态失败:', error);
+        window.location.href = '/login.html';
+        return false;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // --- 登录状态检查 ---
+    checkAuthStatus();
+
     // --- DOM Elements ---
     const menu = document.querySelector('.menu');
     const menuItems = document.querySelectorAll('.menu-item');
@@ -9,6 +38,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const sidebar = document.querySelector('.sidebar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
+    
+    // 用户相关元素
+    const userNameElement = document.getElementById('user-name');
+    const btnLogout = document.getElementById('btn-logout');
+    
+    // 登出按钮事件
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            if (confirm('确定要登出吗？')) {
+                try {
+                    const response = await fetch('/api/auth/logout', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        window.location.href = '/login.html';
+                    } else {
+                        alert('登出失败，请重试');
+                    }
+                } catch (error) {
+                    console.error('登出错误:', error);
+                    alert('登出失败，请重试');
+                }
+            }
+        });
+    }
     
     const assetForm = document.getElementById('asset-form');
     const assetsTableBody = document.querySelector('#assets-table tbody');

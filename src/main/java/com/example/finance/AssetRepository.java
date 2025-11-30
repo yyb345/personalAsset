@@ -17,6 +17,22 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
      * @return A list of assets.
      */
     List<Asset> findAllByEntryDateBetween(LocalDate startDate, LocalDate endDate);
+    
+    /**
+     * Finds all assets for a specific user between two dates.
+     * @param userId The user ID.
+     * @param startDate The start date of the period.
+     * @param endDate The end date of the period.
+     * @return A list of assets.
+     */
+    List<Asset> findAllByUserIdAndEntryDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
+    
+    /**
+     * Finds all assets for a specific user.
+     * @param userId The user ID.
+     * @return A list of assets.
+     */
+    List<Asset> findAllByUserId(Long userId);
 
     /**
      * Finds all distinct months (formatted as 'YYYY-MM') that have asset entries.
@@ -25,4 +41,12 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
      */
     @Query(value = "SELECT DISTINCT strftime('%Y-%m', entry_date) FROM asset ORDER BY 1 DESC", nativeQuery = true)
     List<String> findDistinctMonths();
+    
+    /**
+     * Finds all distinct months for a specific user.
+     * @param userId The user ID.
+     * @return A list of strings representing the months, sorted in descending order.
+     */
+    @Query(value = "SELECT DISTINCT strftime('%Y-%m', entry_date) FROM asset WHERE user_id = ?1 ORDER BY 1 DESC", nativeQuery = true)
+    List<String> findDistinctMonthsByUserId(Long userId);
 }
