@@ -1,0 +1,107 @@
+name: Deploy to Aliyun
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+    
+    - name: Login to Aliyun Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ secrets.ALIYUN_REGISTRY }}
+        username: ${{ secrets.ALIYUN_REGISTRY_USER }}
+        password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:latest
+          ${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:${{ github.sha }}
+        cache-from: type=registry,ref=${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:buildcache
+        cache-to: type=registry,ref=${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:buildcache,mode=max
+    
+    - name: Deploy to Aliyun ECS
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.ALIYUN_ECS_HOST }}
+        username: ${{ secrets.ALIYUN_ECS_USER }}
+        key: ${{ secrets.ALIYUN_ECS_SSH_KEY }}
+        port: ${{ secrets.ALIYUN_ECS_PORT || 22 }}
+        script: |
+          # 登录阿里云容器镜像服务
+          docker login --username=${{ secrets.ALIYUN_REGISTRY_USER }} \
+            --password=${{ secrets.ALIYUN_REGISTRY_PASSWORD }} \
+            ${{ secrets.ALIYUN_REGISTRY }}
+          
+          # 创建应用目录
+          mkdir -p ~/finance-app
+          cd ~/finance-app
+          
+          # 拉取最新镜像
+          docker pull ${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:latest
+          
+          # 停止并删除旧容器
+          docker stop finance-app || true
+          docker rm finance-app || true
+          
+          # 启动新容器
+          docker run -d \
+            --name finance-app \
+            --restart unless-stopped \
+            -p 8080:8080 \
+            -v ~/finance-app/data:/data \
+            -e TZ=Asia/Shanghai \
+            ${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:latest
+          
+          # 清理未使用的镜像
+          docker image prune -af --filter "until=72h"
+          
+          # 显示运行状态
+          echo "等待应用启动..."
+          sleep 10
+          docker ps | grep finance-app
+          echo "检查应用健康状态..."
+          curl -f http://localhost:8080/actuator/health || echo "健康检查失败，请检查日志"
+    
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ 部署成功！"
+          echo "应用地址: http://${{ secrets.ALIYUN_ECS_HOST }}:8080"
+        else
+          echo "❌ 部署失败，请查看日志"
+        fi
+
