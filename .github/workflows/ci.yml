@@ -55,6 +55,10 @@ jobs:
         retention-days: 7
     
     # Docker steps - only run if Docker Hub credentials are configured
+    - name: Set up Docker Buildx
+      if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+      uses: docker/setup-buildx-action@v3
+    
     - name: Login to Docker Hub
       if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
       uses: docker/login-action@v3
@@ -62,12 +66,27 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
-    - name: Build Docker image
+    - name: Docker meta
       if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/finance-app:latest -t ${{ secrets.DOCKERHUB_USERNAME }}/finance-app:${{ github.sha }} .
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/finance-app
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
     
-    - name: Push Docker image
+    - name: Build and push Docker image
       if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
-      run: |
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/finance-app:latest
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/finance-app:${{ github.sha }}
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/finance-app:buildcache
+        cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/finance-app:buildcache,mode=max
+        provenance: true
+        sbom: true
