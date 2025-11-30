@@ -1,5 +1,7 @@
 package com.example.finance;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,8 @@ import java.util.stream.Stream;
 @RequestMapping("/api")
 public class AssetController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AssetController.class);
+
     @Autowired
     private AssetRepository assetRepository;
 
@@ -34,34 +38,44 @@ public class AssetController {
 
     @GetMapping("/assets")
     public List<Asset> getAssetsByMonth(@RequestParam(required = false) String month) {
+        logger.info("Fetching assets for month: {}", month);
         if (month == null || month.isEmpty()) {
+            logger.warn("Month parameter is null or empty");
             return Collections.emptyList();
         }
         try {
             YearMonth yearMonth = YearMonth.parse(month); // Expects "YYYY-MM"
             LocalDate startDate = yearMonth.atDay(1);
             LocalDate endDate = yearMonth.atEndOfMonth();
-            return assetRepository.findAllByEntryDateBetween(startDate, endDate);
+            List<Asset> assets = assetRepository.findAllByEntryDateBetween(startDate, endDate);
+            logger.info("Found {} assets for month {}", assets.size(), month);
+            return assets;
         } catch (DateTimeParseException e) {
+            logger.error("Invalid month format: {}", month, e);
             return Collections.emptyList();
         }
     }
 
     @PostMapping("/assets")
     public Asset addAsset(@RequestBody Asset asset) {
+        logger.info("Adding new asset: {} of type {}", asset.getName(), asset.getType());
         if (asset.getEntryDate() == null) {
             asset.setEntryDate(LocalDate.now());
         }
         if (asset.getCurrency() == null || asset.getCurrency().isEmpty()) {
             asset.setCurrency("CNY");
         }
-        return assetRepository.save(asset);
+        Asset savedAsset = assetRepository.save(asset);
+        logger.info("Successfully saved asset with ID: {}", savedAsset.getId());
+        return savedAsset;
     }
 
     @PutMapping("/assets/{id}")
     public ResponseEntity<Asset> updateAsset(@PathVariable Long id, @RequestBody Asset assetDetails) {
+        logger.info("Updating asset with ID: {}", id);
         Optional<Asset> optionalAsset = assetRepository.findById(id);
         if (!optionalAsset.isPresent()) {
+            logger.warn("Asset not found with ID: {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         
@@ -73,15 +87,19 @@ public class AssetController {
         asset.setEntryDate(assetDetails.getEntryDate());
         
         Asset updatedAsset = assetRepository.save(asset);
+        logger.info("Successfully updated asset with ID: {}", id);
         return new ResponseEntity<>(updatedAsset, HttpStatus.OK);
     }
 
     @DeleteMapping("/assets/{id}")
     public ResponseEntity<Void> deleteAsset(@PathVariable Long id) {
+        logger.info("Deleting asset with ID: {}", id);
         if (!assetRepository.existsById(id)) {
+            logger.warn("Asset not found for deletion with ID: {}", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         assetRepository.deleteById(id);
+        logger.info("Successfully deleted asset with ID: {}", id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -194,10 +212,13 @@ public class AssetController {
     public ResponseEntity<String> getStockData(@RequestParam String symbol, 
                                                  @RequestParam Long period1, 
                                                  @RequestParam Long period2) {
+        logger.info("Fetching stock data for symbol: {}", symbol);
         try {
             String data = stockService.getStockData(symbol, period1, period2);
+            logger.info("Successfully retrieved stock data for symbol: {}", symbol);
             return ResponseEntity.ok(data);
         } catch (Exception e) {
+            logger.error("Error fetching stock data for symbol: {}", symbol, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("{\"error\": \"" + e.getMessage() + "\"}");
         }

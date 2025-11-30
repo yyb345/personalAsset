@@ -1,5 +1,7 @@
 package com.example.finance;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,6 +13,7 @@ import java.util.Random;
 @Service
 public class StockService {
     
+    private static final Logger logger = LoggerFactory.getLogger(StockService.class);
     private static final int CACHE_DURATION_MINUTES = 15;
     private final Map<String, CachedStockData> cache = new HashMap<>();
     private final Random random = new Random();
@@ -31,12 +34,16 @@ public class StockService {
     
     public String getStockData(String symbol, Long period1, Long period2) {
         String cacheKey = symbol + "_" + period1 + "_" + period2;
+        logger.debug("Fetching stock data for symbol: {}, cacheKey: {}", symbol, cacheKey);
         
         // Check cache first
         if (cache.containsKey(cacheKey)) {
             CachedStockData cached = cache.get(cacheKey);
             if (!cached.isExpired()) {
+                logger.info("Returning cached stock data for symbol: {}", symbol);
                 return cached.data;
+            } else {
+                logger.debug("Cache expired for symbol: {}", symbol);
             }
         }
         
@@ -46,6 +53,7 @@ public class StockService {
                 "https://query2.finance.yahoo.com/v8/finance/chart/%s?period1=%d&period2=%d&interval=1d",
                 symbol, period1, period2
             );
+            logger.info("Fetching stock data from Yahoo Finance for symbol: {}", symbol);
             
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.getInterceptors().add((request, body, execution) -> {
@@ -57,16 +65,18 @@ public class StockService {
             
             // Cache the successful response
             cache.put(cacheKey, new CachedStockData(response, LocalDateTime.now()));
+            logger.info("Successfully fetched and cached stock data for symbol: {}", symbol);
             
             return response;
         } catch (Exception e) {
             // If API fails, return mock data
-            System.err.println("Failed to fetch real stock data for " + symbol + ": " + e.getMessage());
+            logger.warn("Failed to fetch real stock data for {}, returning mock data: {}", symbol, e.getMessage());
             return generateMockStockData(symbol, period1, period2);
         }
     }
     
     private String generateMockStockData(String symbol, Long period1, Long period2) {
+        logger.info("Generating mock stock data for symbol: {}", symbol);
         // Generate realistic mock data
         long startTime = period1;
         long endTime = period2;
