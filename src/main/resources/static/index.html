@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人资产管理</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    <aside class="sidebar">
+        <h1 class="sidebar-title">个人资产管理</h1>
+        <nav class="menu">
+            <ul>
+                <li><a href="#" class="menu-item active" data-page="page-entry">资产录入</a></li>
+                <li><a href="#" class="menu-item" data-page="page-charts">资产分析</a></li>
+                <li><a href="#" class="menu-item" data-page="page-future">未来资产</a></li>
+                <li><a href="#" class="menu-item" data-page="page-stocks">股票分析</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="month-selector-container">
+            <label for="view-month">选择查看月份:</label>
+            <input type="text" id="view-month" placeholder="2025-11" pattern="\d{4}-\d{2}" title="请输入格式: YYYY-MM (例如: 2025-11)">
+        </div>
+
+        <div id="page-entry" class="page active">
+            <div class="form-container">
+                <h2>录入新资产</h2>
+                <form id="asset-form">
+                    <div class="form-group">
+                        <label for="entryDate">资产月份:</label>
+                        <input type="text" id="entryDate" name="entryDate" placeholder="2025-11" pattern="\d{4}-\d{2}" title="请输入格式: YYYY-MM (例如: 2025-11)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">资产名称:</label>
+                        <input type="text" id="name" name="name" placeholder="例如: 招商银行储蓄卡" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="type">资产类型:</label>
+                        <select id="type" name="type" required>
+                            <option value="现金">现金</option>
+                            <option value="股票">股票</option>
+                            <option value="基金">基金</option>
+                            <option value="债券">债券</option>
+                            <option value="房地产">房地产</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="value">当前价值:</label>
+                        <input type="number" id="value" name="value" step="0.01" placeholder="例如: 10000.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">币种:</label>
+                        <select id="currency" name="currency" required>
+                            <option value="CNY" selected>人民币 (CNY)</option>
+                            <option value="SGD"> (SGD)</option>
+                        </select>
+                    </div>
+                    <button type="submit">添加资产</button>
+                </form>
+            </div>
+            <div class="assets-container">
+                <h2>我的资产</h2>
+                <table id="assets-table">
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>类型</th>
+                        <th>价值</th>
+                        <th>币种</th>
+                        <th>录入日期</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="page-charts" class="page">
+            <div class="charts-container">
+                <h2>月度资产构成分析</h2>
+                <div id="stacked-bar-chart-container" style="width: 100%; height:600px;"></div>
+            </div>
+        </div>
+
+        <div id="page-future" class="page">
+            <div class="future-container">
+                <h2>未来资产预测</h2>
+                <div class="future-form-section">
+                    <div class="form-group">
+                        <label for="base-month">基准月份:</label>
+                        <div class="input-button-group">
+                            <input type="text" id="base-month" placeholder="2025-11" pattern="\d{4}-\d{2}" title="请输入格式: YYYY-MM (例如: 2025-11)">
+                            <button id="load-base-assets" class="btn-secondary">加载当前资产</button>
+                        </div>
+                    </div>
+                    <div class="current-assets-display">
+                        <p><strong>当前资产总值 (CNY):</strong> <span id="current-asset-value">--</span></p>
+                    </div>
+                </div>
+
+                <div class="future-form-section">
+                    <h3>预测参数</h3>
+                    <div class="exchange-rate-info">
+                        <small>💱 汇率参考: 1 SGD ≈ 5.3 CNY</small>
+                    </div>
+                    
+                    <div class="form-subsection">
+                        <h4>每月收入项目</h4>
+                        <div id="income-items-container">
+                            <div class="income-item" data-index="0">
+                                <div class="item-row">
+                                    <input type="text" class="item-name" placeholder="收入名称（如：工资）" required>
+                                    <input type="number" class="item-amount" step="0.01" placeholder="金额" required>
+                                    <select class="item-currency">
+                                        <option value="CNY" selected>CNY</option>
+                                        <option value="SGD">SGD</option>
+                                    </select>
+                                    <button type="button" class="btn-remove-item" onclick="removeIncomeItem(0)" title="删除">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="add-income-item" class="btn-add-item">+ 添加收入项目</button>
+                    </div>
+
+                    <div class="form-subsection">
+                        <h4>每月支出项目</h4>
+                        <div id="expense-items-container">
+                            <div class="expense-item" data-index="0">
+                                <div class="item-row">
+                                    <input type="text" class="item-name" placeholder="支出名称（如：房租）" required>
+                                    <input type="number" class="item-amount" step="0.01" placeholder="金额" required>
+                                    <select class="item-currency">
+                                        <option value="CNY" selected>CNY</option>
+                                        <option value="SGD">SGD</option>
+                                    </select>
+                                    <button type="button" class="btn-remove-item" onclick="removeExpenseItem(0)" title="删除">×</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="add-expense-item" class="btn-add-item">+ 添加支出项目</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="target-month">截至月份:</label>
+                        <input type="text" id="target-month" placeholder="2026-11" pattern="\d{4}-\d{2}" title="请输入格式: YYYY-MM (例如: 2026-11)" required>
+                    </div>
+                    <button id="calculate-future" class="btn-primary">计算未来资产</button>
+                </div>
+
+                <div class="future-result-section" id="future-result" style="display: none;">
+                    <h3>预测结果</h3>
+                    <div class="result-card">
+                        <div class="result-item">
+                            <span class="result-label">基准月份:</span>
+                            <span class="result-value" id="result-base-month">--</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">当前资产:</span>
+                            <span class="result-value" id="result-current-assets">--</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">预测至:</span>
+                            <span class="result-value" id="result-target-month">--</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">预测月数:</span>
+                            <span class="result-value" id="result-months">--</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">每月总收入:</span>
+                            <span class="result-value" id="result-total-income">--</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">每月总支出:</span>
+                            <span class="result-value" id="result-total-expense">--</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">每月净收入:</span>
+                            <span class="result-value" id="result-net-income">--</span>
+                        </div>
+                        <div class="result-item highlight">
+                            <span class="result-label">预计资产总值:</span>
+                            <span class="result-value" id="result-future-assets">--</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">资产增长:</span>
+                            <span class="result-value" id="result-growth">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-stocks" class="page">
+            <div class="stocks-container">
+                <h2>股票分析</h2>
+                
+                <div class="stocks-control-panel">
+                    <div class="time-range-selector">
+                        <label>时间范围:</label>
+                        <button class="time-btn active" data-range="1M">1个月</button>
+                        <button class="time-btn" data-range="3M">3个月</button>
+                        <button class="time-btn" data-range="6M">6个月</button>
+                        <button class="time-btn" data-range="1Y">1年</button>
+                    </div>
+                    <button id="refresh-stocks" class="btn-refresh">🔄 刷新数据</button>
+                </div>
+
+                <div class="stocks-grid">
+                    <div class="stock-card">
+                        <div class="stock-header">
+                            <h3>阿里巴巴 (BABA)</h3>
+                            <div class="stock-info">
+                                <span class="current-price" id="baba-price">--</span>
+                                <span class="price-change" id="baba-change">--</span>
+                            </div>
+                        </div>
+                        <div class="stock-chart" id="baba-chart"></div>
+                    </div>
+
+                    <div class="stock-card">
+                        <div class="stock-header">
+                            <h3>东方甄选 (01797.HK)</h3>
+                            <div class="stock-info">
+                                <span class="current-price" id="orient-price">--</span>
+                                <span class="price-change" id="orient-change">--</span>
+                            </div>
+                        </div>
+                        <div class="stock-chart" id="orient-chart"></div>
+                    </div>
+
+                    <div class="stock-card">
+                        <div class="stock-header">
+                            <h3>可口可乐 (KO)</h3>
+                            <div class="stock-info">
+                                <span class="current-price" id="ko-price">--</span>
+                                <span class="price-change" id="ko-change">--</span>
+                            </div>
+                        </div>
+                        <div class="stock-chart" id="ko-chart"></div>
+                    </div>
+                </div>
+
+                <div class="stocks-disclaimer">
+                    <small>⚠️ 数据仅供参考，不构成投资建议。股票价格存在延迟，请以实际交易平台为准。</small>
+                    <small style="display: block; margin-top: 5px;">💡 如遇API限制，系统将自动使用模拟数据进行演示。数据每15分钟更新一次。</small>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>编辑资产</h2>
+        <form id="edit-asset-form">
+            <input type="hidden" id="edit-asset-id" name="id">
+            <div class="form-group">
+                <label for="edit-entryDate">资产月份:</label>
+                <input type="text" id="edit-entryDate" name="entryDate" placeholder="2025-11" pattern="\d{4}-\d{2}" title="请输入格式: YYYY-MM (例如: 2025-11)" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-name">资产名称:</label>
+                <input type="text" id="edit-name" name="name" placeholder="例如: 招商银行储蓄卡" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-type">资产类型:</label>
+                <select id="edit-type" name="type" required>
+                    <option value="现金">现金</option>
+                    <option value="股票">股票</option>
+                    <option value="基金">基金</option>
+                    <option value="债券">债券</option>
+                    <option value="房地产">房地产</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-value">当前价值:</label>
+                <input type="number" id="edit-value" name="value" step="0.01" placeholder="例如: 10000.00" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-currency">币种:</label>
+                <select id="edit-currency" name="currency" required>
+                    <option value="CNY">人民币 (CNY)</option>
+                    <option value="SGD">新加坡元 (SGD)</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button type="submit" class="btn-save">保存</button>
+                <button type="button" class="btn-cancel">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
