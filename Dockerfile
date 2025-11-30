@@ -16,8 +16,8 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# 创建数据目录
-RUN mkdir -p /data
+# 创建数据目录和日志目录
+RUN mkdir -p /data /logs
 
 # 复制构建好的 jar 包
 COPY --from=builder /app/target/*.jar app.jar
@@ -28,6 +28,9 @@ ENV SERVER_PORT=8080
 
 # 暴露端口
 EXPOSE 8080
+
+# 安装 wget 用于健康检查
+RUN apk add --no-cache wget
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
