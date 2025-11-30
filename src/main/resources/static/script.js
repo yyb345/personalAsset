@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const pages = document.querySelectorAll('.page');
     const monthSelectorContainer = document.querySelector('.month-selector-container');
     
+    // 移动端菜单元素
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    
     const assetForm = document.getElementById('asset-form');
     const assetsTableBody = document.querySelector('#assets-table tbody');
     const viewMonthInput = document.getElementById('view-month');
@@ -105,8 +110,39 @@ document.addEventListener('DOMContentLoaded', function () {
         const menuItem = event.target.closest('.menu-item');
         if (menuItem) {
             switchPage(menuItem.getAttribute('data-page'));
+            // 在移动端点击菜单后关闭侧边栏
+            closeMobileSidebar();
         }
     });
+    
+    // --- 移动端菜单功能 ---
+    function openMobileSidebar() {
+        if (sidebar) sidebar.classList.add('active');
+        if (sidebarOverlay) sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+    }
+    
+    function closeMobileSidebar() {
+        if (sidebar) sidebar.classList.remove('active');
+        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // 恢复滚动
+    }
+    
+    // 汉堡菜单按钮点击
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+            if (sidebar.classList.contains('active')) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        });
+    }
+    
+    // 点击遮罩层关闭侧边栏
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+    }
 
     // --- Core Functions ---
     function initializeMonthInputs() {
@@ -174,12 +210,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     const monthOnly = asset.entryDate.substring(0, 7);
 
                     row.innerHTML = `
-                        <td>${escapeHTML(asset.name)}</td>
-                        <td>${escapeHTML(asset.type)}</td>
-                        <td>${formattedValue}</td>
-                        <td>${escapeHTML(asset.currency)}</td>
-                        <td>${asset.entryDate}</td>
-                        <td>
+                        <td data-label="名称">${escapeHTML(asset.name)}</td>
+                        <td data-label="类型">${escapeHTML(asset.type)}</td>
+                        <td data-label="价值">${formattedValue}</td>
+                        <td data-label="币种">${escapeHTML(asset.currency)}</td>
+                        <td data-label="录入日期">${asset.entryDate}</td>
+                        <td data-label="操作">
                             <button class="edit-btn" 
                                 data-id="${asset.id}"
                                 data-name="${escapeHTML(asset.name)}"
