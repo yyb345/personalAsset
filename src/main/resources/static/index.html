@@ -34,6 +34,7 @@
                 <li><a href="#" class="menu-item" data-page="page-charts">资产分析</a></li>
                 <li><a href="#" class="menu-item" data-page="page-future">未来资产</a></li>
                 <li><a href="#" class="menu-item" data-page="page-stocks">股票分析</a></li>
+                <li><a href="#" class="menu-item" data-page="page-news">📰 今日热点</a></li>
             </ul>
         </nav>
     </aside>
@@ -268,6 +269,39 @@
                 <div class="stocks-disclaimer">
                     <small>⚠️ 数据仅供参考，不构成投资建议。股票价格存在延迟，请以实际交易平台为准。</small>
                     <small style="display: block; margin-top: 5px;">💡 如遇API限制，系统将自动使用模拟数据进行演示。数据每15分钟更新一次。</small>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-news" class="page">
+            <div class="news-container">
+                <h2>📰 今日热点</h2>
+                <p class="news-subtitle">实时更新，精选新闻资讯</p>
+
+                <div class="news-controls">
+                    <div class="category-tabs">
+                        <button class="category-tab active" data-category="all">全部</button>
+                        <button class="category-tab" data-category="科技">科技</button>
+                        <button class="category-tab" data-category="财经">财经</button>
+                        <button class="category-tab" data-category="体育">体育</button>
+                        <button class="category-tab" data-category="娱乐">娱乐</button>
+                        <button class="category-tab" data-category="健康">健康</button>
+                        <button class="category-tab" data-category="教育">教育</button>
+                    </div>
+                    <button class="refresh-news-btn" id="refresh-news-btn">
+                        <span>🔄</span>
+                        <span>刷新</span>
+                    </button>
+                </div>
+
+                <div id="news-loading" class="news-loading" style="display: none;">
+                    正在加载新闻...
+                </div>
+
+                <div id="news-error" class="news-error" style="display: none;"></div>
+
+                <div class="news-grid" id="news-grid">
+                    <!-- 新闻卡片将动态插入这里 -->
                 </div>
             </div>
         </div>

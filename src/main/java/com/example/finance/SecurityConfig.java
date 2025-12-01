@@ -22,10 +22,15 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // 简化开发，生产环境建议启用
             .authorizeHttpRequests(auth -> auth
+                // 公开访问的资源
                 .requestMatchers("/api/auth/**", "/login.html", "/register.html", 
-                               "/style.css", "/actuator/**").permitAll()
-                .requestMatchers("/", "/index.html", "/script.js", "/api/**").authenticated()
-                .anyRequest().authenticated()
+                               "/style.css", "/actuator/**", 
+                               "/news.html", "/api/news/**",
+                               "/", "/index.html", "/script.js").permitAll()
+                // 需要认证的API - 资产录入和报表查看
+                .requestMatchers("/api/assets/**", "/api/reports/**", 
+                               "/api/report", "/api/months", "/api/stocks/**").authenticated()
+                .anyRequest().permitAll()
             )
             .formLogin(form -> form
                 .loginPage("/login.html")
@@ -38,7 +43,14 @@ public class SecurityConfig {
             )
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendRedirect("/login.html");
+                    // 对于API请求返回401，对于页面请求重定向到登录页
+                    if (request.getRequestURI().startsWith("/api/")) {
+                        response.setStatus(401);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\":\"请先登录\",\"message\":\"需要登录才能访问此功能\"}");
+                    } else {
+                        response.sendRedirect("/login.html");
+                    }
                 })
             );
 

@@ -10,16 +10,28 @@
     --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Noto Sans SC', sans-serif;
     margin: 0;
+    padding: 0;
     color: var(--text-color);
     background-color: var(--main-bg);
+    overflow-x: hidden; /* 防止横向滚动 */
+    width: 100%;
+    max-width: 100vw;
 }
 
 .app-container {
     display: flex;
     min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden; /* 防止横向滚动 */
+    position: relative;
 }
 
 /* --- Sidebar Styles --- */
@@ -152,6 +164,8 @@ h2 {
     border-radius: 8px;
     box-shadow: 0 4px 15px var(--shadow-color);
     margin-bottom: 30px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .form-group {
@@ -167,6 +181,7 @@ label {
 
 input[type="text"], input[type="number"], select {
     width: 100%;
+    max-width: 100%;
     padding: 12px;
     border: 1px solid var(--border-color);
     border-radius: 5px;
@@ -226,8 +241,11 @@ button:hover {
 
 #assets-table {
     width: 100%;
+    max-width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    table-layout: auto;
+    box-sizing: border-box;
 }
 
 #assets-table th, #assets-table td {
@@ -886,7 +904,8 @@ button:hover {
     }
 
     .app-container {
-        flex-direction: column;
+        flex-direction: row; /* 保持横向布局 */
+        position: relative;
     }
 
     /* 侧边栏移动端样式 */
@@ -925,7 +944,13 @@ button:hover {
     /* 主内容区域调整 */
     .main-content {
         width: 100%;
+        max-width: 100%;
+        min-width: 0; /* 防止flex子元素溢出 */
+        flex: 1 1 auto;
         padding: 70px 15px 15px 15px;
+        margin-left: 0; /* 确保没有左边距 */
+        box-sizing: border-box; /* 确保padding包含在宽度内 */
+        overflow-x: hidden; /* 防止横向滚动 */
     }
 
     /* 月份选择器 */
@@ -943,6 +968,9 @@ button:hover {
     .form-container, .assets-container, .report-container, .charts-container {
         padding: 15px;
         margin-bottom: 20px;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
     }
 
     h2 {
@@ -998,8 +1026,23 @@ button:hover {
 
 /* 手机端专属优化 */
 @media (max-width: 576px) {
+    body {
+        width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    .app-container {
+        width: 100vw;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
     .main-content {
         padding: 60px 10px 10px 10px;
+        width: 100%;
+        max-width: 100vw;
+        min-width: 0;
+        overflow-x: hidden;
     }
 
     .sidebar-title {
@@ -1017,6 +1060,20 @@ button:hover {
     select {
         font-size: 16px; /* 防止iOS自动缩放 */
         padding: 10px;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* 确保表单不溢出 */
+    form {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .form-group {
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     button {
@@ -1144,5 +1201,250 @@ button:hover {
 
     .stocks-container {
         padding: 15px;
+    }
+}
+
+/* ======================================
+   News Page Styles - 新闻页面样式
+   ====================================== */
+
+.news-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.news-subtitle {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.news-controls {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.category-tab {
+    padding: 10px 20px;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.category-tab:hover {
+    background: #f0f4ff;
+}
+
+.category-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+}
+
+.refresh-news-btn {
+    padding: 10px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.refresh-news-btn:hover {
+    transform: scale(1.05);
+}
+
+.refresh-news-btn:active {
+    transform: scale(0.95);
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.news-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.news-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.news-card-content {
+    padding: 20px;
+}
+
+.news-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.news-category {
+    display: inline-block;
+    padding: 5px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.news-time {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.news-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-description {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.news-source {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.read-more {
+    color: #667eea;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.3s;
+}
+
+.read-more:hover {
+    color: #764ba2;
+}
+
+.news-loading {
+    text-align: center;
+    padding: 50px;
+    color: #667eea;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.news-error {
+    background: #ff6b6b;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+    .news-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+    
+    .news-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .category-tabs {
+        justify-content: center;
+    }
+    
+    .refresh-news-btn {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .news-container {
+        padding: 15px;
+    }
+    
+    .news-controls {
+        padding: 15px;
+    }
+    
+    .news-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .category-tabs {
+        gap: 8px;
+    }
+    
+    .category-tab {
+        padding: 8px 16px;
+        font-size: 0.9em;
     }
 }

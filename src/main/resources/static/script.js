@@ -1,33 +1,68 @@
 // --- 登录状态检查函数 ---
+let isLoggedIn = false;
+
 async function checkAuthStatus() {
     try {
         const response = await fetch('/api/auth/check');
         const data = await response.json();
         
-        if (!data.authenticated) {
-            // 未登录，跳转到登录页
-            window.location.href = '/login.html';
-            return false;
+        if (data.authenticated) {
+            isLoggedIn = true;
+            // 已登录，更新用户信息显示
+            const userNameElement = document.getElementById('user-name');
+            const btnLogout = document.getElementById('btn-logout');
+            if (userNameElement) {
+                userNameElement.textContent = data.fullName || data.username;
+            }
+            // 显示登出按钮
+            if (btnLogout) {
+                btnLogout.style.display = 'inline-block';
+            }
+        } else {
+            isLoggedIn = false;
+            // 未登录，显示登录提示
+            updateUIForGuestUser();
         }
         
-        // 已登录，更新用户信息显示
-        const userNameElement = document.getElementById('user-name');
-        if (userNameElement && data.username) {
-            userNameElement.textContent = data.fullName || data.username;
-        }
-        
-        return true;
+        return isLoggedIn;
     } catch (error) {
         console.error('检查登录状态失败:', error);
-        window.location.href = '/login.html';
+        isLoggedIn = false;
+        updateUIForGuestUser();
         return false;
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    // --- 登录状态检查 ---
-    checkAuthStatus();
+function updateUIForGuestUser() {
+    const userNameElement = document.getElementById('user-name');
+    const btnLogout = document.getElementById('btn-logout');
+    
+    if (userNameElement) {
+        userNameElement.innerHTML = '<a href="/login.html" style="color: inherit; text-decoration: underline;">未登录</a>';
+    }
+    
+    // 隐藏登出按钮，显示登录按钮
+    if (btnLogout) {
+        btnLogout.style.display = 'none';
+        const userInfo = document.querySelector('.user-info .user-details');
+        if (userInfo && !document.getElementById('btn-login')) {
+            const loginBtn = document.createElement('button');
+            loginBtn.id = 'btn-login';
+            loginBtn.className = 'btn-logout';
+            loginBtn.textContent = '登录';
+            loginBtn.onclick = () => window.location.href = '/login.html';
+            userInfo.appendChild(loginBtn);
+        }
+    }
+}
 
+function showLoginPrompt(message = '此操作需要登录，请先登录后再试') {
+    if (confirm(message + '\n\n是否前往登录页面？')) {
+        window.location.href = '/login.html';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
     // --- DOM Elements ---
     const menu = document.querySelector('.menu');
     const menuItems = document.querySelectorAll('.menu-item');
@@ -120,19 +155,30 @@ document.addEventListener('DOMContentLoaded', function () {
         'page-entry': '#entry',
         'page-charts': '#charts',
         'page-future': '#future',
-        'page-stocks': '#stocks'
+        'page-stocks': '#stocks',
+        'page-news': '#news'
     };
     
     const hashToPage = {
         '#entry': 'page-entry',
         '#charts': 'page-charts',
         '#future': 'page-future',
-        '#stocks': 'page-stocks'
+        '#stocks': 'page-stocks',
+        '#news': 'page-news'
     };
 
     function switchPage(pageId, updateHash = true) {
+        // 检查 pageId 是否有效
+        if (!pageId) return;
+        
+        const targetPage = document.getElementById(pageId);
+        if (!targetPage) {
+            console.warn(`Page with id "${pageId}" not found`);
+            return;
+        }
+        
         pages.forEach(page => page.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
+        targetPage.classList.add('active');
 
         menuItems.forEach(item => {
             item.classList.toggle('active', item.getAttribute('data-page') === pageId);
@@ -144,12 +190,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         
         // Show/hide month selector based on page
-        monthSelectorContainer.style.display = (pageId === 'page-charts' || pageId === 'page-stocks') ? 'none' : 'flex';
+        monthSelectorContainer.style.display = (pageId === 'page-charts' || pageId === 'page-stocks' || pageId === 'page-news') ? 'none' : 'flex';
 
         if (pageId === 'page-charts') {
             renderStackedBarChart(); // Call the new stacked bar chart render function
         } else if (pageId === 'page-stocks') {
             loadStockData();
+        } else if (pageId === 'page-news') {
+            loadNewsData();
         }
     }
 
@@ -161,12 +209,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     menu.addEventListener('click', function(event) {
-        event.preventDefault();
         const menuItem = event.target.closest('.menu-item');
         if (menuItem) {
-            switchPage(menuItem.getAttribute('data-page'));
-            // 在移动端点击菜单后关闭侧边栏
-            closeMobileSidebar();
+            const pageId = menuItem.getAttribute('data-page');
+            // 如果菜单项有 data-page 属性，则在页面内切换
+            if (pageId) {
+                event.preventDefault();
+                switchPage(pageId);
+                // 在移动端点击菜单后关闭侧边栏
+                closeMobileSidebar();
+            }
+            // 如果没有 data-page 属性（如外部链接），让链接正常跳转
         }
     });
     
@@ -246,8 +299,23 @@ document.addEventListener('DOMContentLoaded', function () {
             assetsTableBody.innerHTML = '<tr><td colspan="6">请选择一个有效的月份</td></tr>';
             return;
         }
+        
+        // 如果未登录，显示提示信息
+        if (!isLoggedIn) {
+            assetsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;"><a href="/login.html" style="color: #667eea; text-decoration: none; font-weight: 500;">🔒 登录后查看资产数据</a></td></tr>';
+            return;
+        }
+        
         try {
             const response = await fetch(`/api/assets?month=${month}`);
+            
+            if (response.status === 401) {
+                isLoggedIn = false;
+                assetsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;"><a href="/login.html" style="color: #667eea; text-decoration: none; font-weight: 500;">🔒 登录后查看资产数据</a></td></tr>';
+                updateUIForGuestUser();
+                return;
+            }
+            
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const assets = await response.json();
@@ -378,6 +446,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function loadBaseAssets() {
+        if (!isLoggedIn) {
+            showLoginPrompt('查看资产数据需要登录');
+            return;
+        }
+        
         const baseMonth = baseMonthInput.value;
         if (!baseMonth || !validateMonthFormat(baseMonth)) {
             alert('请输入有效的基准月份');
@@ -386,6 +459,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             const response = await fetch(`/api/report?month=${baseMonth}`);
+            
+            if (response.status === 401) {
+                isLoggedIn = false;
+                updateUIForGuestUser();
+                showLoginPrompt('会话已过期，请重新登录');
+                return;
+            }
+            
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const report = await response.json();
@@ -550,6 +631,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const url = `/api/stocks/data?symbol=${symbol}&period1=${period1}&period2=${period2}`;
             
             const response = await fetch(url);
+            
+            if (response.status === 401) {
+                isLoggedIn = false;
+                updateUIForGuestUser();
+                return null;
+            }
+            
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const data = await response.json();
@@ -677,6 +765,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function loadStockData() {
+        if (!isLoggedIn) {
+            // 显示登录提示
+            ['baba', 'orient', 'ko'].forEach(id => {
+                const priceEl = document.getElementById(`${id}-price`);
+                const changeEl = document.getElementById(`${id}-change`);
+                if (priceEl) priceEl.innerHTML = '<a href="/login.html" style="color: #667eea; text-decoration: none;">🔒 登录查看</a>';
+                if (changeEl) changeEl.textContent = '';
+            });
+            return;
+        }
+        
         // Show loading indicators
         ['baba', 'orient', 'ko'].forEach(id => {
             const priceEl = document.getElementById(`${id}-price`);
@@ -714,8 +813,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Charting Functions ---
     async function renderStackedBarChart() {
+        if (!isLoggedIn) {
+            stackedBarChartContainer.innerHTML = '<p style="text-align: center; padding: 50px; font-size: 1.2rem;"><a href="/login.html" style="color: #667eea; text-decoration: none; font-weight: 500;">🔒 登录后查看报表数据</a></p>';
+            if(stackedBarChart) stackedBarChart.clear();
+            return;
+        }
+        
         try {
             const response = await fetch('/api/reports/stacked-bar-data');
+            
+            if (response.status === 401) {
+                isLoggedIn = false;
+                updateUIForGuestUser();
+                stackedBarChartContainer.innerHTML = '<p style="text-align: center; padding: 50px; font-size: 1.2rem;"><a href="/login.html" style="color: #667eea; text-decoration: none; font-weight: 500;">🔒 登录后查看报表数据</a></p>';
+                if(stackedBarChart) stackedBarChart.clear();
+                return;
+            }
+            
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const dataset = await response.json(); // dataset is List<List<Object>>
 
@@ -833,6 +947,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     assetForm.addEventListener('submit', async function (event) {
         event.preventDefault();
+        
+        // 检查登录状态
+        if (!isLoggedIn) {
+            showLoginPrompt('录入资产需要登录');
+            return;
+        }
+        
         const formData = new FormData(assetForm);
         const monthValue = formData.get('entryDate');
 
@@ -850,6 +971,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(assetData),
             });
+            
+            if (response.status === 401) {
+                isLoggedIn = false;
+                updateUIForGuestUser();
+                showLoginPrompt('会话已过期，请重新登录');
+                return;
+            }
+            
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             assetForm.reset();
@@ -867,6 +996,11 @@ document.addEventListener('DOMContentLoaded', function () {
     assetsTableBody.addEventListener('click', async function(event) {
         // Handle edit button click
         if (event.target.classList.contains('edit-btn')) {
+            if (!isLoggedIn) {
+                showLoginPrompt('编辑资产需要登录');
+                return;
+            }
+            
             const button = event.target;
             editAssetId.value = button.getAttribute('data-id');
             editName.value = button.getAttribute('data-name');
@@ -880,10 +1014,23 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Handle delete button click
         if (event.target.classList.contains('delete-btn')) {
+            if (!isLoggedIn) {
+                showLoginPrompt('删除资产需要登录');
+                return;
+            }
+            
             const assetId = event.target.getAttribute('data-id');
             if (confirm('您确定要删除这条资产记录吗？')) {
                 try {
                     const response = await fetch(`/api/assets/${assetId}`, { method: 'DELETE' });
+                    
+                    if (response.status === 401) {
+                        isLoggedIn = false;
+                        updateUIForGuestUser();
+                        showLoginPrompt('会话已过期，请重新登录');
+                        return;
+                    }
+                    
                     if (response.ok || response.status === 204) {
                         await loadAssets(viewMonthInput.value);
                     } else {
@@ -919,6 +1066,12 @@ document.addEventListener('DOMContentLoaded', function () {
     editAssetForm.addEventListener('submit', async function(event) {
         event.preventDefault();
         
+        if (!isLoggedIn) {
+            editModal.classList.remove('show');
+            showLoginPrompt('编辑资产需要登录');
+            return;
+        }
+        
         const assetId = editAssetId.value;
         const formData = new FormData(editAssetForm);
         const monthValue = formData.get('entryDate');
@@ -938,6 +1091,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify(assetData),
             });
             
+            if (response.status === 401) {
+                isLoggedIn = false;
+                updateUIForGuestUser();
+                editModal.classList.remove('show');
+                showLoginPrompt('会话已过期，请重新登录');
+                return;
+            }
+            
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             // Close modal and reload assets
@@ -950,6 +1111,154 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // --- News Functions ---
+    let currentNewsCategory = 'all';
+
+    async function loadNewsData() {
+        const loadingEl = document.getElementById('news-loading');
+        const errorEl = document.getElementById('news-error');
+        const gridEl = document.getElementById('news-grid');
+
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (errorEl) errorEl.style.display = 'none';
+        if (gridEl) gridEl.innerHTML = '';
+
+        try {
+            let url = currentNewsCategory === 'all' 
+                ? '/api/news/hot' 
+                : `/api/news/category/${currentNewsCategory}`;
+            
+            const response = await fetch(url);
+            const result = await response.json();
+
+            if (result.success) {
+                displayNewsCards(result.data);
+            } else {
+                showNewsError(result.message || '加载新闻失败');
+            }
+        } catch (error) {
+            console.error('加载新闻失败:', error);
+            showNewsError('网络错误: ' + error.message);
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
+
+    async function refreshNewsData() {
+        try {
+            const response = await fetch('/api/news/refresh', {
+                method: 'POST'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                loadNewsData();
+            } else {
+                showNewsError(result.message || '刷新失败');
+            }
+        } catch (error) {
+            console.error('刷新新闻失败:', error);
+            showNewsError('刷新失败: ' + error.message);
+        }
+    }
+
+    function displayNewsCards(newsList) {
+        const gridEl = document.getElementById('news-grid');
+        if (!gridEl) return;
+
+        if (newsList.length === 0) {
+            gridEl.innerHTML = '<div class="news-loading">暂无新闻</div>';
+            return;
+        }
+
+        gridEl.innerHTML = '';
+        newsList.forEach(news => {
+            const newsCard = createNewsCardElement(news);
+            gridEl.appendChild(newsCard);
+        });
+    }
+
+    function createNewsCardElement(news) {
+        const card = document.createElement('div');
+        card.className = 'news-card';
+        
+        const timeAgo = getTimeAgo(news.publishedAt);
+        
+        card.innerHTML = `
+            <img src="${escapeHTML(news.imageUrl)}" alt="${escapeHTML(news.title)}" class="news-image" onerror="this.src='https://via.placeholder.com/800x450?text=News'">
+            <div class="news-card-content">
+                <div class="news-card-header">
+                    <span class="news-category">${escapeHTML(news.category)}</span>
+                    <span class="news-time">${timeAgo}</span>
+                </div>
+                <h3 class="news-title">${escapeHTML(news.title)}</h3>
+                <p class="news-description">${escapeHTML(news.description)}</p>
+                <div class="news-footer">
+                    <span class="news-source">${escapeHTML(news.source)}</span>
+                    <a href="${escapeHTML(news.url)}" class="read-more" target="_blank" onclick="event.stopPropagation()">阅读全文 →</a>
+                </div>
+            </div>
+        `;
+
+        // 点击卡片打开新闻链接
+        card.addEventListener('click', function() {
+            window.open(news.url, '_blank');
+        });
+
+        return card;
+    }
+
+    function getTimeAgo(dateString) {
+        const now = new Date();
+        const publishedDate = new Date(dateString);
+        const diffMs = now - publishedDate;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) {
+            return '刚刚';
+        } else if (diffMins < 60) {
+            return `${diffMins}分钟前`;
+        } else if (diffHours < 24) {
+            return `${diffHours}小时前`;
+        } else if (diffDays < 7) {
+            return `${diffDays}天前`;
+        } else {
+            return publishedDate.toLocaleDateString('zh-CN');
+        }
+    }
+
+    function showNewsError(message) {
+        const errorEl = document.getElementById('news-error');
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+    }
+
+    // Setup news event listeners
+    function setupNewsEventListeners() {
+        // 分类标签点击事件
+        const categoryTabs = document.querySelectorAll('.category-tab');
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                categoryTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentNewsCategory = this.dataset.category;
+                loadNewsData();
+            });
+        });
+
+        // 刷新按钮点击事件
+        const refreshNewsBtn = document.getElementById('refresh-news-btn');
+        if (refreshNewsBtn) {
+            refreshNewsBtn.addEventListener('click', function() {
+                refreshNewsData();
+            });
+        }
+    }
+
     // --- Utility & Initialization ---
     function escapeHTML(str) {
         if (typeof str !== 'string') return str;
@@ -957,6 +1266,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function init() {
+        // 首先等待登录状态检查完成
+        await checkAuthStatus();
+        
         initializeMonthInputs();
         await loadAssets(viewMonthInput.value);
         
@@ -973,6 +1285,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 targetMonthInput.value = `${nextYear}-${month}`;
             }
         }
+        
+        // Setup news event listeners
+        setupNewsEventListeners();
         
         // Check URL hash and navigate to the corresponding page
         const hash = window.location.hash || '#entry';
