@@ -7,6 +7,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -18,18 +23,35 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // Use allowedOriginPatterns instead of allowedOrigins when allowCredentials is true
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:*", 
+            "http://127.0.0.1:*"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) // 简化开发，生产环境建议启用
             .authorizeHttpRequests(auth -> auth
                 // 公开访问的资源
-                .requestMatchers("/api/auth/**", "/login.html", "/register.html", 
-                               "/style.css", "/actuator/**", 
-                               "/news.html", "/api/news/**",
+                .requestMatchers("/api/auth/**", "/api/admin/**", "/login.html", "/register.html", 
+                               "/style.css", "/actuator/**",
                                "/", "/index.html", "/script.js").permitAll()
-                // 需要认证的API - 资产录入和报表查看
-                .requestMatchers("/api/assets/**", "/api/reports/**", 
-                               "/api/report", "/api/months", "/api/stocks/**").authenticated()
+                // 需要认证的API
+                .requestMatchers("/api/stocks/**").authenticated()
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form
