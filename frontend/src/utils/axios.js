@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+// 根据环境使用不同的 baseURL
+// 生产环境使用相对路径（前后端同域），开发环境使用 localhost
 const instance = axios.create({
-  baseURL: 'http://localhost:8081',
+  baseURL: import.meta.env.PROD ? '' : 'http://localhost:8081',
   timeout: 10000,
   withCredentials: true
 })
