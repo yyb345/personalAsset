@@ -29,11 +29,6 @@ const router = createRouter({
           redirect: '/dashboard/youtube'
         },
         {
-          path: 'stocks',
-          name: 'Stocks',
-          component: () => import('@/views/dashboard/Stocks.vue')
-        },
-        {
           path: 'youtube',
           name: 'YoutubeImport',
           component: () => import('@/views/dashboard/YoutubeImport.vue'),

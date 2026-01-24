@@ -27,12 +27,14 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vue-vendor': ['vue', 'vue-router'],
-          'ui-vendor': ['lucide-vue-next', 'echarts']
+          'ui-vendor': ['lucide-vue-next']
         }
       }
     },
     // 使用 esbuild 进行压缩（更快，内存占用更少）
-    minify: 'esbuild'
+    minify: 'esbuild',
+    // 禁用 sourcemap 以节省内存
+    sourcemap: false
   }
 })
 

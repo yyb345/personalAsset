@@ -63,18 +63,6 @@
       
       <nav class="menu">
         <ul>
-          <!-- 已隐藏：股票分析 -->
-          <!-- <li>
-            <router-link 
-              to="/dashboard/stocks" 
-              class="menu-item"
-              @click="closeMobileSidebar"
-            >
-              <span class="menu-icon">📈</span>
-              <span class="menu-text">股票分析</span>
-            </router-link>
-          </li> -->
-          
           <li>
             <router-link 
               to="/dashboard/youtube" 
