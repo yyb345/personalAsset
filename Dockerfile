@@ -14,7 +14,8 @@ RUN npm ci
 # 复制前端源代码
 COPY frontend/ ./
 
-# 构建前端应用
+# 设置 Node.js 内存限制并构建前端应用
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
 # ============================================

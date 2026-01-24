@@ -19,8 +19,20 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: '../src/main/resources/static',
-    emptyOutDir: true
+    outDir: 'dist',
+    emptyOutDir: true,
+    // 优化构建性能和内存使用
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router'],
+          'ui-vendor': ['lucide-vue-next', 'echarts']
+        }
+      }
+    },
+    // 使用 esbuild 进行压缩（更快，内存占用更少）
+    minify: 'esbuild'
   }
 })
 
