@@ -13,6 +13,8 @@ public interface VideoDownloadTaskRepository extends JpaRepository<VideoDownload
     
     List<VideoDownloadTask> findByYoutubeVideoId(Long youtubeVideoId);
     
+    List<VideoDownloadTask> findByXiaohongshuVideoId(Long xiaohongshuVideoId);
+    
     Optional<VideoDownloadTask> findByIdAndCreatedBy(Long id, Long userId);
     
     List<VideoDownloadTask> findByStatus(String status);

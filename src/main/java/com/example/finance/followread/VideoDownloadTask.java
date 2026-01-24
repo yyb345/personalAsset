@@ -18,6 +18,14 @@ public class VideoDownloadTask {
     @Column(name = "youtube_video_id")
     private Long youtubeVideoId;
     
+    // 关联的小红书视频
+    @Column(name = "xiaohongshu_video_id")
+    private Long xiaohongshuVideoId;
+    
+    // 平台类型: youtube, xiaohongshu
+    @Column(name = "platform")
+    private String platform;
+    
     // 视频 ID（用于文件命名）
     @Column(name = "video_id")
     private String videoId;
@@ -108,6 +116,22 @@ public class VideoDownloadTask {
 
     public void setYoutubeVideoId(Long youtubeVideoId) {
         this.youtubeVideoId = youtubeVideoId;
+    }
+
+    public Long getXiaohongshuVideoId() {
+        return xiaohongshuVideoId;
+    }
+
+    public void setXiaohongshuVideoId(Long xiaohongshuVideoId) {
+        this.xiaohongshuVideoId = xiaohongshuVideoId;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
     }
 
     public String getVideoId() {

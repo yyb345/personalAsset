@@ -33,6 +33,12 @@ const router = createRouter({
           name: 'YoutubeImport',
           component: () => import('@/views/dashboard/YoutubeImport.vue'),
           meta: { requiresAuth: false }
+        },
+        {
+          path: 'xiaohongshu',
+          name: 'XiaohongshuImport',
+          component: () => import('@/views/dashboard/XiaohongshuImport.vue'),
+          meta: { requiresAuth: false }
         }
       ]
     }

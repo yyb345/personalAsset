@@ -72,6 +72,15 @@
               <span class="menu-text">YouTube Videos</span>
             </router-link>
           </li>
+          <li>
+            <router-link 
+              to="/dashboard/xiaohongshu" 
+              class="menu-item"
+              @click="closeMobileSidebar"
+            >
+              <span class="menu-text">小红书视频</span>
+            </router-link>
+          </li>
         </ul>
       </nav>
     </aside>
