@@ -35,8 +35,8 @@ public class ShadowingApiController {
     @PostMapping("/parse")
     public ResponseEntity<?> parseSubtitles(@RequestBody ParseRequest request) {
         try {
-            log.info("📥 收到字幕解析请求: videoId={}, videoUrl={}", 
-                request.getVideoId(), request.getVideoUrl());
+            log.info("📥 收到字幕解析请求: videoId={}, videoUrl={},cookie={}",
+                request.getVideoId(), request.getVideoUrl(),request.getCookies());
 
             // 校验参数
             if (request.getVideoId() == null || request.getVideoId().isEmpty()) {
@@ -84,7 +84,8 @@ public class ShadowingApiController {
                 request.getVideoUrl() : 
                 "https://www.youtube.com/watch?v=" + request.getVideoId();
             
-            log.info("🆕 创建新视频解析任务: videoId={}", request.getVideoId());
+            log.info("🆕 创建新视频解析任务: videoId={}, cookies={}", 
+                request.getVideoId(), request.getCookies() != null ? "已提供" : "未提供");
             
             // 添加到库并触发解析
             YoutubeVideo video = videoService.addVideoToLibrary(
@@ -92,6 +93,11 @@ public class ShadowingApiController {
                 1L,  // 默认用户ID（插件用户）
                 "auto"
             );
+            
+            // 如果提供了 cookies，先保存
+            if (request.getCookies() != null && !request.getCookies().isEmpty()) {
+                videoService.saveCookiesForVideo(video.getVideoId(), request.getCookies());
+            }
             
             // 异步解析字幕
             videoService.parseSubtitlesAsync(video.getId());
@@ -263,7 +269,8 @@ public class ShadowingApiController {
                 request.getVideoId(),
                 request.getVideoUrl(),
                 request.getMetadata(),
-                request.getSubtitles()
+                request.getSubtitles(),
+                request.getCookies()  // 传递 cookies
             );
 
             log.info("✅ 浏览器字幕处理完成: videoId={}, sentences={}", 
@@ -289,6 +296,7 @@ public class ShadowingApiController {
     public static class ParseRequest {
         private String videoId;
         private String videoUrl;
+        private String cookies;  // 添加 cookies 字段
 
         public String getVideoId() {
             return videoId;
@@ -305,6 +313,14 @@ public class ShadowingApiController {
         public void setVideoUrl(String videoUrl) {
             this.videoUrl = videoUrl;
         }
+
+        public String getCookies() {
+            return cookies;
+        }
+
+        public void setCookies(String cookies) {
+            this.cookies = cookies;
+        }
     }
 
     /**
@@ -315,6 +331,7 @@ public class ShadowingApiController {
         private String videoUrl;
         private Map<String, Object> metadata;
         private List<Map<String, Object>> subtitles;
+        private String cookies;  // 添加 cookies 字段
 
         public String getVideoId() {
             return videoId;
@@ -346,6 +363,14 @@ public class ShadowingApiController {
 
         public void setSubtitles(List<Map<String, Object>> subtitles) {
             this.subtitles = subtitles;
+        }
+
+        public String getCookies() {
+            return cookies;
+        }
+
+        public void setCookies(String cookies) {
+            this.cookies = cookies;
         }
     }
 }

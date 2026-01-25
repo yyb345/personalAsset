@@ -209,12 +209,26 @@ public class YoutubeVideoService {
     private void fetchVideoMetadata(YoutubeVideo video) throws Exception {
         // 使用 yt-dlp 获取视频信息
         updateProgress(video, "正在连接YouTube服务器...");
-        ProcessBuilder pb = new ProcessBuilder(
-            "yt-dlp",
-            "--dump-json",
-            "--no-download",
-            video.getSourceUrl()
-        );
+        
+        // 构建命令，如果有 cookies 文件则使用
+        List<String> command = new ArrayList<>();
+        command.add("yt-dlp");
+        
+        // 检查是否有 cookies 文件
+        String cookieFile = getCookieFilePath(video.getVideoId());
+        if (cookieFile != null) {
+            command.add("--cookies");
+            command.add(cookieFile);
+            log.info("🍪 使用 cookies 文件: {}", cookieFile);
+        } else {
+            log.info("ℹ️ 未找到 cookies 文件，尝试无 cookies 方式");
+        }
+        
+        command.add("--dump-json");
+        command.add("--no-download");
+        command.add(video.getSourceUrl());
+        
+        ProcessBuilder pb = new ProcessBuilder(command);
         
         Process process = pb.start();
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -261,16 +275,31 @@ public class YoutubeVideoService {
         
         // 使用 yt-dlp 下载字幕
         updateProgress(video, "正在请求字幕下载...");
-        ProcessBuilder pb = new ProcessBuilder(
-            "yt-dlp",
-            "--write-sub",
-            "--write-auto-sub",
-            "--sub-lang", "en",
-            "--sub-format", "vtt",
-            "--skip-download",
-            "-o", SUBTITLE_DIR + video.getVideoId(),
-            video.getSourceUrl()
-        );
+        
+        // 构建命令，如果有 cookies 文件则使用
+        List<String> command = new ArrayList<>();
+        command.add("yt-dlp");
+        
+        // 检查是否有 cookies 文件
+        String cookieFile = getCookieFilePath(video.getVideoId());
+        if (cookieFile != null) {
+            command.add("--cookies");
+            command.add(cookieFile);
+            log.info("🍪 使用 cookies 文件: {}", cookieFile);
+        }
+        
+        command.add("--write-sub");
+        command.add("--write-auto-sub");
+        command.add("--sub-lang");
+        command.add("en");
+        command.add("--sub-format");
+        command.add("vtt");
+        command.add("--skip-download");
+        command.add("-o");
+        command.add(SUBTITLE_DIR + video.getVideoId());
+        command.add(video.getSourceUrl());
+        
+        ProcessBuilder pb = new ProcessBuilder(command);
         
         Process process = pb.start();
         int exitCode = process.waitFor();
@@ -693,9 +722,16 @@ public class YoutubeVideoService {
             String videoId, 
             String videoUrl, 
             Map<String, Object> metadata,
-            List<Map<String, Object>> browserSubtitles) throws Exception {
+            List<Map<String, Object>> browserSubtitles,
+            String cookies) throws Exception {
         
-        log.info("处理浏览器字幕: videoId={}, 字幕数={}", videoId, browserSubtitles.size());
+        log.info("处理浏览器字幕: videoId={}, 字幕数={}, cookies={}", 
+            videoId, browserSubtitles.size(), cookies != null ? "已提供" : "未提供");
+        
+        // 如果提供了 cookies，保存到临时文件，以便后续需要时使用
+        if (cookies != null && !cookies.isEmpty()) {
+            saveCookiesToFile(videoId, cookies);
+        }
         
         // 检查是否已经存在
         Optional<YoutubeVideo> existingOpt = videoRepository.findByVideoId(videoId);
@@ -770,6 +806,38 @@ public class YoutubeVideoService {
             log.error("❌ 浏览器字幕处理失败: videoId={}", videoId, e);
             throw e;
         }
+    }
+
+    /**
+     * 保存 cookies 到临时文件
+     */
+    private void saveCookiesToFile(String videoId, String cookies) {
+        try {
+            String cookieFilePath = "/tmp/youtube_cookies_" + videoId + ".txt";
+            Files.write(Paths.get(cookieFilePath), cookies.getBytes());
+            log.info("✅ Cookies 已保存到: {}", cookieFilePath);
+        } catch (Exception e) {
+            log.warn("⚠️ 保存 cookies 失败: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * 为视频保存 cookies（public 方法，供 Controller 调用）
+     */
+    public void saveCookiesForVideo(String videoId, String cookies) {
+        saveCookiesToFile(videoId, cookies);
+    }
+    
+    /**
+     * 获取 cookies 文件路径（如果存在）
+     */
+    private String getCookieFilePath(String videoId) {
+        String cookieFilePath = "/tmp/youtube_cookies_" + videoId + ".txt";
+        if (Files.exists(Paths.get(cookieFilePath))) {
+            log.info("✅ 找到 cookies 文件: {}", cookieFilePath);
+            return cookieFilePath;
+        }
+        return null;
     }
 
     // 内部类：句子单元
