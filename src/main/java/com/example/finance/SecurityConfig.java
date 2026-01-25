@@ -25,10 +25,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Use allowedOriginPatterns instead of allowedOrigins when allowCredentials is true
+        // Allow Chrome Extension and localhost
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:*", 
-            "http://127.0.0.1:*"
+            "http://127.0.0.1:*",
+            "chrome-extension://*"  // Allow Chrome extensions
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -50,6 +51,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**", "/api/admin/**", "/login.html", "/register.html", 
                                "/style.css", "/actuator/**",
                                "/", "/index.html", "/script.js").permitAll()
+                // Chrome 插件 API（公开访问）
+                .requestMatchers("/api/youtube/**").permitAll()
                 // 需要认证的API
                 .requestMatchers("/api/stocks/**").authenticated()
                 .anyRequest().permitAll()

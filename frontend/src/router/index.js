@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { checkAuth } from '@/utils/auth'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
@@ -41,6 +41,12 @@ const router = createRouter({
           meta: { requiresAuth: false }
         }
       ]
+    },
+    {
+      path: '/shadowing',
+      name: 'Shadowing',
+      component: () => import('@/views/Shadowing.vue'),
+      meta: { requiresAuth: false }
     }
   ]
 })
