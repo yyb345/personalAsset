@@ -35,8 +35,15 @@ public class ShadowingApiController {
     @PostMapping("/parse")
     public ResponseEntity<?> parseSubtitles(@RequestBody ParseRequest request) {
         try {
-            log.info("📥 收到字幕解析请求: videoId={}, videoUrl={},cookie={}",
-                request.getVideoId(), request.getVideoUrl(),request.getCookies());
+            String cookies = request.getCookies();
+            String cookiesInfo;
+            if (cookies == null) {
+                cookiesInfo = "null";
+            } else {
+                cookiesInfo = "len=" + cookies.length();
+            }
+            log.info("📥 收到字幕解析请求: videoId={}, videoUrl={}, cookies={}",
+                request.getVideoId(), request.getVideoUrl(), cookiesInfo);
 
             // 校验参数
             if (request.getVideoId() == null || request.getVideoId().isEmpty()) {
@@ -68,6 +75,14 @@ public class ShadowingApiController {
                 
                 // 如果之前失败了，重新尝试解析
                 if ("failed".equals(video.getStatus()) || "added".equals(video.getStatus())) {
+                    // 如果提供了 cookies，先保存，确保异步解析线程能拿到 /tmp 下的 cookies 文件
+                    if (cookies != null && !cookies.trim().isEmpty()) {
+                        videoService.saveCookiesForVideo(video.getVideoId(), cookies);
+                        log.info("🍪 已更新 cookies 文件用于重新解析: videoId={}, {}", video.getVideoId(), cookiesInfo);
+                    } else {
+                        log.info("ℹ️ 重新解析未提供 cookies: videoId={}", video.getVideoId());
+                    }
+
                     log.info("🔄 重新解析视频: videoId={}", request.getVideoId());
                     videoService.parseSubtitlesAsync(video.getId());
                     
@@ -95,8 +110,8 @@ public class ShadowingApiController {
             );
             
             // 如果提供了 cookies，先保存
-            if (request.getCookies() != null && !request.getCookies().isEmpty()) {
-                videoService.saveCookiesForVideo(video.getVideoId(), request.getCookies());
+            if (cookies != null && !cookies.trim().isEmpty()) {
+                videoService.saveCookiesForVideo(video.getVideoId(), cookies);
             }
             
             // 异步解析字幕

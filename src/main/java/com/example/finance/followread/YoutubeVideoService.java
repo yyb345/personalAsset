@@ -298,6 +298,14 @@ public class YoutubeVideoService {
         command.add("-o");
         command.add(SUBTITLE_DIR + video.getVideoId());
         command.add(video.getSourceUrl());
+
+        // 打印最终执行命令，便于排查 cookies/参数/输出目录问题
+        try {
+            String safeCmd = String.join(" ", command);
+            log.info("🎬 yt-dlp command(videoId={}): {}", video.getVideoId(), safeCmd);
+        } catch (Exception e) {
+            // ignore
+        }
         
         ProcessBuilder pb = new ProcessBuilder(command);
         
