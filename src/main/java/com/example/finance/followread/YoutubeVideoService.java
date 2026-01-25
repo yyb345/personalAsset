@@ -684,6 +684,94 @@ public class YoutubeVideoService {
         }
     }
 
+    /**
+     * 处理从浏览器提取的字幕（Chrome Extension 专用）
+     * 这个方法不需要 yt-dlp，直接处理前端传来的字幕数据
+     */
+    @Transactional
+    public YoutubeVideo processSubtitlesFromBrowser(
+            String videoId, 
+            String videoUrl, 
+            Map<String, Object> metadata,
+            List<Map<String, Object>> browserSubtitles) throws Exception {
+        
+        log.info("处理浏览器字幕: videoId={}, 字幕数={}", videoId, browserSubtitles.size());
+        
+        // 检查是否已经存在
+        Optional<YoutubeVideo> existingOpt = videoRepository.findByVideoId(videoId);
+        YoutubeVideo video;
+        
+        if (existingOpt.isPresent()) {
+            video = existingOpt.get();
+            log.info("视频已存在，更新数据: videoId={}", videoId);
+        } else {
+            // 创建新视频记录
+            video = new YoutubeVideo();
+            video.setVideoId(videoId);
+            video.setSourceUrl(videoUrl != null ? videoUrl : "https://www.youtube.com/watch?v=" + videoId);
+            video.setCreatedBy(1L); // 默认用户
+            video.setDifficultyLevel("auto");
+        }
+        
+        // 设置元数据
+        if (metadata != null) {
+            video.setTitle((String) metadata.getOrDefault("title", "Unknown Title"));
+            video.setDescription((String) metadata.getOrDefault("description", ""));
+            video.setDuration(((Number) metadata.getOrDefault("duration", 0)).intValue());
+            video.setChannel((String) metadata.getOrDefault("channel", ""));
+            video.setThumbnailUrl((String) metadata.getOrDefault("thumbnailUrl", ""));
+        }
+        
+        video.setHasSubtitle(true);
+        video.setSubtitleLanguage("en");
+        video.setStatus("parsing");
+        video.setProgressMessage("正在处理浏览器字幕...");
+        videoRepository.save(video);
+        
+        try {
+            // 转换浏览器字幕为 SubtitleSegment
+            List<SubtitleSegment> segments = new ArrayList<>();
+            for (int i = 0; i < browserSubtitles.size(); i++) {
+                Map<String, Object> sub = browserSubtitles.get(i);
+                
+                SubtitleSegment segment = new SubtitleSegment();
+                segment.setVideoId(video.getId());
+                segment.setStartTime(((Number) sub.get("startTime")).doubleValue());
+                segment.setEndTime(((Number) sub.get("endTime")).doubleValue());
+                segment.setRawText((String) sub.get("text"));
+                segment.setCleanText(cleanText((String) sub.get("text")));
+                segment.setSegmentOrder(i);
+                
+                segments.add(segment);
+                segmentRepository.save(segment);
+            }
+            
+            log.info("保存了 {} 个字幕片段", segments.size());
+            
+            // 生成学习句子
+            generateLearningSentences(video, segments);
+            
+            // 标记完成
+            video.setStatus("completed");
+            video.setProgressMessage("字幕解析完成！");
+            video.setCompletedAt(LocalDateTime.now());
+            videoRepository.save(video);
+            
+            log.info("✅ 浏览器字幕处理完成: videoId={}, sentences={}", 
+                video.getVideoId(), video.getSentenceCount());
+            
+            return video;
+            
+        } catch (Exception e) {
+            video.setStatus("failed");
+            video.setErrorMessage(e.getMessage());
+            video.setProgressMessage("处理失败: " + e.getMessage());
+            videoRepository.save(video);
+            log.error("❌ 浏览器字幕处理失败: videoId={}", videoId, e);
+            throw e;
+        }
+    }
+
     // 内部类：句子单元
     private static class SentenceUnit {
         String text;

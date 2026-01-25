@@ -224,6 +224,66 @@ public class ShadowingApiController {
     }
 
     /**
+     * 接收从浏览器提取的字幕（Chrome Extension 专用）
+     * POST /api/youtube/parse-from-browser
+     */
+    @PostMapping("/parse-from-browser")
+    public ResponseEntity<?> parseSubtitlesFromBrowser(@RequestBody BrowserSubtitlesRequest request) {
+        try {
+            log.info("📥 收到浏览器提取的字幕: videoId={}, 字幕数={}", 
+                request.getVideoId(), request.getSubtitles() != null ? request.getSubtitles().size() : 0);
+
+            // 校验参数
+            if (request.getVideoId() == null || request.getVideoId().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "videoId is required"));
+            }
+
+            if (request.getSubtitles() == null || request.getSubtitles().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "subtitles are required"));
+            }
+
+            // 检查是否已经存在
+            Optional<YoutubeVideo> existingVideo = videoRepository.findByVideoId(request.getVideoId());
+            
+            if (existingVideo.isPresent() && "completed".equals(existingVideo.get().getStatus())) {
+                log.info("✅ 视频已解析过，直接返回: videoId={}", request.getVideoId());
+                YoutubeVideo video = existingVideo.get();
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "videoId", video.getVideoId(),
+                    "sentenceCount", video.getSentenceCount(),
+                    "message", "Video already processed"
+                ));
+            }
+
+            // 使用 YoutubeVideoService 处理浏览器提取的字幕
+            YoutubeVideo video = videoService.processSubtitlesFromBrowser(
+                request.getVideoId(),
+                request.getVideoUrl(),
+                request.getMetadata(),
+                request.getSubtitles()
+            );
+
+            log.info("✅ 浏览器字幕处理完成: videoId={}, sentences={}", 
+                video.getVideoId(), video.getSentenceCount());
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "videoId", video.getVideoId(),
+                "sentenceCount", video.getSentenceCount(),
+                "message", "Subtitles processed successfully"
+            ));
+            
+        } catch (Exception e) {
+            log.error("❌ 浏览器字幕处理失败: videoId={}", request.getVideoId(), e);
+            return ResponseEntity.status(500)
+                .body(Map.of("error", "处理失败: " + e.getMessage()));
+        }
+    }
+
+    /**
      * 请求 DTO
      */
     public static class ParseRequest {
@@ -244,6 +304,48 @@ public class ShadowingApiController {
 
         public void setVideoUrl(String videoUrl) {
             this.videoUrl = videoUrl;
+        }
+    }
+
+    /**
+     * 浏览器字幕请求 DTO
+     */
+    public static class BrowserSubtitlesRequest {
+        private String videoId;
+        private String videoUrl;
+        private Map<String, Object> metadata;
+        private List<Map<String, Object>> subtitles;
+
+        public String getVideoId() {
+            return videoId;
+        }
+
+        public void setVideoId(String videoId) {
+            this.videoId = videoId;
+        }
+
+        public String getVideoUrl() {
+            return videoUrl;
+        }
+
+        public void setVideoUrl(String videoUrl) {
+            this.videoUrl = videoUrl;
+        }
+
+        public Map<String, Object> getMetadata() {
+            return metadata;
+        }
+
+        public void setMetadata(Map<String, Object> metadata) {
+            this.metadata = metadata;
+        }
+
+        public List<Map<String, Object>> getSubtitles() {
+            return subtitles;
+        }
+
+        public void setSubtitles(List<Map<String, Object>> subtitles) {
+            this.subtitles = subtitles;
         }
     }
 }
