@@ -9,9 +9,9 @@
     <!-- 错误状态 -->
     <div v-else-if="error" class="error-screen">
       <div class="error-icon">⚠️</div>
-      <h2>加载失败</h2>
+      <h2>Load Failed</h2>
       <p>{{ error }}</p>
-      <button @click="retry" class="retry-btn">重试</button>
+      <button @click="retry" class="retry-btn">Retry</button>
     </div>
 
     <!-- 主界面 -->
@@ -25,17 +25,17 @@
             <div class="meta">
               <span class="channel">📺 {{ videoData.channel }}</span>
               <span class="duration">⏱️ {{ formatDuration(videoData.duration) }}</span>
-              <span class="sentence-count">📝 {{ videoData.totalSentences }} 个学习句子</span>
+              <span class="sentence-count">📝 {{ videoData.totalSentences }} learning sentences</span>
             </div>
           </div>
         </div>
-        <button @click="goBack" class="close-btn" title="关闭">✕</button>
+        <button @click="goBack" class="close-btn" title="Close">✕</button>
       </header>
 
       <!-- 控制面板 -->
       <div class="control-panel">
         <div class="speed-control">
-          <label>速度：</label>
+          <label>Speed:</label>
           <button 
             v-for="speed in speedOptions" 
             :key="speed"
@@ -48,41 +48,41 @@
         </div>
         
         <div class="filter-control">
-          <label>难度筛选：</label>
+          <label>Difficulty:</label>
           <button 
             @click="difficultyFilter = 'all'"
             :class="{ active: difficultyFilter === 'all' }"
             class="filter-btn"
           >
-            全部
+            All
           </button>
           <button 
             @click="difficultyFilter = 'easy'"
             :class="{ active: difficultyFilter === 'easy' }"
             class="filter-btn difficulty-easy"
           >
-            简单
+            Easy
           </button>
           <button 
             @click="difficultyFilter = 'medium'"
             :class="{ active: difficultyFilter === 'medium' }"
             class="filter-btn difficulty-medium"
           >
-            中等
+            Medium
           </button>
           <button 
             @click="difficultyFilter = 'hard'"
             :class="{ active: difficultyFilter === 'hard' }"
             class="filter-btn difficulty-hard"
           >
-            困难
+            Hard
           </button>
         </div>
 
         <div class="loop-control">
           <label>
             <input type="checkbox" v-model="loopEnabled" />
-            单句循环
+            Loop Sentence
           </label>
         </div>
       </div>
@@ -116,17 +116,17 @@
                   @click.stop="playSentence(index)" 
                   class="play-btn"
                   :disabled="isPlaying && currentSentenceIndex === index"
+                  :title="isPlaying && currentSentenceIndex === index ? 'Playing' : 'Play'"
                 >
-                  <span class="btn-icon">▶️</span>
-                  <span class="btn-text">{{ isPlaying && currentSentenceIndex === index ? '播放中' : '播放' }}</span>
+                  <span class="btn-icon">▶</span>
                 </button>
                 <button 
                   @click.stop="toggleLoop(index)" 
                   class="loop-btn"
                   :class="{ active: loopEnabled && currentSentenceIndex === index }"
+                  title="Loop"
                 >
-                  <span class="btn-icon">🔁</span>
-                  <span class="btn-text">循环</span>
+                  <span class="btn-icon">⟳</span>
                 </button>
               </div>
             </div>
@@ -135,7 +135,7 @@
 
         <!-- 无句子提示 -->
         <div v-if="filteredSentences.length === 0" class="no-sentences">
-          <p>😕 没有符合筛选条件的句子</p>
+          <p>😕 No sentences match the filter</p>
         </div>
       </div>
 
@@ -143,23 +143,23 @@
       <div v-if="currentSentence" class="player-footer">
         <div class="current-sentence-display">
           <div class="sentence-info">
-            <span class="current-index">句子 {{ currentSentenceIndex + 1 }} / {{ filteredSentences.length }}</span>
+            <span class="current-index">Sentence {{ currentSentenceIndex + 1 }} / {{ filteredSentences.length }}</span>
             <span class="current-time">{{ formatTime(currentSentence.startTime) }} - {{ formatTime(currentSentence.endTime) }}</span>
           </div>
           <p class="current-text">{{ currentSentence.text }}</p>
         </div>
         <div class="player-controls">
           <button @click="previousSentence" class="control-btn" :disabled="currentSentenceIndex === 0">
-            ⏮️ 上一句
+            ⏮️ Previous
           </button>
           <button @click="togglePlay" class="control-btn primary">
-            {{ isPlaying ? '⏸️ 暂停' : '▶️ 播放' }}
+            {{ isPlaying ? '⏸️ Pause' : '▶️ Play' }}
           </button>
           <button @click="stopPlay" class="control-btn" :disabled="!isPlaying">
-            ⏹️ 停止
+            ⏹️ Stop
           </button>
           <button @click="nextSentence" class="control-btn" :disabled="currentSentenceIndex === filteredSentences.length - 1">
-            ⏭️ 下一句
+            ⏭️ Next
           </button>
         </div>
       </div>
@@ -170,7 +170,7 @@
 
     <!-- 快捷键提示 -->
     <div class="keyboard-hints" v-if="!loading && !error">
-      <p>⌨️ 快捷键: <kbd>Space</kbd> 播放/暂停 | <kbd>←</kbd> 上一句 | <kbd>→</kbd> 下一句 | <kbd>L</kbd> 循环</p>
+      <p>⌨️ Shortcuts: <kbd>Space</kbd> Play/Pause | <kbd>←</kbd> Previous | <kbd>→</kbd> Next | <kbd>L</kbd> Loop</p>
     </div>
   </div>
 </template>
@@ -183,7 +183,7 @@ export default {
   data() {
     return {
       loading: true,
-      loadingMessage: '正在加载字幕...',
+      loadingMessage: 'Loading subtitles...',
       error: null,
       videoId: null,
       videoData: null,
@@ -236,7 +236,7 @@ export default {
     this.videoId = urlParams.get('videoId')
     
     if (!this.videoId) {
-      this.error = '缺少视频 ID 参数'
+      this.error = 'Missing video ID parameter'
       this.loading = false
       return
     }
@@ -288,7 +288,7 @@ export default {
     
     async loadVideoData() {
       try {
-        this.loadingMessage = '正在获取视频信息...'
+        this.loadingMessage = 'Fetching video info...'
         
         // 先检查状态
         const statusRes = await axios.get(`/api/youtube/status/${this.videoId}`)
@@ -305,7 +305,7 @@ export default {
           // 初始化 YouTube 播放器
           await this.initPlayer()
         } else if (statusRes.data.status === 'failed') {
-          throw new Error(statusRes.data.message || '字幕解析失败')
+          throw new Error(statusRes.data.message || 'Subtitle parsing failed')
         } else {
           // 触发解析
           await axios.post('/api/youtube/parse', {
@@ -316,13 +316,13 @@ export default {
         
       } catch (err) {
         console.error('加载视频数据失败:', err)
-        this.error = err.response?.data?.error || err.message || '加载失败'
+        this.error = err.response?.data?.error || err.message || 'Load failed'
         this.loading = false
       }
     },
     
     async pollParseStatus() {
-      this.loadingMessage = '正在解析字幕，请稍候...'
+      this.loadingMessage = 'Parsing subtitles, please wait...'
       
       return new Promise((resolve, reject) => {
         const interval = setInterval(async () => {
@@ -338,9 +338,9 @@ export default {
               resolve()
             } else if (res.data.status === 'failed') {
               clearInterval(interval)
-              reject(new Error(res.data.message || '解析失败'))
+              reject(new Error(res.data.message || 'Parsing failed'))
             } else {
-              this.loadingMessage = res.data.message || '解析中...'
+              this.loadingMessage = res.data.message || 'Parsing...'
             }
           } catch (err) {
             clearInterval(interval)
@@ -351,7 +351,7 @@ export default {
         // 超时保护（5分钟）
         setTimeout(() => {
           clearInterval(interval)
-          reject(new Error('解析超时'))
+          reject(new Error('Parsing timeout'))
         }, 5 * 60 * 1000)
       })
     },
@@ -501,9 +501,9 @@ export default {
     
     getDifficultyLabel(difficulty) {
       const labels = {
-        easy: '简单',
-        medium: '中等',
-        hard: '困难'
+        easy: 'Easy',
+        medium: 'Medium',
+        hard: 'Hard'
       }
       return labels[difficulty] || difficulty
     },
@@ -825,62 +825,61 @@ export default {
   font-size: 14px;
   line-height: 1.6;
   color: #0F0F0F;
-  margin: 0 0 12px 0;
+  margin: 0 0 6px 0;
 }
 
 .sentence-controls {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  align-items: flex-start;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
 }
 
 .play-btn,
 .loop-btn {
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
-  background: #0F0F0F;
-  color: #FFFFFF;
+  padding: 4px;
+  background: transparent;
   border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
-  gap: 6px;
+  transition: color 0.2s, opacity 0.2s;
+  color: #909090;
+  opacity: 0.6;
 }
 
 .play-btn:hover,
 .loop-btn:hover {
-  background: #272727;
+  color: #0F0F0F;
+  opacity: 1;
 }
 
 .play-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.3;
   cursor: not-allowed;
-  background: #E5E5E5;
+}
+
+.play-btn:disabled:hover {
   color: #909090;
+  opacity: 0.3;
 }
 
 .loop-btn.active {
-  background: #0F0F0F;
+  color: #0F0F0F;
+  opacity: 1;
 }
 
 .loop-btn.active:hover {
-  background: #272727;
+  color: #0F0F0F;
+  opacity: 1;
 }
 
 .btn-icon {
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1;
-}
-
-.btn-text {
-  font-size: 12px;
-  line-height: 1;
+  display: inline-block;
 }
 
 .no-sentences {
