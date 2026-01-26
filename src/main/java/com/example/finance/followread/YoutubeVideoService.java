@@ -359,7 +359,7 @@ public class YoutubeVideoService {
         
         return null;
     }
-    
+
     /**
      * 获取字幕（支持指定语言）
      */
@@ -368,7 +368,7 @@ public class YoutubeVideoService {
     }
     
     /**
-     * 获取字幕（支持指定语言）
+     * 获取字幕（支持指定语言，如果失败会自动尝试其他语言）
      */
     private List<SubtitleSegment> fetchSubtitles(YoutubeVideo video, String language) throws Exception {
         // 确定要使用的语言
@@ -377,105 +377,96 @@ public class YoutubeVideoService {
             targetLanguage = "en"; // 默认英文
         }
         
-        String langCode = getLanguageCode(targetLanguage);
-        String subtitleFile = SUBTITLE_DIR + video.getVideoId() + "." + langCode + ".vtt";
+        // 尝试下载字幕：先尝试指定语言，如果失败则尝试所有可用语言
+        List<String> languagesToTry = new ArrayList<>();
+        languagesToTry.add(targetLanguage);
         
-        // 使用 yt-dlp 下载字幕
-        updateProgress(video, String.format("正在下载%s字幕...", getLanguageDisplayName(targetLanguage)));
-        
-        // 构建命令，如果有 cookies 文件则使用
-        List<String> command = new ArrayList<>();
-        command.add("yt-dlp");
-        
-        // 检查是否有 cookies 文件
-        String cookieFile = getCookieFilePath(video.getVideoId());
-        if (cookieFile != null) {
-            command.add("--cookies");
-            command.add(cookieFile);
-            log.info("🍪 使用 cookies 文件: {}", cookieFile);
-        }
-        
-        command.add("--write-sub");
-        command.add("--write-auto-sub");
-        command.add("--sub-lang");
-        command.add(targetLanguage); // 使用完整语言代码，如 zh-Hans
-        command.add("--sub-format");
-        command.add("vtt");
-        command.add("--skip-download");
-        // yt-dlp 输出模板：%(id)s 是视频ID，%(ext)s 是扩展名
-        // 字幕文件会自动添加语言代码，格式通常是：{id}.{lang}.vtt
-        command.add("-o");
-        command.add(SUBTITLE_DIR + "%(id)s.%(ext)s");
-        command.add(video.getSourceUrl());
-
-        // 打印最终执行命令，便于排查 cookies/参数/输出目录问题
-        try {
-            String safeCmd = String.join(" ", command);
-            log.info("🎬 yt-dlp command(videoId={}): {}", video.getVideoId(), safeCmd);
-        } catch (Exception e) {
-            // ignore
-        }
-        
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.redirectErrorStream(true); // 合并错误输出到标准输出
-        
-        Process process = pb.start();
-        
-        // 读取输出和错误信息
-        StringBuilder output = new StringBuilder();
-        StringBuilder errorOutput = new StringBuilder();
-        
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-             BufferedReader errorReader = new BufferedReader(
-                new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
-            
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-            
-            while ((line = errorReader.readLine()) != null) {
-                errorOutput.append(line).append("\n");
+        // 添加常见语言作为备选
+        String[] fallbackLanguages = {"zh", "zh-Hans", "zh-Hant", "zh-CN", "zh-TW", "en", "ja", "ko"};
+        for (String lang : fallbackLanguages) {
+            if (!languagesToTry.contains(lang)) {
+                languagesToTry.add(lang);
             }
         }
         
-        int exitCode = process.waitFor();
+        Exception lastException = null;
+        String downloadedLanguage = null;
+        String downloadedFilePath = null;
         
-        // 记录 yt-dlp 的输出
-        if (output.length() > 0) {
-            log.info("yt-dlp 输出: {}", output.toString());
-        }
-        if (errorOutput.length() > 0) {
-            log.warn("yt-dlp 错误输出: {}", errorOutput.toString());
-        }
-        
-        if (exitCode != 0) {
-            log.error("yt-dlp 执行失败，退出码: {}, 输出: {}, 错误: {}", 
-                exitCode, output.toString(), errorOutput.toString());
-            throw new RuntimeException("Failed to download subtitles: " + errorOutput.toString());
-        }
-        
-        // 列出目录中的所有文件，帮助调试
-        try {
-            File subtitleDir = new File(SUBTITLE_DIR);
-            if (subtitleDir.exists()) {
-                File[] files = subtitleDir.listFiles((dir, name) -> 
-                    name.startsWith(video.getVideoId()) && name.endsWith(".vtt"));
-                if (files != null && files.length > 0) {
-                    log.info("找到字幕文件: {}", Arrays.toString(
-                        Arrays.stream(files).map(File::getName).toArray()));
-                } else {
-                    log.warn("未找到任何字幕文件，目录: {}", subtitleDir.getAbsolutePath());
+        // 策略1: 先尝试指定语言
+        for (String langToTry : languagesToTry) {
+            try {
+                log.info("尝试下载字幕: videoId={}, language={}", video.getVideoId(), langToTry);
+                updateProgress(video, String.format("正在下载%s字幕...", getLanguageDisplayName(langToTry)));
+                
+                if (downloadSubtitleWithLanguage(video, langToTry)) {
+                    // 尝试多种可能的文件名格式
+                    File subtitleFile = findSubtitleFile(video.getVideoId(), langToTry);
+                    if (subtitleFile != null && subtitleFile.exists()) {
+                        downloadedLanguage = langToTry;
+                        downloadedFilePath = subtitleFile.getAbsolutePath();
+                        log.info("✅ 成功下载字幕: videoId={}, language={}, file={}", 
+                            video.getVideoId(), langToTry, downloadedFilePath);
+                        break;
+                    }
                 }
+            } catch (Exception e) {
+                log.warn("下载字幕失败: videoId={}, language={}, error={}", 
+                    video.getVideoId(), langToTry, e.getMessage());
+                lastException = e;
             }
-        } catch (Exception e) {
-            log.warn("列出字幕文件失败: {}", e.getMessage());
         }
-
+        
+        // 策略2: 如果所有指定语言都失败，尝试下载所有可用字幕（不指定语言）
+        if (downloadedFilePath == null) {
+            try {
+                log.info("尝试下载所有可用字幕: videoId={}", video.getVideoId());
+                updateProgress(video, "正在下载所有可用字幕...");
+                
+                if (downloadAllAvailableSubtitles(video)) {
+                    // 查找任何下载成功的字幕文件
+                    File subtitleFile = findAnySubtitleFile(video.getVideoId());
+                    if (subtitleFile != null && subtitleFile.exists()) {
+                        downloadedFilePath = subtitleFile.getAbsolutePath();
+                        // 从文件名推断语言
+                        String fileName = subtitleFile.getName();
+                        if (fileName.contains(".zh.") || fileName.contains(".zh-Hans.") || fileName.contains(".zh-Hant.")) {
+                            downloadedLanguage = "zh";
+                        } else if (fileName.contains(".en.")) {
+                            downloadedLanguage = "en";
+                        } else if (fileName.contains(".ja.")) {
+                            downloadedLanguage = "ja";
+                        } else if (fileName.contains(".ko.")) {
+                            downloadedLanguage = "ko";
+                        } else {
+                            downloadedLanguage = targetLanguage; // 使用原始目标语言
+                        }
+                        log.info("✅ 成功下载字幕（所有语言）: videoId={}, file={}", 
+                            video.getVideoId(), downloadedFilePath);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("下载所有字幕失败: videoId={}, error={}", video.getVideoId(), e.getMessage());
+                lastException = e;
+            }
+        }
+        
+        // 如果仍然失败，抛出异常
+        if (downloadedFilePath == null || !new File(downloadedFilePath).exists()) {
+            log.error("❌ 所有字幕下载尝试都失败了: videoId={}", video.getVideoId());
+            throw new RuntimeException("Failed to download subtitles after trying multiple languages. " +
+                (lastException != null ? "Last error: " + lastException.getMessage() : ""));
+        }
+        
+        // 更新视频的语言信息
+        if (downloadedLanguage != null) {
+            video.setSubtitleLanguage(downloadedLanguage);
+            videoRepository.save(video);
+        }
+        
         // 解析 VTT 字幕文件
         updateProgress(video, "正在解析字幕文件...");
-        List<SubtitleSegment> segments = parseVttFile(subtitleFile, video.getId(), targetLanguage);
+        List<SubtitleSegment> segments = parseVttFile(downloadedFilePath, video.getId(), downloadedLanguage);
         
         // 保存字幕片段
         updateProgress(video, String.format("正在保存字幕片段 (0/%d)...", segments.size()));
@@ -490,6 +481,178 @@ public class YoutubeVideoService {
         }
         
         return segments;
+    }
+    
+    /**
+     * 使用指定语言下载字幕
+     */
+    private boolean downloadSubtitleWithLanguage(YoutubeVideo video, String language) throws Exception {
+        // 构建命令，如果有 cookies 文件则使用
+        List<String> command = new ArrayList<>();
+        command.add("yt-dlp");
+        
+        // 检查是否有 cookies 文件
+        String cookieFile = getCookieFilePath(video.getVideoId());
+        if (cookieFile != null) {
+            command.add("--cookies");
+            command.add(cookieFile);
+        }
+        
+        command.add("--write-sub");
+        command.add("--write-auto-sub");
+        command.add("--sub-lang");
+        command.add(language);
+        command.add("--sub-format");
+        command.add("vtt");
+        command.add("--skip-download");
+        command.add("-o");
+        command.add(SUBTITLE_DIR + "%(id)s.%(ext)s");
+        command.add(video.getSourceUrl());
+
+        log.info("🎬 yt-dlp command(videoId={}, language={}): {}", 
+            video.getVideoId(), language, String.join(" ", command));
+        
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+        
+        Process process = pb.start();
+        
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+        }
+        
+        int exitCode = process.waitFor();
+        
+        if (output.length() > 0) {
+            log.info("yt-dlp 输出: {}", output.toString());
+        }
+        
+        // 检查输出中是否有 "There are no subtitles" 的提示
+        if (output.toString().contains("There are no subtitles")) {
+            log.warn("该语言没有字幕: videoId={}, language={}", video.getVideoId(), language);
+            return false;
+        }
+        
+        return exitCode == 0;
+    }
+    
+    /**
+     * 下载所有可用字幕（不指定语言）
+     */
+    private boolean downloadAllAvailableSubtitles(YoutubeVideo video) throws Exception {
+        // 构建命令，如果有 cookies 文件则使用
+        List<String> command = new ArrayList<>();
+        command.add("yt-dlp");
+        
+        // 检查是否有 cookies 文件
+        String cookieFile = getCookieFilePath(video.getVideoId());
+        if (cookieFile != null) {
+            command.add("--cookies");
+            command.add(cookieFile);
+        }
+        
+        command.add("--write-sub");
+        command.add("--write-auto-sub");
+        // 不指定 --sub-lang，让 yt-dlp 下载所有可用字幕
+        command.add("--sub-format");
+        command.add("vtt");
+        command.add("--skip-download");
+        command.add("-o");
+        command.add(SUBTITLE_DIR + "%(id)s.%(ext)s");
+        command.add(video.getSourceUrl());
+
+        log.info("🎬 yt-dlp command(videoId={}, all languages): {}", 
+            video.getVideoId(), String.join(" ", command));
+        
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+        
+        Process process = pb.start();
+        
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+        }
+        
+        int exitCode = process.waitFor();
+        
+        if (output.length() > 0) {
+            log.info("yt-dlp 输出: {}", output.toString());
+        }
+        
+        return exitCode == 0;
+    }
+    
+    /**
+     * 查找字幕文件（支持多种文件名格式）
+     */
+    private File findSubtitleFile(String videoId, String language) {
+        File subtitleDir = new File(SUBTITLE_DIR);
+        if (!subtitleDir.exists()) {
+            return null;
+        }
+        
+        String langCode = getLanguageCode(language);
+        
+        // 尝试多种可能的文件名格式
+        String[] possibleNames = {
+            videoId + "." + langCode + ".vtt",
+            videoId + "." + language + ".vtt",
+            videoId + ".vtt"
+        };
+        
+        for (String name : possibleNames) {
+            File file = new File(subtitleDir, name);
+            if (file.exists()) {
+                return file;
+            }
+        }
+        
+        // 如果都不存在，列出所有匹配的文件
+        File[] files = subtitleDir.listFiles((dir, name) -> 
+            name.startsWith(videoId) && name.endsWith(".vtt"));
+        
+        if (files != null && files.length > 0) {
+            // 优先返回包含目标语言代码的文件
+            for (File file : files) {
+                if (file.getName().contains(langCode) || file.getName().contains(language)) {
+                    return file;
+                }
+            }
+            // 如果没有匹配的，返回第一个
+            return files[0];
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 查找任何字幕文件（不指定语言）
+     */
+    private File findAnySubtitleFile(String videoId) {
+        File subtitleDir = new File(SUBTITLE_DIR);
+        if (!subtitleDir.exists()) {
+            return null;
+        }
+        
+        File[] files = subtitleDir.listFiles((dir, name) -> 
+            name.startsWith(videoId) && name.endsWith(".vtt"));
+        
+        if (files != null && files.length > 0) {
+            // 返回第一个找到的文件
+            return files[0];
+        }
+        
+        return null;
     }
 
     /**
@@ -556,7 +719,7 @@ public class YoutubeVideoService {
             }
             
             // 4. 尝试常见语言后缀
-            if (!Files.exists(path)) {
+        if (!Files.exists(path)) {
                 String[] commonLangs = {"en", "zh", "ja", "ko", "zh-Hans", "zh-Hant", "en-US", "zh-CN", "zh-TW"};
                 for (String lang : commonLangs) {
                     String altPath = SUBTITLE_DIR + videoIdStr + "." + lang + ".vtt";
@@ -571,7 +734,7 @@ public class YoutubeVideoService {
             }
             
             // 5. 尝试不带语言后缀的文件名（yt-dlp 可能生成这种格式）
-            if (!Files.exists(path)) {
+        if (!Files.exists(path)) {
                 String altPath = SUBTITLE_DIR + videoIdStr + ".vtt";
                 Path alt = Paths.get(altPath);
                 triedPaths.add(altPath);
@@ -699,7 +862,7 @@ public class YoutubeVideoService {
             text = text.replaceAll("[\\p{Cntrl}&&[^\n\r\t]]", "");
         } else {
             // 英文等：使用原有逻辑，保留基本ASCII字符和标点
-            text = text.replaceAll("[^a-zA-Z0-9\\s,.!?'-]", "");
+        text = text.replaceAll("[^a-zA-Z0-9\\s,.!?'-]", "");
         }
         
         return text.trim();
@@ -767,7 +930,7 @@ public class YoutubeVideoService {
             } else {
                 // 英文等：基于单词数
                 int wordCount = unit.text.split("\\s+").length;
-                if (wordCount < 3 || wordCount > 80 || duration < 0.5 || duration > 40) {
+            if (wordCount < 3 || wordCount > 80 || duration < 0.5 || duration > 40) {
                     shouldFilter = true;
                 }
             }
@@ -780,7 +943,7 @@ public class YoutubeVideoService {
                         unit.text.length(), duration, unit.startTime, unit.endTime, preview);
                 } else {
                     int wordCount = unit.text.split("\\s+").length;
-                    log.info("过滤句子: {} 词, {:.2f}秒 ({}~{}) - {}", 
+                log.info("过滤句子: {} 词, {:.2f}秒 ({}~{}) - {}", 
                         wordCount, duration, unit.startTime, unit.endTime, preview);
                 }
                 continue; // 跳过不适合跟读的句子
@@ -900,19 +1063,19 @@ public class YoutubeVideoService {
             return result.trim();
         } else {
             // 英文等：使用空格分割
-            String[] words = text.toLowerCase().split("\\s+");
-            StringBuilder result = new StringBuilder();
+        String[] words = text.toLowerCase().split("\\s+");
+        StringBuilder result = new StringBuilder();
             Set<String> fillerWords = getFillerWords(language);
-            
-            for (String word : words) {
-                String cleanWord = word.replaceAll("[^a-z]", "");
+        
+        for (String word : words) {
+            String cleanWord = word.replaceAll("[^a-z]", "");
                 if (!fillerWords.contains(cleanWord)) {
-                    result.append(word).append(" ");
-                }
+                result.append(word).append(" ");
             }
-            
-            return result.toString().trim();
         }
+        
+        return result.toString().trim();
+    }
     }
     
     /**
@@ -955,25 +1118,25 @@ public class YoutubeVideoService {
             }
         } else {
             // 英文等：使用原有逻辑（基于单词数）
-            String[] words = text.split("\\s+");
-            int wordCount = words.length;
-            int longWordCount = 0;
-            
-            for (String word : words) {
-                if (word.length() > 8) {
-                    longWordCount++;
-                }
+        String[] words = text.split("\\s+");
+        int wordCount = words.length;
+        int longWordCount = 0;
+        
+        for (String word : words) {
+            if (word.length() > 8) {
+                longWordCount++;
             }
-            
+        }
+        
             double longWordRatio = wordCount > 0 ? longWordCount / (double) wordCount : 0;
-            
-            // 调整难度阈值以适应更长的句子
-            if (wordCount < 12 && longWordRatio < 0.2) {
-                return "easy";
-            } else if (wordCount > 25 || longWordRatio > 0.4) {
-                return "hard";
-            } else {
-                return "medium";
+        
+        // 调整难度阈值以适应更长的句子
+        if (wordCount < 12 && longWordRatio < 0.2) {
+            return "easy";
+        } else if (wordCount > 25 || longWordRatio > 0.4) {
+            return "hard";
+        } else {
+            return "medium";
             }
         }
     }
