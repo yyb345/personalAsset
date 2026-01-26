@@ -94,42 +94,59 @@
             v-for="(sentence, index) in filteredSentences" 
             :key="sentence.id"
             :ref="el => setSentenceRef(index, el)"
-            @click="playSentence(index)"
-            :class="[
-              'sentence-item',
-              { 'active': currentSentenceIndex === index },
-              { 'playing': isPlaying && currentSentenceIndex === index },
-              `difficulty-${sentence.difficulty}`
-            ]"
+            class="sentence-item-wrapper"
           >
-            <div class="sentence-content">
-              <div class="sentence-header">
-                <span class="sentence-number">#{{ index + 1 }}</span>
-                <span :class="['difficulty-badge', `badge-${sentence.difficulty}`]">
-                  {{ getDifficultyLabel(sentence.difficulty) }}
-                </span>
-                <span class="sentence-time">{{ formatTime(sentence.startTime) }}</span>
-              </div>
+            <!-- 句子卡片 -->
+            <div 
+              :class="[
+                'sentence-item',
+                { 'active': currentSentenceIndex === index },
+                { 'playing': isPlaying && currentSentenceIndex === index },
+                { 'expanded': expandedSentenceId === sentence.id },
+                `difficulty-${sentence.difficulty}`
+              ]"
+              @click="playSentence(index)"
+            >
+              <div class="sentence-content">
+                <div class="sentence-header">
+                  <span class="sentence-number">#{{ index + 1 }}</span>
+                  <span :class="['difficulty-badge', `badge-${sentence.difficulty}`]">
+                    {{ getDifficultyLabel(sentence.difficulty) }}
+                  </span>
+                  <span class="sentence-time">{{ formatTime(sentence.startTime) }}</span>
+                </div>
               <p class="sentence-text">{{ sentence.text }}</p>
-              <div class="sentence-controls">
-                <button 
-                  @click.stop="playSentence(index)" 
-                  class="play-btn"
-                  :disabled="isPlaying && currentSentenceIndex === index"
-                  :title="isPlaying && currentSentenceIndex === index ? 'Playing' : 'Play'"
-                >
-                  <span class="btn-icon">▶</span>
-                </button>
-                <button 
-                  @click.stop="toggleLoop(index)" 
-                  class="loop-btn"
-                  :class="{ active: loopEnabled && currentSentenceIndex === index }"
-                  title="Loop"
-                >
-                  <span class="btn-icon">⟳</span>
-                </button>
-              </div>
             </div>
+              <button 
+                class="expand-btn" 
+                @click.stop="toggleExpand(sentence)"
+                :title="expandedSentenceId === sentence.id ? 'Collapse' : 'Expand video player'"
+              >
+                {{ expandedSentenceId === sentence.id ? '▼' : '▶' }}
+              </button>
+            </div>
+
+            <!-- 展开的视频播放器区域 -->
+            <transition name="slide-down">
+              <div v-if="expandedSentenceId === sentence.id" class="expanded-video-panel">
+                <div class="video-player-container">
+                  <h3>Video Player</h3>
+                  <div :id="'youtube-player-' + sentence.id" class="youtube-player-container"></div>
+                  <div class="player-controls">
+                    <button 
+                      class="play-segment-btn" 
+                      @click="playYoutubeSegment(sentence)"
+                      :disabled="!sentencePlayers[sentence.id]?.ready"
+                    >
+                      {{ sentencePlayers[sentence.id]?.playing ? '⏸ Pause' : '▶ Play Segment' }}
+                    </button>
+                    <span class="time-hint">
+                      {{ formatTime(sentence.startTime) }} - {{ formatTime(sentence.endTime) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </transition>
           </div>
         </div>
 
@@ -164,13 +181,6 @@
         </div>
       </div>
 
-      <!-- 隐藏的 YouTube 播放器 -->
-      <div id="youtube-player" style="display: none;"></div>
-    </div>
-
-    <!-- 快捷键提示 -->
-    <div class="keyboard-hints" v-if="!loading && !error">
-      <p>⌨️ Shortcuts: <kbd>Space</kbd> Play/Pause | <kbd>←</kbd> Previous | <kbd>→</kbd> Next | <kbd>L</kbd> Loop</p>
     </div>
   </div>
 </template>
@@ -201,7 +211,11 @@ export default {
       
       // 循环控制
       loopInterval: null,
-      sentenceRefs: []
+      sentenceRefs: [],
+      
+      // 展开控制
+      expandedSentenceId: null,
+      sentencePlayers: {} // 存储每个句子的播放器实例
     }
   },
   computed: {
@@ -222,18 +236,22 @@ export default {
     }
   },
   async mounted() {
-    // 从 URL 获取 videoId（支持 Hash 路由）
-    let urlParams
-    if (window.location.hash.includes('?')) {
-      // Hash 模式：从 hash 中提取参数
-      const hashQuery = window.location.hash.split('?')[1]
-      urlParams = new URLSearchParams(hashQuery)
-    } else {
-      // History 模式：从 search 中提取参数
-      urlParams = new URLSearchParams(window.location.search)
-    }
+    // 从路由参数获取 videoId（优先使用 Vue Router 的 query，兼容直接 URL 参数）
+    this.videoId = this.$route.query.videoId
     
-    this.videoId = urlParams.get('videoId')
+    // 如果没有从 query 获取到，尝试从 URL 中提取（兼容旧方式）
+    if (!this.videoId) {
+      let urlParams
+      if (window.location.hash.includes('?')) {
+        // Hash 模式：从 hash 中提取参数
+        const hashQuery = window.location.hash.split('?')[1]
+        urlParams = new URLSearchParams(hashQuery)
+      } else {
+        // History 模式：从 search 中提取参数
+        urlParams = new URLSearchParams(window.location.search)
+      }
+      this.videoId = urlParams.get('videoId')
+    }
     
     if (!this.videoId) {
       this.error = 'Missing video ID parameter'
@@ -259,6 +277,12 @@ export default {
     if (this.player) {
       this.player.destroy()
     }
+    // 清理所有句子播放器
+    Object.values(this.sentencePlayers).forEach(playerData => {
+      if (playerData && playerData.player) {
+        playerData.player.destroy()
+      }
+    })
   },
   methods: {
     async loadYouTubeAPI() {
@@ -357,54 +381,155 @@ export default {
     },
     
     async initPlayer() {
+      // 不再需要全局播放器，改为按需创建
+    },
+    
+    toggleExpand(sentence) {
+      if (this.expandedSentenceId === sentence.id) {
+        // 收起
+        this.expandedSentenceId = null
+        // 清理播放器
+        if (this.sentencePlayers[sentence.id]) {
+          const player = this.sentencePlayers[sentence.id].player
+          if (player) {
+            player.destroy()
+          }
+          delete this.sentencePlayers[sentence.id]
+        }
+      } else {
+        // 收起之前的
+        if (this.expandedSentenceId) {
+          const oldPlayer = this.sentencePlayers[this.expandedSentenceId]
+          if (oldPlayer && oldPlayer.player) {
+            oldPlayer.player.destroy()
+          }
+          delete this.sentencePlayers[this.expandedSentenceId]
+        }
+        
+        // 展开新的
+        this.expandedSentenceId = sentence.id
+        
+        // 等待 DOM 更新后初始化播放器
+        this.$nextTick(() => {
+          this.initSentencePlayer(sentence)
+        })
+      }
+    },
+    
+    async initSentencePlayer(sentence) {
       try {
         if (!window.YT || !window.YT.Player) {
           console.error('YouTube API 未加载')
           return
         }
         
-        this.player = new window.YT.Player('youtube-player', {
+        const containerId = `youtube-player-${sentence.id}`
+        
+        // 检查容器是否存在
+        const container = document.getElementById(containerId)
+        if (!container) {
+          console.error('播放器容器不存在:', containerId)
+          return
+        }
+        
+        const player = new window.YT.Player(containerId, {
           videoId: this.videoId,
+          height: '200',
+          width: '100%',
           playerVars: {
             autoplay: 0,
-            controls: 0,
-            disablekb: 1,
-            modestbranding: 1
+            controls: 1,
+            disablekb: 0,
+            modestbranding: 1,
+            rel: 0,
+            playsinline: 1
           },
           events: {
             onReady: () => {
-              console.log('YouTube 播放器已准备')
+              // 定位到句子的开始时间
+              player.seekTo(sentence.startTime, true)
+              
+              // 保存播放器实例
+              if (!this.sentencePlayers[sentence.id]) {
+                this.$set(this.sentencePlayers, sentence.id, {
+                  player: player,
+                  ready: true,
+                  playing: false
+                })
+              } else {
+                this.sentencePlayers[sentence.id].player = player
+                this.sentencePlayers[sentence.id].ready = true
+              }
             },
             onStateChange: (event) => {
-              if (event.data === window.YT.PlayerState.ENDED) {
-                this.onSentenceEnd()
+              if (this.sentencePlayers[sentence.id]) {
+                if (event.data === window.YT.PlayerState.PLAYING) {
+                  this.sentencePlayers[sentence.id].playing = true
+                } else if (event.data === window.YT.PlayerState.PAUSED || 
+                           event.data === window.YT.PlayerState.ENDED) {
+                  this.sentencePlayers[sentence.id].playing = false
+                }
               }
             }
           }
         })
       } catch (error) {
-        console.error('初始化播放器失败:', error)
+        console.error('初始化句子播放器失败:', error)
+      }
+    },
+    
+    playYoutubeSegment(sentence) {
+      if (!sentence || !this.sentencePlayers[sentence.id]) return
+      
+      const playerData = this.sentencePlayers[sentence.id]
+      if (!playerData.player || !playerData.ready) return
+      
+      const player = playerData.player
+      
+      if (playerData.playing) {
+        // 暂停
+        player.pauseVideo()
+      } else {
+        // 播放片段
+        player.seekTo(sentence.startTime, true)
+        player.setPlaybackRate(this.playbackSpeed)
+        player.playVideo()
+        
+        // 设置定时器在句子结束时暂停
+        const duration = (sentence.endTime - sentence.startTime) * 1000
+        setTimeout(() => {
+          if (playerData.player && playerData.playing) {
+            playerData.player.pauseVideo()
+          }
+        }, duration)
       }
     },
     
     playSentence(index) {
-      if (!this.player) return
-      
       this.currentSentenceIndex = index
       const sentence = this.filteredSentences[index]
       
       if (!sentence) return
       
-      this.isPlaying = true
-      this.player.setPlaybackRate(this.playbackSpeed)
-      this.player.seekTo(sentence.startTime, true)
-      this.player.playVideo()
-      
-      // 设置定时器在句子结束时停止
-      const duration = (sentence.endTime - sentence.startTime) * 1000
-      setTimeout(() => {
-        this.onSentenceEnd()
-      }, duration)
+      // 如果有展开的播放器，使用它播放
+      if (this.expandedSentenceId === sentence.id && this.sentencePlayers[sentence.id]) {
+        this.playYoutubeSegment(sentence)
+        this.isPlaying = true
+      } else {
+        // 否则使用隐藏的播放器（如果存在）
+        if (this.player) {
+          this.isPlaying = true
+          this.player.setPlaybackRate(this.playbackSpeed)
+          this.player.seekTo(sentence.startTime, true)
+          this.player.playVideo()
+          
+          // 设置定时器在句子结束时停止
+          const duration = (sentence.endTime - sentence.startTime) * 1000
+          setTimeout(() => {
+            this.onSentenceEnd()
+          }, duration)
+        }
+      }
       
       // 滚动到当前句子
       this.$nextTick(() => {
@@ -423,14 +548,33 @@ export default {
         }, 300)
       } else {
         this.isPlaying = false
-        this.player.pauseVideo()
+        const sentence = this.currentSentence
+        if (sentence && this.expandedSentenceId === sentence.id && this.sentencePlayers[sentence.id]) {
+          const player = this.sentencePlayers[sentence.id].player
+          if (player) {
+            player.pauseVideo()
+          }
+        } else if (this.player) {
+          this.player.pauseVideo()
+        }
       }
     },
     
     togglePlay() {
+      const sentence = this.currentSentence
+      if (!sentence) return
+      
       if (this.isPlaying) {
         this.isPlaying = false
-        this.player.pauseVideo()
+        // 暂停当前播放器
+        if (this.expandedSentenceId === sentence.id && this.sentencePlayers[sentence.id]) {
+          const player = this.sentencePlayers[sentence.id].player
+          if (player) {
+            player.pauseVideo()
+          }
+        } else if (this.player) {
+          this.player.pauseVideo()
+        }
       } else {
         this.playSentence(this.currentSentenceIndex)
       }
@@ -438,7 +582,13 @@ export default {
     
     stopPlay() {
       this.isPlaying = false
-      if (this.player) {
+      const sentence = this.currentSentence
+      if (sentence && this.expandedSentenceId === sentence.id && this.sentencePlayers[sentence.id]) {
+        const player = this.sentencePlayers[sentence.id].player
+        if (player) {
+          player.pauseVideo()
+        }
+      } else if (this.player) {
         this.player.pauseVideo()
       }
     },
@@ -532,7 +682,12 @@ export default {
     },
     
     goBack() {
-      window.close()
+      // 尝试返回上一页，如果没有历史记录则关闭窗口
+      if (window.history.length > 1) {
+        this.$router.go(-1)
+      } else {
+        this.$router.push('/dashboard/youtube')
+      }
     }
   }
 }
@@ -666,6 +821,121 @@ export default {
 
 .close-btn:hover {
   background: #F2F2F2;
+}
+
+/* 句子项包装器 */
+.sentence-item-wrapper {
+  margin-bottom: 12px;
+}
+
+.sentence-item {
+  position: relative;
+}
+
+.expand-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: #FFFFFF;
+  border: 1px solid #DADADA;
+  border-radius: 6px;
+  color: #0F0F0F;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.expand-btn:hover {
+  background: #F9F9F9;
+  border-color: #0F0F0F;
+}
+
+.sentence-item.expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* 展开的视频面板 */
+.expanded-video-panel {
+  background: #FAFAFA;
+  border: 1px solid #E5E5E5;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 16px;
+  margin-top: -12px;
+}
+
+.video-player-container {
+  width: 100%;
+}
+
+.video-player-container h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0F0F0F;
+  margin: 0 0 12px 0;
+}
+
+.youtube-player-container {
+  width: 100%;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000000;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.play-segment-btn {
+  padding: 8px 16px;
+  background: #0F0F0F;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.play-segment-btn:hover:not(:disabled) {
+  background: #272727;
+}
+
+.play-segment-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.time-hint {
+  font-size: 13px;
+  color: #606060;
+}
+
+/* 动画 */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /* 控制面板 */
@@ -964,27 +1234,6 @@ export default {
   border-color: #E5E5E5;
 }
 
-/* 快捷键提示 */
-.keyboard-hints {
-  position: fixed;
-  bottom: 140px;
-  right: 20px;
-  background: #0F0F0F;
-  color: #FFFFFF;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  z-index: 99;
-}
-
-kbd {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: monospace;
-  margin: 0 2px;
-}
-
 /* 响应式 */
 @media (max-width: 768px) {
   .video-info {
@@ -999,10 +1248,6 @@ kbd {
   .control-panel {
     flex-direction: column;
     align-items: flex-start;
-  }
-  
-  .keyboard-hints {
-    display: none;
   }
   
   .shadowing-main {

@@ -680,14 +680,11 @@ export default {
         return;
       }
       
-      try {
-        const response = await axios.get(`/api/youtube/videos/${video.id}`);
-        this.selectedVideo = response.data.video;
-        this.videoSentences = response.data.sentences || [];
-      } catch (error) {
-        console.error('获取视频详情失败:', error);
-        alert('Failed to load. Please try again');
-      }
+      // 跳转到新页面，使用数据库的 id
+      this.$router.push({
+        path: '/shadowing',
+        query: { videoId: video.videoId }
+      });
     },
     
     backToList() {
@@ -717,6 +714,8 @@ export default {
           this.currentTask = response.data;
         } catch (error) {
           console.error('创建任务失败:', error);
+          alert('Failed to create practice task. Please try again.');
+          this.currentTask = null;
         }
       }
     },
@@ -878,6 +877,12 @@ export default {
     
     async uploadRecording(audioBlob) {
       try {
+        if (!this.currentTask || !this.currentTask.id) {
+          console.error('上传录音失败: 任务未创建');
+          alert('Task not created. Please try again.');
+          return;
+        }
+        
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.wav');
         
@@ -895,8 +900,18 @@ export default {
     },
     
     pollTaskResult() {
+      if (!this.currentTask || !this.currentTask.id) {
+        console.error('无法轮询结果: 任务未创建');
+        return;
+      }
+      
       this.taskPollInterval = setInterval(async () => {
         try {
+          if (!this.currentTask || !this.currentTask.id) {
+            clearInterval(this.taskPollInterval);
+            return;
+          }
+          
           const response = await axios.get(`/api/follow-read/tasks/${this.currentTask.id}`);
           if (response.data.task.status === 'completed') {
             this.taskResult = response.data;
