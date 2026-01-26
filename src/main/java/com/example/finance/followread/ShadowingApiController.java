@@ -5,8 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.Random;
 
 /**
  * Shadowing API Controller - 专为 Chrome 插件设计的轻量级 API
@@ -77,10 +79,17 @@ public class ShadowingApiController {
                 if ("failed".equals(video.getStatus()) || "added".equals(video.getStatus())) {
                     // 如果提供了 cookies，先保存，确保异步解析线程能拿到 /tmp 下的 cookies 文件
                     if (cookies != null && !cookies.trim().isEmpty()) {
+                        log.info("🍪 保存 cookies 文件用于重新解析: videoId={}, {}", video.getVideoId(), cookiesInfo);
                         videoService.saveCookiesForVideo(video.getVideoId(), cookies);
-                        log.info("🍪 已更新 cookies 文件用于重新解析: videoId={}, {}", video.getVideoId(), cookiesInfo);
+                        // 验证文件是否保存成功
+                        String cookieFilePath = "/tmp/youtube_cookies_" + video.getVideoId() + ".txt";
+                        if (java.nio.file.Files.exists(java.nio.file.Paths.get(cookieFilePath))) {
+                            log.info("✅ Cookies 文件验证成功: {}", cookieFilePath);
+                        } else {
+                            log.warn("⚠️ Cookies 文件保存后验证失败: {}", cookieFilePath);
+                        }
                     } else {
-                        log.info("ℹ️ 重新解析未提供 cookies: videoId={}", video.getVideoId());
+                        log.warn("⚠️ 重新解析未提供 cookies，将尝试无 cookies 方式: videoId={}", video.getVideoId());
                     }
 
                     log.info("🔄 重新解析视频: videoId={}", request.getVideoId());
@@ -109,12 +118,22 @@ public class ShadowingApiController {
                 "auto"
             );
             
-            // 如果提供了 cookies，先保存
+            // 如果提供了 cookies，先保存（必须在异步解析之前保存）
             if (cookies != null && !cookies.trim().isEmpty()) {
+                log.info("🍪 保存 cookies 文件: videoId={}, cookies长度={}", video.getVideoId(), cookies.length());
                 videoService.saveCookiesForVideo(video.getVideoId(), cookies);
+                // 验证文件是否保存成功
+                String cookieFilePath = "/tmp/youtube_cookies_" + video.getVideoId() + ".txt";
+                if (java.nio.file.Files.exists(java.nio.file.Paths.get(cookieFilePath))) {
+                    log.info("✅ Cookies 文件验证成功: {}", cookieFilePath);
+                } else {
+                    log.warn("⚠️ Cookies 文件保存后验证失败: {}", cookieFilePath);
+                }
+            } else {
+                log.warn("⚠️ 未提供 cookies，将尝试无 cookies 方式解析: videoId={}", video.getVideoId());
             }
             
-            // 异步解析字幕
+            // 异步解析字幕（cookies 文件应该已经保存好了）
             videoService.parseSubtitlesAsync(video.getId());
             
             return ResponseEntity.ok(Map.of(
@@ -242,6 +261,83 @@ public class ShadowingApiController {
         response.put("totalSentences", sentenceList.size());
         
         return response;
+    }
+
+    /**
+     * 评估录音（Chrome Extension 专用，无需认证）
+     * POST /api/youtube/evaluate-recording
+     */
+    @PostMapping("/evaluate-recording")
+    public ResponseEntity<?> evaluateRecording(
+            @RequestParam("audio") MultipartFile audioFile,
+            @RequestParam(value = "sentenceId", required = false) Long sentenceId,
+            @RequestParam(value = "sentenceText", required = false) String sentenceText) {
+        try {
+            log.info("📥 收到录音评估请求: sentenceId={}, audioSize={} bytes", 
+                sentenceId, audioFile != null ? audioFile.getSize() : 0);
+
+            if (audioFile == null || audioFile.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "音频文件不能为空"));
+            }
+
+            // 模拟评估过程（延迟模拟真实评估）
+            Thread.sleep(1000);
+
+            // 生成模拟评分
+            Random random = new Random();
+            int pronunciationScore = 70 + random.nextInt(25); // 70-95
+            int fluencyScore = 65 + random.nextInt(30); // 65-95
+            int intonationScore = 68 + random.nextInt(27); // 68-95
+            int overallScore = (pronunciationScore + fluencyScore + intonationScore) / 3;
+
+            // 生成优化建议
+            List<String> suggestions = new ArrayList<>();
+            if (overallScore < 60) {
+                suggestions.add("注意单词发音的准确性，建议多听几遍原音");
+                suggestions.add("提高语速的流畅度，避免停顿过多");
+                suggestions.add("注意语调的变化，让发音更自然");
+            } else if (overallScore < 75) {
+                suggestions.add("发音基本正确，可以尝试更自然的语调");
+                suggestions.add("注意连读和弱读，提高流畅度");
+            } else if (overallScore < 85) {
+                suggestions.add("发音很好！继续保持");
+                suggestions.add("可以尝试更自然的语调和节奏");
+            } else {
+                suggestions.add("发音很棒！继续保持");
+                suggestions.add("语调自然流畅，非常好");
+            }
+
+            // 如果有句子文本，可以生成单词级别的建议
+            if (sentenceText != null && !sentenceText.trim().isEmpty()) {
+                String[] words = sentenceText.split("\\s+");
+                if (words.length > 0 && overallScore < 80) {
+                    // 随机选择一个可能需要改进的单词
+                    int wordIndex = random.nextInt(Math.min(words.length, 5));
+                    String word = words[wordIndex].replaceAll("[^a-zA-Z]", "");
+                    if (!word.isEmpty()) {
+                        suggestions.add(String.format("注意单词 '%s' 的发音", word));
+                    }
+                }
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("overallScore", overallScore);
+            result.put("pronunciationScore", pronunciationScore);
+            result.put("fluencyScore", fluencyScore);
+            result.put("intonationScore", intonationScore);
+            result.put("suggestions", suggestions);
+            result.put("message", "评估完成");
+
+            log.info("✅ 录音评估完成: overallScore={}", overallScore);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("❌ 录音评估失败", e);
+            return ResponseEntity.status(500)
+                .body(Map.of("error", "评估失败: " + e.getMessage()));
+        }
     }
 
     /**

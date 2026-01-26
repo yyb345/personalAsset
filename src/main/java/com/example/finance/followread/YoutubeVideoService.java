@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -821,11 +822,29 @@ public class YoutubeVideoService {
      */
     private void saveCookiesToFile(String videoId, String cookies) {
         try {
+            if (cookies == null || cookies.trim().isEmpty()) {
+                log.warn("⚠️ Cookies 为空，无法保存: videoId={}", videoId);
+                return;
+            }
+            
             String cookieFilePath = "/tmp/youtube_cookies_" + videoId + ".txt";
-            Files.write(Paths.get(cookieFilePath), cookies.getBytes());
-            log.info("✅ Cookies 已保存到: {}", cookieFilePath);
+            Path cookiePath = Paths.get(cookieFilePath);
+            
+            // 确保目录存在
+            Files.createDirectories(cookiePath.getParent());
+            
+            // 写入文件
+            Files.write(cookiePath, cookies.getBytes(StandardCharsets.UTF_8));
+            
+            // 验证文件是否写入成功
+            if (Files.exists(cookiePath)) {
+                long fileSize = Files.size(cookiePath);
+                log.info("✅ Cookies 已保存到: {} (大小: {} bytes)", cookieFilePath, fileSize);
+            } else {
+                log.error("❌ Cookies 文件保存后验证失败: {}", cookieFilePath);
+            }
         } catch (Exception e) {
-            log.warn("⚠️ 保存 cookies 失败: {}", e.getMessage());
+            log.error("❌ 保存 cookies 失败: videoId={}, error={}", videoId, e.getMessage(), e);
         }
     }
     
