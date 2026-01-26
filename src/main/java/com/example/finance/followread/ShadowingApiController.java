@@ -93,7 +93,8 @@ public class ShadowingApiController {
                     }
 
                     log.info("🔄 重新解析视频: videoId={}", request.getVideoId());
-                    videoService.parseSubtitlesAsync(video.getId());
+                    String language = request.getLanguage();
+                    videoService.parseSubtitlesAsync(video.getId(), language);
                     
                     return ResponseEntity.ok(Map.of(
                         "status", "parsing",
@@ -134,7 +135,9 @@ public class ShadowingApiController {
             }
             
             // 异步解析字幕（cookies 文件应该已经保存好了）
-            videoService.parseSubtitlesAsync(video.getId());
+            // 支持语言参数，如果请求中指定了语言则使用，否则自动检测
+            String language = request.getLanguage();
+            videoService.parseSubtitlesAsync(video.getId(), language);
             
             return ResponseEntity.ok(Map.of(
                 "status", "parsing",
@@ -408,6 +411,7 @@ public class ShadowingApiController {
         private String videoId;
         private String videoUrl;
         private String cookies;  // 添加 cookies 字段
+        private String language; // 字幕语言（en, zh, ja, ko等），可选，不指定则自动检测
 
         public String getVideoId() {
             return videoId;
@@ -431,6 +435,14 @@ public class ShadowingApiController {
 
         public void setCookies(String cookies) {
             this.cookies = cookies;
+        }
+
+        public String getLanguage() {
+            return language;
+        }
+
+        public void setLanguage(String language) {
+            this.language = language;
         }
     }
 

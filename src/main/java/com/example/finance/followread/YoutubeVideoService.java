@@ -38,10 +38,50 @@ public class YoutubeVideoService {
     private static final String SUBTITLE_DIR = "uploads/subtitles/";
     private static final String AUDIO_DIR = "uploads/audio/";
     
-    // Filler words to remove
-    private static final Set<String> FILLER_WORDS = new HashSet<>(Arrays.asList(
+    // Filler words to remove (English)
+    private static final Set<String> FILLER_WORDS_EN = new HashSet<>(Arrays.asList(
         "uh", "um", "you know", "like", "so", "well", "actually", "basically", "literally"
     ));
+    
+    // Filler words to remove (Chinese)
+    private static final Set<String> FILLER_WORDS_ZH = new HashSet<>(Arrays.asList(
+        "嗯", "那个", "就是", "然后", "这个", "那个", "呃", "啊", "哦"
+    ));
+    
+    // Filler words to remove (Japanese)
+    private static final Set<String> FILLER_WORDS_JA = new HashSet<>(Arrays.asList(
+        "えー", "あの", "まあ", "その", "なんか", "っていうか", "てか"
+    ));
+    
+    /**
+     * 判断是否是中日韩语言（CJK）
+     */
+    private boolean isCJKLanguage(String language) {
+        if (language == null) return false;
+        String lang = language.toLowerCase();
+        return lang.startsWith("zh") || lang.startsWith("ja") || 
+               lang.startsWith("ko") || lang.equals("jpn") || 
+               lang.equals("chi") || lang.equals("kor") ||
+               lang.equals("zh-cn") || lang.equals("zh-tw") ||
+               lang.equals("zh-hans") || lang.equals("zh-hant");
+    }
+    
+    /**
+     * 获取语言代码的简化形式（用于文件名）
+     */
+    private String getLanguageCode(String language) {
+        if (language == null) return "en";
+        String lang = language.toLowerCase();
+        // 处理 zh-Hans, zh-Hant 等格式
+        if (lang.startsWith("zh")) {
+            if (lang.contains("hans") || lang.contains("cn")) return "zh";
+            if (lang.contains("hant") || lang.contains("tw")) return "zh";
+            return "zh";
+        }
+        if (lang.startsWith("ja")) return "ja";
+        if (lang.startsWith("ko")) return "ko";
+        return lang.split("-")[0]; // 取主要部分，如 en-US -> en
+    }
 
     public YoutubeVideoService() {
         // 确保目录存在
@@ -149,6 +189,15 @@ public class YoutubeVideoService {
     @Async
     @Transactional
     public void parseSubtitlesAsync(Long videoId) {
+        parseSubtitlesAsync(videoId, null);
+    }
+    
+    /**
+     * 异步解析字幕（支持指定语言）
+     */
+    @Async
+    @Transactional
+    public void parseSubtitlesAsync(Long videoId, String language) {
         Optional<YoutubeVideo> videoOpt = videoRepository.findById(videoId);
         if (!videoOpt.isPresent()) {
             return;
@@ -168,9 +217,14 @@ public class YoutubeVideoService {
                 updateProgress(video, "视频信息获取完成 ✓");
             }
             
-            // Step 2: 获取字幕
+            // Step 2: 获取字幕（如果指定了语言，使用指定语言；否则使用检测到的语言）
+            String targetLanguage = language != null ? language : video.getSubtitleLanguage();
+            if (targetLanguage != null) {
+                video.setSubtitleLanguage(targetLanguage);
+                videoRepository.save(video);
+            }
             updateProgress(video, "正在下载字幕文件...");
-            List<SubtitleSegment> segments = fetchSubtitles(video);
+            List<SubtitleSegment> segments = fetchSubtitles(video, targetLanguage);
             updateProgress(video, String.format("字幕下载完成 ✓ (共 %d 个片段)", segments.size()));
             
             // Step 3: 生成学习句子
@@ -257,25 +311,77 @@ public class YoutubeVideoService {
         video.setChannel(root.path("channel").asText());
         video.setThumbnailUrl(root.path("thumbnail").asText());
         
-        // 检查字幕可用性
+        // 检查字幕可用性（支持多语言）
         JsonNode subtitles = root.path("subtitles");
         JsonNode automaticCaptions = root.path("automatic_captions");
         
-        boolean hasSubtitle = subtitles.has("en") || automaticCaptions.has("en");
+        // 检测可用的字幕语言（优先顺序：en, zh, ja, ko, 其他）
+        String detectedLanguage = detectAvailableSubtitleLanguage(subtitles, automaticCaptions);
+        boolean hasSubtitle = detectedLanguage != null;
+        
         video.setHasSubtitle(hasSubtitle);
-        video.setSubtitleLanguage("en");
+        video.setSubtitleLanguage(detectedLanguage != null ? detectedLanguage : "en");
         
         videoRepository.save(video);
+        
+        log.info("检测到字幕语言: videoId={}, language={}, hasSubtitle={}", 
+            video.getVideoId(), detectedLanguage, hasSubtitle);
     }
 
     /**
-     * 获取字幕
+     * 检测可用的字幕语言
+     */
+    private String detectAvailableSubtitleLanguage(JsonNode subtitles, JsonNode automaticCaptions) {
+        // 优先顺序：en, zh, ja, ko, 其他
+        String[] preferredLanguages = {"en", "zh", "zh-Hans", "zh-Hant", "ja", "ko"};
+        
+        // 先检查官方字幕
+        for (String lang : preferredLanguages) {
+            if (subtitles.has(lang)) {
+                return lang;
+            }
+        }
+        
+        // 再检查自动生成字幕
+        for (String lang : preferredLanguages) {
+            if (automaticCaptions.has(lang)) {
+                return lang;
+            }
+        }
+        
+        // 如果都没有，返回第一个可用的
+        if (subtitles.isObject() && subtitles.size() > 0) {
+            return subtitles.fieldNames().next();
+        }
+        if (automaticCaptions.isObject() && automaticCaptions.size() > 0) {
+            return automaticCaptions.fieldNames().next();
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 获取字幕（支持指定语言）
      */
     private List<SubtitleSegment> fetchSubtitles(YoutubeVideo video) throws Exception {
-        String subtitleFile = SUBTITLE_DIR + video.getVideoId() + ".vtt";
+        return fetchSubtitles(video, null);
+    }
+    
+    /**
+     * 获取字幕（支持指定语言）
+     */
+    private List<SubtitleSegment> fetchSubtitles(YoutubeVideo video, String language) throws Exception {
+        // 确定要使用的语言
+        String targetLanguage = language != null ? language : video.getSubtitleLanguage();
+        if (targetLanguage == null || targetLanguage.isEmpty()) {
+            targetLanguage = "en"; // 默认英文
+        }
+        
+        String langCode = getLanguageCode(targetLanguage);
+        String subtitleFile = SUBTITLE_DIR + video.getVideoId() + "." + langCode + ".vtt";
         
         // 使用 yt-dlp 下载字幕
-        updateProgress(video, "正在请求字幕下载...");
+        updateProgress(video, String.format("正在下载%s字幕...", getLanguageDisplayName(targetLanguage)));
         
         // 构建命令，如果有 cookies 文件则使用
         List<String> command = new ArrayList<>();
@@ -292,7 +398,7 @@ public class YoutubeVideoService {
         command.add("--write-sub");
         command.add("--write-auto-sub");
         command.add("--sub-lang");
-        command.add("en");
+        command.add(targetLanguage); // 使用完整语言代码，如 zh-Hans
         command.add("--sub-format");
         command.add("vtt");
         command.add("--skip-download");
@@ -319,7 +425,7 @@ public class YoutubeVideoService {
 
         // 解析 VTT 字幕文件
         updateProgress(video, "正在解析字幕文件...");
-        List<SubtitleSegment> segments = parseVttFile(subtitleFile, video.getId());
+        List<SubtitleSegment> segments = parseVttFile(subtitleFile, video.getId(), targetLanguage);
         
         // 保存字幕片段
         updateProgress(video, String.format("正在保存字幕片段 (0/%d)...", segments.size()));
@@ -337,20 +443,62 @@ public class YoutubeVideoService {
     }
 
     /**
-     * 解析 VTT 字幕文件
+     * 获取语言显示名称
+     */
+    private String getLanguageDisplayName(String language) {
+        if (language == null) return "英文";
+        String lang = language.toLowerCase();
+        if (lang.startsWith("zh")) return "中文";
+        if (lang.startsWith("ja")) return "日文";
+        if (lang.startsWith("ko")) return "韩文";
+        if (lang.startsWith("en")) return "英文";
+        return language;
+    }
+    
+    /**
+     * 解析 VTT 字幕文件（支持多语言）
      */
     private List<SubtitleSegment> parseVttFile(String filePath, Long videoId) throws Exception {
+        return parseVttFile(filePath, videoId, null);
+    }
+    
+    /**
+     * 解析 VTT 字幕文件（支持多语言）
+     */
+    private List<SubtitleSegment> parseVttFile(String filePath, Long videoId, String language) throws Exception {
         List<SubtitleSegment> segments = new ArrayList<>();
         
         // 尝试多个可能的文件名
         Path path = Paths.get(filePath);
+        
+        if (!Files.exists(path) && language != null) {
+            // 尝试带语言代码的文件名
+            String langCode = getLanguageCode(language);
+            String altPath = filePath.replace(".vtt", "." + langCode + ".vtt");
+            path = Paths.get(altPath);
+        }
+        
         if (!Files.exists(path)) {
-            // 尝试 .en.vtt 后缀
+            // 尝试常见语言后缀
+            String[] commonLangs = {"en", "zh", "ja", "ko", "zh-Hans", "zh-Hant"};
+            for (String lang : commonLangs) {
+                String altPath = filePath.replace(".vtt", "." + lang + ".vtt");
+                Path alt = Paths.get(altPath);
+                if (Files.exists(alt)) {
+                    path = alt;
+                    break;
+                }
+            }
+        }
+        
+        if (!Files.exists(path)) {
+            // 最后尝试 .en.vtt（向后兼容）
             path = Paths.get(filePath.replace(".vtt", ".en.vtt"));
         }
         
         if (!Files.exists(path)) {
-            throw new RuntimeException("Subtitle file not found: " + filePath);
+            throw new RuntimeException("Subtitle file not found: " + filePath + 
+                (language != null ? " (language: " + language + ")" : ""));
         }
         
         List<String> lines = Files.readAllLines(path);
@@ -392,7 +540,7 @@ public class YoutubeVideoService {
                     segment.setStartTime(startTime);
                     segment.setEndTime(endTime);
                     segment.setRawText(rawText);
-                    segment.setCleanText(cleanText(rawText));
+                    segment.setCleanText(cleanText(rawText, language)); // 传入语言参数
                     segment.setSegmentOrder(order++);
                     segments.add(segment);
                 }
@@ -426,9 +574,16 @@ public class YoutubeVideoService {
     }
 
     /**
-     * 清洗字幕文本
+     * 清洗字幕文本（支持多语言）
      */
     private String cleanText(String text) {
+        return cleanText(text, null);
+    }
+    
+    /**
+     * 清洗字幕文本（根据语言选择不同策略）
+     */
+    private String cleanText(String text, String language) {
         // 1. 解码HTML实体
         text = decodeHtmlEntities(text);
         
@@ -438,8 +593,15 @@ public class YoutubeVideoService {
         // 3. 移除多余空格
         text = text.replaceAll("\\s+", " ");
         
-        // 4. 移除特殊字符（保留基本标点）
-        text = text.replaceAll("[^a-zA-Z0-9\\s,.!?'-]", "");
+        // 4. 根据语言选择不同的字符过滤策略
+        if (isCJKLanguage(language)) {
+            // 中文/日文/韩文：保留所有Unicode字符，只移除控制字符
+            // 保留中文标点：，。！？；：""''（）【】《》、·等
+            text = text.replaceAll("[\\p{Cntrl}&&[^\n\r\t]]", "");
+        } else {
+            // 英文等：使用原有逻辑，保留基本ASCII字符和标点
+            text = text.replaceAll("[^a-zA-Z0-9\\s,.!?'-]", "");
+        }
         
         return text.trim();
     }
@@ -484,7 +646,7 @@ public class YoutubeVideoService {
         
         // 按语义切分句子
         updateProgress(video, "正在按语义切分句子...");
-        List<SentenceUnit> sentenceUnits = splitIntoSentences(mergedSegments);
+        List<SentenceUnit> sentenceUnits = splitIntoSentences(mergedSegments, video.getSubtitleLanguage());
         updateProgress(video, String.format("句子切分完成，共 %d 个候选句子", sentenceUnits.size()));
         
         updateProgress(video, "正在过滤和保存学习句子...");
@@ -493,16 +655,35 @@ public class YoutubeVideoService {
         int filtered = 0;
         for (SentenceUnit unit : sentenceUnits) {
             processed++;
-            // 过滤太短或太长的句子（更宽松的范围）
-            int wordCount = unit.text.split("\\s+").length;
+            // 过滤太短或太长的句子（根据语言选择不同策略）
             double duration = unit.endTime - unit.startTime;
+            boolean shouldFilter = false;
             
-            // 放宽过滤条件：单词数 3-80个，时长 0.5-40秒
-            if (wordCount < 3 || wordCount > 80 || duration < 0.5 || duration > 40) {
+            if (isCJKLanguage(video.getSubtitleLanguage())) {
+                // 中文/日文：基于字符数
+                int charCount = unit.text.length();
+                if (charCount < 3 || charCount > 200 || duration < 0.5 || duration > 40) {
+                    shouldFilter = true;
+                }
+            } else {
+                // 英文等：基于单词数
+                int wordCount = unit.text.split("\\s+").length;
+                if (wordCount < 3 || wordCount > 80 || duration < 0.5 || duration > 40) {
+                    shouldFilter = true;
+                }
+            }
+            
+            if (shouldFilter) {
                 filtered++;
-                log.info("过滤句子: {} 词, {:.2f}秒 ({}~{}) - {}", 
-                    wordCount, duration, unit.startTime, unit.endTime, 
-                    unit.text.substring(0, Math.min(50, unit.text.length())));
+                String preview = unit.text.length() > 50 ? unit.text.substring(0, 50) + "..." : unit.text;
+                if (isCJKLanguage(video.getSubtitleLanguage())) {
+                    log.info("过滤句子: {} 字符, {:.2f}秒 ({}~{}) - {}", 
+                        unit.text.length(), duration, unit.startTime, unit.endTime, preview);
+                } else {
+                    int wordCount = unit.text.split("\\s+").length;
+                    log.info("过滤句子: {} 词, {:.2f}秒 ({}~{}) - {}", 
+                        wordCount, duration, unit.startTime, unit.endTime, preview);
+                }
                 continue; // 跳过不适合跟读的句子
             }
             
@@ -515,7 +696,7 @@ public class YoutubeVideoService {
             sentence.setText(unit.text);
             sentence.setPhonetic(""); // TODO: 生成音标
             sentence.setAudioUrl(null); // YouTube句子使用视频片段，不需要单独的音频文件
-            sentence.setDifficulty(calculateDifficulty(unit.text, video.getDifficultyLevel()));
+            sentence.setDifficulty(calculateDifficulty(unit.text, video.getDifficultyLevel(), video.getSubtitleLanguage()));
             sentence.setCategory("YouTube");
             sentence.setYoutubeVideoId(video.getId());
             sentence.setStartTime(unit.startTime);
@@ -576,7 +757,7 @@ public class YoutubeVideoService {
     /**
      * 按语义切分成句子（改进版：直接使用字幕段的准确时间）
      */
-    private List<SentenceUnit> splitIntoSentences(List<SubtitleSegment> segments) {
+    private List<SentenceUnit> splitIntoSentences(List<SubtitleSegment> segments, String language) {
         List<SentenceUnit> units = new ArrayList<>();
         
         // 简化策略：每个合并后的字幕段就是一个句子，使用其准确的时间戳
@@ -588,8 +769,8 @@ public class YoutubeVideoService {
                 continue;
             }
             
-            // 移除 filler words
-            text = removeFillerWords(text);
+            // 移除 filler words（根据语言）
+            text = removeFillerWords(text, language);
             
             if (text.isEmpty()) {
                 continue;
@@ -607,50 +788,94 @@ public class YoutubeVideoService {
     }
 
     /**
-     * 移除 filler words
+     * 移除 filler words（支持多语言）
      */
-    private String removeFillerWords(String text) {
-        String[] words = text.toLowerCase().split("\\s+");
-        StringBuilder result = new StringBuilder();
-        
-        for (String word : words) {
-            String cleanWord = word.replaceAll("[^a-z]", "");
-            if (!FILLER_WORDS.contains(cleanWord)) {
-                result.append(word).append(" ");
+    private String removeFillerWords(String text, String language) {
+        if (isCJKLanguage(language)) {
+            // 中文/日文：直接移除填充词，不需要空格分割
+            String result = text;
+            Set<String> fillerWords = getFillerWords(language);
+            for (String filler : fillerWords) {
+                result = result.replace(filler, "");
             }
+            return result.trim();
+        } else {
+            // 英文等：使用空格分割
+            String[] words = text.toLowerCase().split("\\s+");
+            StringBuilder result = new StringBuilder();
+            Set<String> fillerWords = getFillerWords(language);
+            
+            for (String word : words) {
+                String cleanWord = word.replaceAll("[^a-z]", "");
+                if (!fillerWords.contains(cleanWord)) {
+                    result.append(word).append(" ");
+                }
+            }
+            
+            return result.toString().trim();
         }
-        
-        return result.toString().trim();
+    }
+    
+    /**
+     * 获取指定语言的填充词列表
+     */
+    private Set<String> getFillerWords(String language) {
+        if (language == null) return FILLER_WORDS_EN;
+        String lang = language.toLowerCase();
+        if (lang.startsWith("zh")) return FILLER_WORDS_ZH;
+        if (lang.startsWith("ja")) return FILLER_WORDS_JA;
+        return FILLER_WORDS_EN;
     }
 
     /**
-     * 计算难度
+     * 计算难度（支持多语言）
      */
-    private String calculateDifficulty(String text, String userPreference) {
+    private String calculateDifficulty(String text, String userPreference, String language) {
         if (!"auto".equals(userPreference)) {
             return userPreference;
         }
         
-        // 简单的难度评估算法（适配更长的句子）
-        String[] words = text.split("\\s+");
-        int wordCount = words.length;
-        int longWordCount = 0;
-        
-        for (String word : words) {
-            if (word.length() > 8) {
-                longWordCount++;
+        if (isCJKLanguage(language)) {
+            // 中文/日文：基于字符数评估
+            int charCount = text.length();
+            // 统计中文字符数（CJK统一表意文字）
+            long cjkCharCount = text.codePoints()
+                .filter(cp -> Character.UnicodeBlock.of(cp) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS ||
+                             Character.UnicodeBlock.of(cp) == Character.UnicodeBlock.HIRAGANA ||
+                             Character.UnicodeBlock.of(cp) == Character.UnicodeBlock.KATAKANA ||
+                             Character.UnicodeBlock.of(cp) == Character.UnicodeBlock.HANGUL_SYLLABLES)
+                .count();
+            
+            // 基于字符数和CJK字符比例评估难度
+            if (charCount < 15 && cjkCharCount > charCount * 0.7) {
+                return "easy";
+            } else if (charCount > 50 || cjkCharCount < charCount * 0.3) {
+                return "hard";
+            } else {
+                return "medium";
             }
-        }
-        
-        double longWordRatio = longWordCount / (double) wordCount;
-        
-        // 调整难度阈值以适应更长的句子
-        if (wordCount < 12 && longWordRatio < 0.2) {
-            return "easy";
-        } else if (wordCount > 25 || longWordRatio > 0.4) {
-            return "hard";
         } else {
-            return "medium";
+            // 英文等：使用原有逻辑（基于单词数）
+            String[] words = text.split("\\s+");
+            int wordCount = words.length;
+            int longWordCount = 0;
+            
+            for (String word : words) {
+                if (word.length() > 8) {
+                    longWordCount++;
+                }
+            }
+            
+            double longWordRatio = wordCount > 0 ? longWordCount / (double) wordCount : 0;
+            
+            // 调整难度阈值以适应更长的句子
+            if (wordCount < 12 && longWordRatio < 0.2) {
+                return "easy";
+            } else if (wordCount > 25 || longWordRatio > 0.4) {
+                return "hard";
+            } else {
+                return "medium";
+            }
         }
     }
 
@@ -711,7 +936,10 @@ public class YoutubeVideoService {
         
         // 4. 可选：删除字幕文件
         try {
-            String subtitleFile = SUBTITLE_DIR + video.getVideoId() + ".en.vtt";
+            // 根据视频的语言选择字幕文件名
+            String langCode = video.getSubtitleLanguage() != null ? 
+                getLanguageCode(video.getSubtitleLanguage()) : "en";
+            String subtitleFile = SUBTITLE_DIR + video.getVideoId() + "." + langCode + ".vtt";
             Path path = Paths.get(subtitleFile);
             if (Files.exists(path)) {
                 Files.delete(path);
@@ -768,7 +996,12 @@ public class YoutubeVideoService {
         }
         
         video.setHasSubtitle(true);
-        video.setSubtitleLanguage("en");
+        // 从 metadata 中获取语言，如果没有则默认为 en
+        String detectedLanguage = "en";
+        if (metadata != null && metadata.containsKey("language")) {
+            detectedLanguage = (String) metadata.get("language");
+        }
+        video.setSubtitleLanguage(detectedLanguage);
         video.setStatus("parsing");
         video.setProgressMessage("正在处理浏览器字幕...");
         videoRepository.save(video);
@@ -784,7 +1017,7 @@ public class YoutubeVideoService {
                 segment.setStartTime(((Number) sub.get("startTime")).doubleValue());
                 segment.setEndTime(((Number) sub.get("endTime")).doubleValue());
                 segment.setRawText((String) sub.get("text"));
-                segment.setCleanText(cleanText((String) sub.get("text")));
+                segment.setCleanText(cleanText((String) sub.get("text"), video.getSubtitleLanguage()));
                 segment.setSegmentOrder(i);
                 
                 segments.add(segment);
