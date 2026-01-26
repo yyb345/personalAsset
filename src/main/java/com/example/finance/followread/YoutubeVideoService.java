@@ -402,8 +402,10 @@ public class YoutubeVideoService {
         command.add("--sub-format");
         command.add("vtt");
         command.add("--skip-download");
+        // yt-dlp 输出模板：%(id)s 是视频ID，%(ext)s 是扩展名
+        // 字幕文件会自动添加语言代码，格式通常是：{id}.{lang}.vtt
         command.add("-o");
-        command.add(SUBTITLE_DIR + video.getVideoId());
+        command.add(SUBTITLE_DIR + "%(id)s.%(ext)s");
         command.add(video.getSourceUrl());
 
         // 打印最终执行命令，便于排查 cookies/参数/输出目录问题
@@ -415,12 +417,60 @@ public class YoutubeVideoService {
         }
         
         ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true); // 合并错误输出到标准输出
         
         Process process = pb.start();
+        
+        // 读取输出和错误信息
+        StringBuilder output = new StringBuilder();
+        StringBuilder errorOutput = new StringBuilder();
+        
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+             BufferedReader errorReader = new BufferedReader(
+                new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+            
+            while ((line = errorReader.readLine()) != null) {
+                errorOutput.append(line).append("\n");
+            }
+        }
+        
         int exitCode = process.waitFor();
         
+        // 记录 yt-dlp 的输出
+        if (output.length() > 0) {
+            log.info("yt-dlp 输出: {}", output.toString());
+        }
+        if (errorOutput.length() > 0) {
+            log.warn("yt-dlp 错误输出: {}", errorOutput.toString());
+        }
+        
         if (exitCode != 0) {
-            throw new RuntimeException("Failed to download subtitles");
+            log.error("yt-dlp 执行失败，退出码: {}, 输出: {}, 错误: {}", 
+                exitCode, output.toString(), errorOutput.toString());
+            throw new RuntimeException("Failed to download subtitles: " + errorOutput.toString());
+        }
+        
+        // 列出目录中的所有文件，帮助调试
+        try {
+            File subtitleDir = new File(SUBTITLE_DIR);
+            if (subtitleDir.exists()) {
+                File[] files = subtitleDir.listFiles((dir, name) -> 
+                    name.startsWith(video.getVideoId()) && name.endsWith(".vtt"));
+                if (files != null && files.length > 0) {
+                    log.info("找到字幕文件: {}", Arrays.toString(
+                        Arrays.stream(files).map(File::getName).toArray()));
+                } else {
+                    log.warn("未找到任何字幕文件，目录: {}", subtitleDir.getAbsolutePath());
+                }
+            }
+        } catch (Exception e) {
+            log.warn("列出字幕文件失败: {}", e.getMessage());
         }
 
         // 解析 VTT 字幕文件
@@ -468,37 +518,86 @@ public class YoutubeVideoService {
     private List<SubtitleSegment> parseVttFile(String filePath, Long videoId, String language) throws Exception {
         List<SubtitleSegment> segments = new ArrayList<>();
         
-        // 尝试多个可能的文件名
-        Path path = Paths.get(filePath);
+        // 提取视频ID（从文件路径中）
+        String videoIdStr = new File(filePath).getName().split("\\.")[0];
+        File subtitleDir = new File(SUBTITLE_DIR);
         
-        if (!Files.exists(path) && language != null) {
-            // 尝试带语言代码的文件名
-            String langCode = getLanguageCode(language);
-            String altPath = filePath.replace(".vtt", "." + langCode + ".vtt");
-            path = Paths.get(altPath);
-        }
+        // 尝试多个可能的文件名格式
+        Path path = null;
+        List<String> triedPaths = new ArrayList<>();
         
-        if (!Files.exists(path)) {
-            // 尝试常见语言后缀
-            String[] commonLangs = {"en", "zh", "ja", "ko", "zh-Hans", "zh-Hant"};
-            for (String lang : commonLangs) {
-                String altPath = filePath.replace(".vtt", "." + lang + ".vtt");
+        // 1. 尝试原始路径
+        path = Paths.get(filePath);
+        triedPaths.add(filePath);
+        if (Files.exists(path)) {
+            log.info("找到字幕文件: {}", filePath);
+        } else {
+            // 2. 尝试带语言代码的文件名（简化版）
+            if (language != null) {
+                String langCode = getLanguageCode(language);
+                String altPath = SUBTITLE_DIR + videoIdStr + "." + langCode + ".vtt";
+                path = Paths.get(altPath);
+                triedPaths.add(altPath);
+                if (Files.exists(path)) {
+                    log.info("找到字幕文件: {}", altPath);
+                }
+            }
+            
+            // 3. 如果还没找到，列出目录中所有匹配的文件
+            if (!Files.exists(path) && subtitleDir.exists()) {
+                File[] files = subtitleDir.listFiles((dir, name) -> 
+                    name.startsWith(videoIdStr) && name.endsWith(".vtt"));
+                
+                if (files != null && files.length > 0) {
+                    // 使用第一个找到的文件
+                    path = files[0].toPath();
+                    log.info("找到字幕文件（自动匹配）: {}", path);
+                }
+            }
+            
+            // 4. 尝试常见语言后缀
+            if (!Files.exists(path)) {
+                String[] commonLangs = {"en", "zh", "ja", "ko", "zh-Hans", "zh-Hant", "en-US", "zh-CN", "zh-TW"};
+                for (String lang : commonLangs) {
+                    String altPath = SUBTITLE_DIR + videoIdStr + "." + lang + ".vtt";
+                    Path alt = Paths.get(altPath);
+                    triedPaths.add(altPath);
+                    if (Files.exists(alt)) {
+                        path = alt;
+                        log.info("找到字幕文件: {}", altPath);
+                        break;
+                    }
+                }
+            }
+            
+            // 5. 尝试不带语言后缀的文件名（yt-dlp 可能生成这种格式）
+            if (!Files.exists(path)) {
+                String altPath = SUBTITLE_DIR + videoIdStr + ".vtt";
                 Path alt = Paths.get(altPath);
+                triedPaths.add(altPath);
                 if (Files.exists(alt)) {
                     path = alt;
-                    break;
+                    log.info("找到字幕文件: {}", altPath);
                 }
             }
         }
         
-        if (!Files.exists(path)) {
-            // 最后尝试 .en.vtt（向后兼容）
-            path = Paths.get(filePath.replace(".vtt", ".en.vtt"));
-        }
-        
-        if (!Files.exists(path)) {
+        if (path == null || !Files.exists(path)) {
+            // 列出所有尝试过的路径
+            log.error("字幕文件未找到，尝试过的路径: {}", String.join(", ", triedPaths));
+            
+            // 列出目录中的所有文件
+            if (subtitleDir.exists()) {
+                File[] allFiles = subtitleDir.listFiles();
+                if (allFiles != null) {
+                    log.error("字幕目录中的所有文件: {}", 
+                        Arrays.toString(Arrays.stream(allFiles).map(File::getName).toArray()));
+                }
+            }
+            
             throw new RuntimeException("Subtitle file not found: " + filePath + 
-                (language != null ? " (language: " + language + ")" : ""));
+                (language != null ? " (language: " + language + ")" : "") +
+                ". Tried paths: " + String.join(", ", triedPaths));
         }
         
         List<String> lines = Files.readAllLines(path);
