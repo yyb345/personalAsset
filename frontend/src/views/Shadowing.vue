@@ -102,29 +102,33 @@
               `difficulty-${sentence.difficulty}`
             ]"
           >
-            <div class="sentence-header">
-              <span class="sentence-number">#{{ index + 1 }}</span>
-              <span :class="['difficulty-badge', `badge-${sentence.difficulty}`]">
-                {{ getDifficultyLabel(sentence.difficulty) }}
-              </span>
-              <span class="sentence-time">{{ formatTime(sentence.startTime) }}</span>
-            </div>
-            <p class="sentence-text">{{ sentence.text }}</p>
-            <div class="sentence-controls">
-              <button 
-                @click.stop="playSentence(index)" 
-                class="play-btn"
-                :disabled="isPlaying && currentSentenceIndex === index"
-              >
-                {{ isPlaying && currentSentenceIndex === index ? '▶️ 播放中' : '▶️ 播放' }}
-              </button>
-              <button 
-                @click.stop="toggleLoop(index)" 
-                class="loop-btn"
-                :class="{ active: loopEnabled && currentSentenceIndex === index }"
-              >
-                🔁 循环
-              </button>
+            <div class="sentence-content">
+              <div class="sentence-header">
+                <span class="sentence-number">#{{ index + 1 }}</span>
+                <span :class="['difficulty-badge', `badge-${sentence.difficulty}`]">
+                  {{ getDifficultyLabel(sentence.difficulty) }}
+                </span>
+                <span class="sentence-time">{{ formatTime(sentence.startTime) }}</span>
+              </div>
+              <p class="sentence-text">{{ sentence.text }}</p>
+              <div class="sentence-controls">
+                <button 
+                  @click.stop="playSentence(index)" 
+                  class="play-btn"
+                  :disabled="isPlaying && currentSentenceIndex === index"
+                >
+                  <span class="btn-icon">▶️</span>
+                  <span class="btn-text">{{ isPlaying && currentSentenceIndex === index ? '播放中' : '播放' }}</span>
+                </button>
+                <button 
+                  @click.stop="toggleLoop(index)" 
+                  class="loop-btn"
+                  :class="{ active: loopEnabled && currentSentenceIndex === index }"
+                >
+                  <span class="btn-icon">🔁</span>
+                  <span class="btn-text">循环</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -537,9 +541,9 @@ export default {
 <style scoped>
 .shadowing-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #FFFFFF;
+  color: #0F1419;
+  font-family: 'Roboto', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* 加载和错误状态 */
@@ -551,13 +555,14 @@ export default {
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
+  background: #FFFFFF;
 }
 
 .loading-spinner {
   width: 60px;
   height: 60px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 4px solid #E5E5E5;
+  border-top-color: #FF0000;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -573,19 +578,19 @@ export default {
 
 .retry-btn {
   margin-top: 20px;
-  padding: 12px 24px;
-  background: white;
-  color: #667eea;
+  padding: 10px 16px;
+  background: #0F0F0F;
+  color: #FFFFFF;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: background-color 0.2s;
 }
 
 .retry-btn:hover {
-  transform: translateY(-2px);
+  background: #272727;
 }
 
 /* 主界面 */
@@ -593,6 +598,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  background: #FFFFFF;
 }
 
 /* 视频头部 */
@@ -600,16 +606,17 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .video-info {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   flex: 1;
 }
 
@@ -618,53 +625,67 @@ export default {
   height: 90px;
   border-radius: 8px;
   object-fit: cover;
+  background: #F2F2F2;
 }
 
 .info-text h1 {
-  font-size: 24px;
-  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #0F0F0F;
+  line-height: 1.4;
 }
 
 .meta {
   display: flex;
   gap: 16px;
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: 13px;
+  color: #606060;
+}
+
+.meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .close-btn {
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   border: none;
   border-radius: 50%;
-  color: white;
+  color: #0F0F0F;
   font-size: 24px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background: #F2F2F2;
 }
 
 /* 控制面板 */
 .control-panel {
   display: flex;
-  gap: 30px;
+  gap: 24px;
   align-items: center;
   flex-wrap: wrap;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
   border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 20px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
 }
 
 .control-panel label {
   font-size: 14px;
+  color: #0F0F0F;
   margin-right: 8px;
+  font-weight: 400;
 }
 
 .speed-control,
@@ -677,66 +698,83 @@ export default {
 
 .speed-btn,
 .filter-btn {
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  color: white;
-  font-size: 13px;
+  padding: 8px 12px;
+  background: #FFFFFF;
+  border: 1px solid #DADADA;
+  border-radius: 18px;
+  color: #0F0F0F;
+  font-size: 14px;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.2s;
+  min-height: 36px;
 }
 
 .speed-btn:hover,
 .filter-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #F9F9F9;
 }
 
 .speed-btn.active,
 .filter-btn.active {
-  background: white;
-  color: #667eea;
-  border-color: white;
+  background: #0F0F0F;
+  color: #FFFFFF;
+  border-color: #0F0F0F;
+}
+
+.loop-control label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #0F0F0F;
+}
+
+.loop-control input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #0F0F0F;
 }
 
 /* 句子列表 */
 .sentences-container {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px;
   min-height: 400px;
   margin-bottom: 120px;
 }
 
 .sentence-item {
-  background: #f8f9fa;
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
   cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid transparent;
+  transition: all 0.2s;
 }
 
 .sentence-item:hover {
-  background: #e9ecef;
-  transform: translateX(4px);
+  background: #F9F9F9;
+  border-color: #DADADA;
 }
 
 .sentence-item.active {
-  border-color: #667eea;
-  background: #f0f3ff;
+  border-color: #0F0F0F;
+  background: #FAFAFA;
 }
 
 .sentence-item.playing {
-  border-color: #764ba2;
-  background: linear-gradient(135deg, #f0f3ff 0%, #fdf0ff 100%);
-  animation: pulse 2s ease-in-out infinite;
+  border-color: #0F0F0F;
+  background: #F5F5F5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(102, 126, 234, 0); }
+.sentence-content {
+  display: block;
 }
 
 .sentence-header {
@@ -745,80 +783,110 @@ export default {
   gap: 10px;
   margin-bottom: 10px;
   font-size: 13px;
-  color: #6c757d;
+  color: #606060;
 }
 
 .sentence-number {
-  font-weight: 600;
-  color: #667eea;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 24px;
+  background: #0F0F0F;
+  color: #FFFFFF;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 12px;
 }
 
 .difficulty-badge {
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .badge-easy {
-  background: #d4edda;
-  color: #155724;
+  background: #E8F5E9;
+  color: #2E7D32;
 }
 
 .badge-medium {
-  background: #fff3cd;
-  color: #856404;
+  background: #FFF3E0;
+  color: #E65100;
 }
 
 .badge-hard {
-  background: #f8d7da;
-  color: #721c24;
+  background: #FFEBEE;
+  color: #C62828;
 }
 
 .sentence-text {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.6;
-  color: #212529;
+  color: #0F0F0F;
   margin: 0 0 12px 0;
 }
 
 .sentence-controls {
   display: flex;
+  flex-direction: row;
   gap: 8px;
+  align-items: flex-start;
 }
 
 .play-btn,
 .loop-btn {
-  padding: 6px 12px;
-  background: #667eea;
-  color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background: #0F0F0F;
+  color: #FFFFFF;
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
+  gap: 6px;
 }
 
 .play-btn:hover,
 .loop-btn:hover {
-  background: #5568d3;
-  transform: translateY(-2px);
+  background: #272727;
 }
 
 .play-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
+  background: #E5E5E5;
+  color: #909090;
 }
 
 .loop-btn.active {
-  background: #764ba2;
+  background: #0F0F0F;
+}
+
+.loop-btn.active:hover {
+  background: #272727;
+}
+
+.btn-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.btn-text {
+  font-size: 12px;
+  line-height: 1;
 }
 
 .no-sentences {
   text-align: center;
   padding: 60px 20px;
-  color: #6c757d;
+  color: #606060;
 }
 
 /* 底部播放器 */
@@ -827,68 +895,74 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(102, 126, 234, 0.2);
+  background: #FFFFFF;
+  border-top: 1px solid #E5E5E5;
   padding: 16px 20px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 100;
 }
 
 .current-sentence-display {
   margin-bottom: 12px;
-  color: #212529;
+  color: #0F0F0F;
 }
 
 .sentence-info {
   display: flex;
   gap: 16px;
   font-size: 12px;
-  color: #6c757d;
+  color: #606060;
   margin-bottom: 6px;
 }
 
 .current-text {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 400;
   margin: 0;
-  color: #212529;
+  color: #0F0F0F;
+  line-height: 1.5;
 }
 
 .player-controls {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
 }
 
 .control-btn {
-  padding: 10px 20px;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  padding: 10px 16px;
+  background: #FFFFFF;
+  color: #0F0F0F;
+  border: 1px solid #DADADA;
+  border-radius: 18px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  min-height: 36px;
 }
 
 .control-btn:hover:not(:disabled) {
-  background: #5568d3;
-  transform: translateY(-2px);
+  background: #F9F9F9;
 }
 
 .control-btn.primary {
-  background: #764ba2;
+  background: #0F0F0F;
+  color: #FFFFFF;
+  border-color: #0F0F0F;
 }
 
 .control-btn.primary:hover:not(:disabled) {
-  background: #653a8c;
+  background: #272727;
+  border-color: #272727;
 }
 
 .control-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
+  background: #F9F9F9;
+  color: #909090;
+  border-color: #E5E5E5;
 }
 
 /* 快捷键提示 */
@@ -896,11 +970,12 @@ export default {
   position: fixed;
   bottom: 140px;
   right: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 10px 16px;
+  background: #0F0F0F;
+  color: #FFFFFF;
+  padding: 8px 12px;
   border-radius: 8px;
   font-size: 12px;
+  z-index: 99;
 }
 
 kbd {
@@ -929,6 +1004,10 @@ kbd {
   
   .keyboard-hints {
     display: none;
+  }
+  
+  .shadowing-main {
+    padding: 12px;
   }
 }
 </style>
