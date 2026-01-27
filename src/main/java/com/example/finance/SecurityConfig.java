@@ -50,9 +50,13 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) // 简化开发，生产环境建议启用
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
+            )
             .authorizeHttpRequests(auth -> auth
-                // 公开访问的资源
-                .requestMatchers("/api/auth/**", "/api/admin/**", "/login.html", "/register.html", 
+                // 公开访问的资源 - 必须在最前面，确保优先级
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/admin/**", "/login.html", "/register.html", 
                                "/style.css", "/actuator/**",
                                "/", "/index.html", "/script.js").permitAll()
                 // 前端路由（公开访问）
@@ -66,7 +70,9 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login.html")
                 .permitAll()
+                .loginProcessingUrl("/login.html") // 明确指定formLogin只处理/login.html的POST请求
             )
+            .httpBasic(basic -> basic.disable())
             .logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
                 .logoutSuccessUrl("/login.html")
@@ -74,10 +80,12 @@ public class SecurityConfig {
             )
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint((request, response, authException) -> {
-                    // 对于API请求返回401，对于页面请求重定向到登录页
-                    if (request.getRequestURI().startsWith("/api/")) {
+                    String requestUri = request.getRequestURI();
+                    // 对于需要认证的API请求返回401，对于页面请求重定向到登录页
+                    if (requestUri.startsWith("/api/")) {
                         response.setStatus(401);
                         response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
                         response.getWriter().write("{\"error\":\"请先登录\",\"message\":\"需要登录才能访问此功能\"}");
                     } else {
                         response.sendRedirect("/login.html");
