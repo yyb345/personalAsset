@@ -25,10 +25,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow Chrome Extension and localhost
+        // Allow Chrome Extension, localhost, and production domain
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:*", 
             "http://127.0.0.1:*",
+            "http://www.xlearning.top",
+            "http://xlearning.top",
+            "https://www.xlearning.top",
+            "https://xlearning.top",
             "chrome-extension://*"  // Allow Chrome extensions
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
@@ -51,6 +55,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**", "/api/admin/**", "/login.html", "/register.html", 
                                "/style.css", "/actuator/**",
                                "/", "/index.html", "/script.js").permitAll()
+                // 前端路由（公开访问）
+                .requestMatchers("/login", "/register", "/dashboard", "/dashboard/**", "/shadowing").permitAll()
                 // Chrome 插件 API（公开访问）
                 .requestMatchers("/api/youtube/**").permitAll()
                 // 需要认证的API

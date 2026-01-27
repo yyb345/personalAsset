@@ -9,7 +9,7 @@
     <div class="login-container">
       <router-link to="/" class="logo-link">
         <span class="logo-icon">📚</span>
-        <span class="logo-text">English Evolution</span>
+        <span class="logo-text">X Learning</span>
       </router-link>
       <div class="login-header">
         <h1>Welcome Back</h1>

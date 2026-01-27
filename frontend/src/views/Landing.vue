@@ -4,8 +4,13 @@
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
-          <span class="logo-icon">📚</span>
-          <span class="logo-text">English Evolution</span>
+          <div class="logo-icon">
+            <svg viewBox="0 0 90 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="90" height="20" rx="2" fill="#FF0000"/>
+              <text x="45" y="14" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">EE</text>
+            </svg>
+          </div>
+          <span class="logo-text">X Learning</span>
         </div>
         <ul class="nav-menu" :class="{ active: mobileMenuOpen }">
           <li><a href="#features" @click="scrollTo('features')">Features</a></li>
@@ -22,11 +27,6 @@
 
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-background">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-      </div>
       <div class="hero-content">
         <h1 class="hero-title">
           <span class="gradient-text">Master English</span>
@@ -38,7 +38,7 @@
         </p>
         <div class="hero-buttons">
           <router-link to="/register" class="btn-hero-primary">Start Learning</router-link>
-          <a href="#demo" class="btn-hero-secondary">Watch Demo</a>
+          <router-link to="/shadowing?videoId=rtuKId76DZI" class="btn-hero-secondary">Watch Demo</router-link>
         </div>
         <div class="hero-stats">
           <div class="stat-item">
@@ -148,8 +148,13 @@
         <div class="footer-grid">
           <div class="footer-section">
             <div class="footer-logo">
-              <span class="logo-icon">📚</span>
-              <span class="logo-text">English Evolution</span>
+              <div class="logo-icon">
+                <svg viewBox="0 0 90 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="90" height="20" rx="2" fill="#FF0000"/>
+                  <text x="45" y="14" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">EE</text>
+                </svg>
+              </div>
+              <span class="logo-text">X Learning</span>
             </div>
             <p class="footer-description">AI-powered English learning platform for everyone</p>
           </div>
@@ -182,7 +187,7 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2025 English Evolution. All rights reserved.</p>
+          <p>&copy; 2025 X Learning. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -224,7 +229,7 @@ const features = [
 
 const testimonials = [
   {
-    content: 'English Evolution completely transformed my learning approach. The YouTube integration is brilliant – I can learn from content I actually enjoy watching. My speaking confidence has doubled in just 3 months!',
+    content: 'X Learning completely transformed my learning approach. The YouTube integration is brilliant – I can learn from content I actually enjoy watching. My speaking confidence has doubled in just 3 months!',
     avatar: '👨‍💼',
     name: 'David Chen',
     title: 'Software Engineer'
