@@ -70,12 +70,12 @@ COPY --from=backend-builder /app/target/*.jar app.jar
 
 # 设置环境变量
 ENV SPRING_DATASOURCE_URL=jdbc:sqlite:/data/finance.db \
-    SERVER_PORT=8080 \
+    SERVER_PORT=80 \
     JAVA_OPTS="-Xmx512m -Xms256m" \
     TZ=Asia/Shanghai
 
 # 暴露端口
-EXPOSE 8080
+EXPOSE 80
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
