@@ -12,5 +12,6 @@ public interface YoutubeVideoRepository extends JpaRepository<YoutubeVideo, Long
     List<YoutubeVideo> findByCreatedBy(Long userId);
     List<YoutubeVideo> findByStatus(String status);
     List<YoutubeVideo> findByCreatedByOrderByCreatedAtDesc(Long userId);
+    List<YoutubeVideo> findAllByOrderByCreatedAtDesc();
 }
 

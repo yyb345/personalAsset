@@ -150,12 +150,11 @@ public class YoutubeVideoController {
     }
 
     /**
-     * 获取用户的所有视频任务
+     * 获取所有视频（供所有用户学习）
      */
     @GetMapping("/videos")
-    public ResponseEntity<?> getUserVideos(Authentication authentication) {
-        Long userId = getUserId(authentication);
-        List<YoutubeVideo> videos = youtubeVideoService.getUserVideos(userId);
+    public ResponseEntity<?> getAllVideos() {
+        List<YoutubeVideo> videos = youtubeVideoService.getAllVideos();
         return ResponseEntity.ok(videos);
     }
 

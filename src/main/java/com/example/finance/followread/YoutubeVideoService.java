@@ -1149,6 +1149,13 @@ public class YoutubeVideoService {
     }
 
     /**
+     * 获取所有视频（供所有用户学习）
+     */
+    public List<YoutubeVideo> getAllVideos() {
+        return videoRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    /**
      * 获取视频详情（包括生成的句子）
      */
     public Map<String, Object> getVideoDetails(Long videoId) {
