@@ -19,7 +19,7 @@
         </ul>
         <div class="nav-buttons">
           <router-link to="/login" class="btn-secondary">Sign In</router-link>
-          <router-link to="/register" class="btn-primary">Get Started</router-link>
+          <router-link to="/dashboard/youtube" class="btn-primary">Get Started</router-link>
         </div>
         <button class="mobile-menu-btn" @click="mobileMenuOpen = !mobileMenuOpen">☰</button>
       </div>

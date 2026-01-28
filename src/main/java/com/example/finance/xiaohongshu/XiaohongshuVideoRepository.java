@@ -1,5 +1,7 @@
 package com.example.finance.xiaohongshu;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +14,8 @@ public interface XiaohongshuVideoRepository extends JpaRepository<XiaohongshuVid
     List<XiaohongshuVideo> findByCreatedBy(Long userId);
     List<XiaohongshuVideo> findByStatus(String status);
     List<XiaohongshuVideo> findByCreatedByOrderByCreatedAtDesc(Long userId);
+
+    // 分页查询
+    Page<XiaohongshuVideo> findByCreatedByOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }
 

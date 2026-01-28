@@ -100,13 +100,26 @@ public class XiaohongshuVideoController {
     }
 
     /**
-     * 获取用户的所有视频任务
+     * 获取用户的所有视频任务（支持分页）
      */
     @GetMapping("/videos")
-    public ResponseEntity<?> getUserVideos(Authentication authentication) {
+    public ResponseEntity<?> getUserVideos(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         Long userId = getUserId(authentication);
-        List<XiaohongshuVideo> videos = xiaohongshuVideoService.getUserVideos(userId);
-        return ResponseEntity.ok(videos);
+        org.springframework.data.domain.Page<XiaohongshuVideo> videoPage = xiaohongshuVideoService.getUserVideosPaged(userId, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", videoPage.getContent());
+        response.put("totalElements", videoPage.getTotalElements());
+        response.put("totalPages", videoPage.getTotalPages());
+        response.put("currentPage", videoPage.getNumber());
+        response.put("pageSize", videoPage.getSize());
+        response.put("hasNext", videoPage.hasNext());
+        response.put("hasPrevious", videoPage.hasPrevious());
+
+        return ResponseEntity.ok(response);
     }
 
     /**

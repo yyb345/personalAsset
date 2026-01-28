@@ -1156,6 +1156,14 @@ public class YoutubeVideoService {
     }
 
     /**
+     * 分页获取所有视频
+     */
+    public org.springframework.data.domain.Page<YoutubeVideo> getAllVideosPaged(int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return videoRepository.findAllByOrderByCreatedAtDesc(pageable);
+    }
+
+    /**
      * 获取视频详情（包括生成的句子）
      */
     public Map<String, Object> getVideoDetails(Long videoId) {

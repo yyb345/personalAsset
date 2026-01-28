@@ -146,40 +146,62 @@ public class UserController {
     @GetMapping("/check")
     public ResponseEntity<?> checkAuth(HttpSession session) {
         Map<String, Object> response = new HashMap<>();
-        
+
         // 优先检查 Spring Security 认证状态
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() 
+        if (authentication != null && authentication.isAuthenticated()
             && !"anonymousUser".equals(authentication.getPrincipal())) {
-            
+
+            // 处理 OAuth2 用户
+            if (authentication.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+                org.springframework.security.oauth2.core.user.OAuth2User oauth2User =
+                    (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal();
+
+                String email = oauth2User.getAttribute("email");
+                if (email != null) {
+                    Optional<User> userOptional = userRepository.findByEmail(email);
+                    if (userOptional.isPresent()) {
+                        User user = userOptional.get();
+                        return ResponseEntity.ok(buildUserResponse(user));
+                    }
+                }
+            }
+
+            // 处理普通用户
             String username = authentication.getName();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
-                response.put("authenticated", true);
-                response.put("username", user.getUsername());
-                response.put("email", user.getEmail());
-                response.put("fullName", user.getFullName());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(buildUserResponse(user));
             }
         }
-        
+
         // 降级检查 Session
         Object userId = session.getAttribute("userId");
         if (userId != null) {
             Optional<User> userOptional = userRepository.findById((Long) userId);
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
-                response.put("authenticated", true);
-                response.put("username", user.getUsername());
-                response.put("email", user.getEmail());
-                response.put("fullName", user.getFullName());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(buildUserResponse(user));
             }
         }
-        
+
         response.put("authenticated", false);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 构建用户响应信息
+     */
+    private Map<String, Object> buildUserResponse(User user) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("authenticated", true);
+        response.put("username", user.getUsername());
+        response.put("email", user.getEmail());
+        response.put("fullName", user.getFullName());
+        response.put("provider", user.getProvider());
+        response.put("avatarUrl", user.getAvatarUrl());
+        return response;
     }
 }
 

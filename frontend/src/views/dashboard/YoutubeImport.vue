@@ -50,7 +50,7 @@
 
       <!-- 我的视频列表 -->
       <div class="my-videos-section">
-        <h2>My Library</h2>
+        <h2>My Library <span v-if="totalElements > 0" class="total-count">({{ totalElements }} videos)</span></h2>
         <div v-if="myVideos.length === 0" class="empty-state">
           <p>No videos yet</p>
         </div>
@@ -108,6 +108,36 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- 分页控件 -->
+        <div v-if="totalPages > 1" class="pagination">
+          <button
+            class="page-btn"
+            @click="previousPage"
+            :disabled="!hasPrevious"
+          >
+            ← Previous
+          </button>
+
+          <div class="page-numbers">
+            <button
+              v-for="page in visiblePages"
+              :key="page"
+              :class="['page-num', { active: page === currentPage }]"
+              @click="goToPage(page)"
+            >
+              {{ page + 1 }}
+            </button>
+          </div>
+
+          <button
+            class="page-btn"
+            @click="nextPage"
+            :disabled="!hasNext"
+          >
+            Next →
+          </button>
         </div>
       </div>
     </div>
@@ -453,6 +483,14 @@ export default {
       myVideos: [],
       selectedVideo: null,
       videoSentences: [],
+
+      // 分页相关
+      currentPage: 0,
+      totalPages: 0,
+      pageSize: 10,
+      totalElements: 0,
+      hasNext: false,
+      hasPrevious: false,
       
       pollInterval: null,
       videoListPollInterval: null, // 新增：视频列表轮询定时器
@@ -490,6 +528,21 @@ export default {
     incorrectWords() {
       if (!this.taskResult || !this.taskResult.results) return [];
       return this.taskResult.results.filter(r => r.status === 'incorrect');
+    },
+    visiblePages() {
+      const pages = [];
+      const maxVisible = 5;
+      let start = Math.max(0, this.currentPage - Math.floor(maxVisible / 2));
+      let end = Math.min(this.totalPages, start + maxVisible);
+
+      if (end - start < maxVisible) {
+        start = Math.max(0, end - maxVisible);
+      }
+
+      for (let i = start; i < end; i++) {
+        pages.push(i);
+      }
+      return pages;
     }
   },
   mounted() {
@@ -530,19 +583,64 @@ export default {
       }
     },
     
-    async loadMyVideos() {
+    async loadMyVideos(page = this.currentPage) {
       try {
-        const response = await axios.get('/api/youtube/videos');
-        this.myVideos = response.data;
+        const response = await axios.get('/api/youtube/videos', {
+          params: {
+            page: page,
+            size: this.pageSize
+          }
+        });
+        const data = response.data;
+        // 兼容两种返回格式：分页格式 { content, totalElements, ... } 或 直接数组
+        const list = Array.isArray(data.content) ? data.content : (Array.isArray(data) ? data : []);
+        this.myVideos = list.map((v) => this.normalizeVideoItem(v));
+        this.currentPage = typeof data.currentPage === 'number' ? data.currentPage : (data.number ?? 0);
+        this.totalPages = typeof data.totalPages === 'number' ? data.totalPages : (list.length > 0 ? 1 : 0);
+        this.totalElements = typeof data.totalElements === 'number' ? data.totalElements : list.length;
+        this.hasNext = Boolean(data.hasNext);
+        this.hasPrevious = Boolean(data.hasPrevious);
       } catch (error) {
         console.error('加载视频列表失败:', error);
+        this.myVideos = [];
+      }
+    },
+    normalizeVideoItem(v) {
+      if (!v || typeof v !== 'object') return {};
+      return {
+        id: v.id,
+        videoId: v.videoId,
+        title: v.title ?? '',
+        channel: v.channel ?? '',
+        duration: v.duration ?? 0,
+        thumbnailUrl: v.thumbnailUrl ?? v.thumbnail_url ?? '',
+        status: v.status ?? 'added',
+        sentenceCount: v.sentenceCount ?? v.sentence_count ?? 0
+      };
+    },
+
+    goToPage(page) {
+      if (page >= 0 && page < this.totalPages) {
+        this.loadMyVideos(page);
+      }
+    },
+
+    previousPage() {
+      if (this.hasPrevious) {
+        this.goToPage(this.currentPage - 1);
+      }
+    },
+
+    nextPage() {
+      if (this.hasNext) {
+        this.goToPage(this.currentPage + 1);
       }
     },
     
     startVideoListPolling() {
       // 每3秒轮询一次视频列表，以更新状态
       this.videoListPollInterval = setInterval(() => {
-        this.loadMyVideos();
+        this.loadMyVideos(this.currentPage);
       }, 3000); // 3秒间隔
     },
     

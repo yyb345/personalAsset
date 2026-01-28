@@ -1,5 +1,6 @@
 package com.example.finance;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,6 +17,9 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -56,13 +60,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 公开访问的资源 - 必须在最前面，确保优先级
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/admin/**", "/login.html", "/register.html", 
+                .requestMatchers("/api/admin/**", "/login.html", "/register.html",
                                "/style.css", "/actuator/**",
                                "/", "/index.html", "/script.js").permitAll()
                 // 前端路由（公开访问）
                 .requestMatchers("/login", "/register", "/dashboard", "/dashboard/**", "/shadowing").permitAll()
                 // Chrome 插件 API（公开访问）
                 .requestMatchers("/api/youtube/**").permitAll()
+                // OAuth2 相关端点（公开访问）
+                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 // 需要认证的API
                 .requestMatchers("/api/stocks/**").authenticated()
                 .anyRequest().permitAll()
@@ -71,6 +77,21 @@ public class SecurityConfig {
                 .loginPage("/login.html")
                 .permitAll()
                 .loginProcessingUrl("/login.html") // 明确指定formLogin只处理/login.html的POST请求
+            )
+            // OAuth2 登录配置
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler((request, response, authentication) -> {
+                    // OAuth2 登录成功后重定向到前端
+                    response.sendRedirect("/dashboard/youtube");
+                })
+                .failureHandler((request, response, exception) -> {
+                    // OAuth2 登录失败后重定向到登录页
+                    response.sendRedirect("/login?error=oauth2");
+                })
             )
             .httpBasic(basic -> basic.disable())
             .logout(logout -> logout

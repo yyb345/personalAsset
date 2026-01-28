@@ -13,20 +13,28 @@ public class User {
     
     @Column(unique = true, nullable = false)
     private String username;
-    
-    @Column(nullable = false)
+
+    @Column(nullable = true) // OAuth2 用户可能没有密码
     private String password;
-    
+
     @Column(unique = true, nullable = false)
     private String email;
-    
+
     private String fullName;
-    
+
+    // OAuth2 相关字段
+    @Column(nullable = false)
+    private String provider = "local"; // local, google, github 等
+
+    private String providerId; // 第三方平台的用户ID
+
+    private String avatarUrl; // 用户头像URL
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
-    
+
     private LocalDateTime lastLoginAt;
-    
+
     @Column(nullable = false)
     private boolean enabled = true;
 
@@ -105,6 +113,30 @@ public class User {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }
 
