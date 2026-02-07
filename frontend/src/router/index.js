@@ -41,6 +41,12 @@ const router = createRouter({
           meta: { requiresAuth: false }
         }
       ]
+    },
+    {
+      path: '/shadowing',
+      name: 'Shadowing',
+      component: () => import('@/views/Shadowing.vue'),
+      meta: { requiresAuth: false }
     }
   ]
 })

@@ -1,5 +1,7 @@
 package com.example.finance.followread;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +14,10 @@ public interface YoutubeVideoRepository extends JpaRepository<YoutubeVideo, Long
     List<YoutubeVideo> findByCreatedBy(Long userId);
     List<YoutubeVideo> findByStatus(String status);
     List<YoutubeVideo> findByCreatedByOrderByCreatedAtDesc(Long userId);
+    List<YoutubeVideo> findAllByOrderByCreatedAtDesc();
+
+    // 分页查询
+    Page<YoutubeVideo> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    Page<YoutubeVideo> findByCreatedByOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }
 

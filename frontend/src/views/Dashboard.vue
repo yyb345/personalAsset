@@ -280,8 +280,10 @@ const updateSidebarWidth = () => {
 
 const loadVideoLibraryCount = async () => {
   try {
-    const response = await axios.get('/api/youtube/videos')
-    completedVideos.value = response.data.length || 0
+    const response = await axios.get('/api/youtube/videos', { params: { page: 0, size: 1 } })
+    const data = response.data
+    // 兼容分页格式 { totalElements } 或 直接数组
+    completedVideos.value = typeof data.totalElements === 'number' ? data.totalElements : (Array.isArray(data) ? data.length : 0) || 0
   } catch (error) {
     console.error('Failed to load video library count:', error)
     completedVideos.value = 0

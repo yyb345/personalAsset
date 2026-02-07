@@ -236,6 +236,79 @@
   border: 1px solid #cfc;
 }
 
+/* OAuth2 分隔线 */
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.oauth-divider span {
+  padding: 0 1rem;
+  color: #888;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* OAuth2 按钮 */
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 30px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.oauth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.google-btn {
+  background: white;
+  color: #333;
+}
+
+.google-btn:hover {
+  border-color: #4285F4;
+  background: #f8f9ff;
+}
+
+.google-icon {
+  flex-shrink: 0;
+}
+
+.github-btn {
+  background: #24292e;
+  color: white;
+  border-color: #24292e;
+}
+
+.github-btn:hover {
+  background: #1a1e22;
+}
+
 @media (max-width: 768px) {
   .login-container {
     padding: 2rem;
@@ -246,5 +319,6 @@
     font-size: 1.6rem;
   }
 }
+
 
 

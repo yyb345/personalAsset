@@ -177,6 +177,14 @@ public class XiaohongshuVideoService {
     }
 
     /**
+     * 分页获取用户的视频任务
+     */
+    public org.springframework.data.domain.Page<XiaohongshuVideo> getUserVideosPaged(Long userId, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return videoRepository.findByCreatedByOrderByCreatedAtDesc(userId, pageable);
+    }
+
+    /**
      * 获取视频详情
      */
     public Map<String, Object> getVideoDetails(Long videoId) {

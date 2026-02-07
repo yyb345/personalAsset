@@ -1,5 +1,6 @@
 package com.example.finance;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,9 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -25,10 +29,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Use allowedOriginPatterns instead of allowedOrigins when allowCredentials is true
+        // Allow Chrome Extension, localhost, and production domain
         configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:*", 
-            "http://127.0.0.1:*"
+            "http://127.0.0.1:*",
+            "http://www.xlearning.top",
+            "http://xlearning.top",
+            "https://www.xlearning.top",
+            "https://xlearning.top",
+            "chrome-extension://*"  // Allow Chrome extensions
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -45,11 +54,21 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) // 简化开发，生产环境建议启用
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
+            )
             .authorizeHttpRequests(auth -> auth
-                // 公开访问的资源
-                .requestMatchers("/api/auth/**", "/api/admin/**", "/login.html", "/register.html", 
+                // 公开访问的资源 - 必须在最前面，确保优先级
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/admin/**", "/login.html", "/register.html",
                                "/style.css", "/actuator/**",
                                "/", "/index.html", "/script.js").permitAll()
+                // 前端路由（公开访问）
+                .requestMatchers("/login", "/register", "/dashboard", "/dashboard/**", "/shadowing").permitAll()
+                // Chrome 插件 API（公开访问）
+                .requestMatchers("/api/youtube/**").permitAll()
+                // OAuth2 相关端点（公开访问）
+                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 // 需要认证的API
                 .requestMatchers("/api/stocks/**").authenticated()
                 .anyRequest().permitAll()
@@ -57,7 +76,24 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login.html")
                 .permitAll()
+                .loginProcessingUrl("/login.html") // 明确指定formLogin只处理/login.html的POST请求
             )
+            // OAuth2 登录配置
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler((request, response, authentication) -> {
+                    // OAuth2 登录成功后重定向到前端
+                    response.sendRedirect("/dashboard/youtube");
+                })
+                .failureHandler((request, response, exception) -> {
+                    // OAuth2 登录失败后重定向到登录页
+                    response.sendRedirect("/login?error=oauth2");
+                })
+            )
+            .httpBasic(basic -> basic.disable())
             .logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
                 .logoutSuccessUrl("/login.html")
@@ -65,10 +101,12 @@ public class SecurityConfig {
             )
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint((request, response, authException) -> {
-                    // 对于API请求返回401，对于页面请求重定向到登录页
-                    if (request.getRequestURI().startsWith("/api/")) {
+                    String requestUri = request.getRequestURI();
+                    // 对于需要认证的API请求返回401，对于页面请求重定向到登录页
+                    if (requestUri.startsWith("/api/")) {
                         response.setStatus(401);
                         response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
                         response.getWriter().write("{\"error\":\"请先登录\",\"message\":\"需要登录才能访问此功能\"}");
                     } else {
                         response.sendRedirect("/login.html");

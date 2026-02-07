@@ -150,13 +150,24 @@ public class YoutubeVideoController {
     }
 
     /**
-     * 获取用户的所有视频任务
+     * 获取所有视频（供所有用户学习，支持分页）
      */
     @GetMapping("/videos")
-    public ResponseEntity<?> getUserVideos(Authentication authentication) {
-        Long userId = getUserId(authentication);
-        List<YoutubeVideo> videos = youtubeVideoService.getUserVideos(userId);
-        return ResponseEntity.ok(videos);
+    public ResponseEntity<?> getAllVideos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        org.springframework.data.domain.Page<YoutubeVideo> videoPage = youtubeVideoService.getAllVideosPaged(page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", videoPage.getContent());
+        response.put("totalElements", videoPage.getTotalElements());
+        response.put("totalPages", videoPage.getTotalPages());
+        response.put("currentPage", videoPage.getNumber());
+        response.put("pageSize", videoPage.getSize());
+        response.put("hasNext", videoPage.hasNext());
+        response.put("hasPrevious", videoPage.hasPrevious());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
