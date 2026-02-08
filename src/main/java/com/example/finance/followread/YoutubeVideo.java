@@ -61,6 +61,12 @@ public class YoutubeVideo {
     @Column(name = "progress_message", length = 500)
     private String progressMessage; // 解析进度信息
 
+    @Column(name = "pinned")
+    private Boolean pinned;
+
+    @Column(name = "pinned_at")
+    private LocalDateTime pinnedAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -72,6 +78,9 @@ public class YoutubeVideo {
         }
         if (progressMessage == null) {
             progressMessage = "初始化中...";
+        }
+        if (pinned == null) {
+            pinned = false;
         }
     }
 
@@ -218,6 +227,22 @@ public class YoutubeVideo {
 
     public void setProgressMessage(String progressMessage) {
         this.progressMessage = progressMessage;
+    }
+
+    public Boolean getPinned() {
+        return pinned;
+    }
+
+    public void setPinned(Boolean pinned) {
+        this.pinned = pinned;
+    }
+
+    public LocalDateTime getPinnedAt() {
+        return pinnedAt;
+    }
+
+    public void setPinnedAt(LocalDateTime pinnedAt) {
+        this.pinnedAt = pinnedAt;
     }
 }
 

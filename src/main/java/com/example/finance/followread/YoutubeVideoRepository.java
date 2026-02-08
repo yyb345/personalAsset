@@ -19,5 +19,8 @@ public interface YoutubeVideoRepository extends JpaRepository<YoutubeVideo, Long
     // 分页查询
     Page<YoutubeVideo> findAllByOrderByCreatedAtDesc(Pageable pageable);
     Page<YoutubeVideo> findByCreatedByOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
+    // 置顶优先排序的分页查询
+    Page<YoutubeVideo> findAllByOrderByPinnedDescPinnedAtDescCreatedAtDesc(Pageable pageable);
 }
 

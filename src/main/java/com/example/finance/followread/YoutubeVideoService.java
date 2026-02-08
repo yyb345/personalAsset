@@ -1210,7 +1210,23 @@ public class YoutubeVideoService {
      */
     public org.springframework.data.domain.Page<YoutubeVideo> getAllVideosPaged(int page, int size) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
-        return videoRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return videoRepository.findAllByOrderByPinnedDescPinnedAtDescCreatedAtDesc(pageable);
+    }
+
+    /**
+     * 切换视频置顶状态
+     */
+    @Transactional
+    public YoutubeVideo togglePin(Long videoId) {
+        Optional<YoutubeVideo> videoOpt = videoRepository.findById(videoId);
+        if (!videoOpt.isPresent()) {
+            throw new RuntimeException("Video not found");
+        }
+        YoutubeVideo video = videoOpt.get();
+        boolean newPinned = !Boolean.TRUE.equals(video.getPinned());
+        video.setPinned(newPinned);
+        video.setPinnedAt(newPinned ? LocalDateTime.now() : null);
+        return videoRepository.save(video);
     }
 
     /**

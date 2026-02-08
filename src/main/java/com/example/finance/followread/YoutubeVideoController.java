@@ -219,6 +219,25 @@ public class YoutubeVideoController {
     }
 
     /**
+     * 切换视频置顶状态
+     */
+    @PutMapping("/videos/{id}/pin")
+    public ResponseEntity<?> togglePin(@PathVariable Long id) {
+        try {
+            YoutubeVideo video = youtubeVideoService.togglePin(id);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("pinned", video.getPinned());
+            response.put("message", Boolean.TRUE.equals(video.getPinned()) ? "Video pinned" : "Video unpinned");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Failed to toggle pin: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    /**
      * 从请求中获取用户 ID
      */
     private Long getUserId(Authentication authentication) {

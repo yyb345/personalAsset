@@ -55,17 +55,22 @@
           <p>No videos yet</p>
         </div>
         <div v-else class="video-list">
-          <div 
-            v-for="video in myVideos" 
+          <div
+            v-for="video in myVideos"
             :key="video.id"
-            class="video-card"
+            :class="['video-card', { 'is-pinned': video.pinned }]"
+            @mouseenter="onCardHover(video, $event)"
+            @mouseleave="onCardLeave"
           >
             <div class="video-thumbnail" @click="viewVideoDetails(video)">
               <img v-if="video.thumbnailUrl" :src="video.thumbnailUrl" alt="thumbnail" />
               <div v-else class="thumbnail-placeholder">📹</div>
             </div>
             <div class="video-info" @click="viewVideoDetails(video)">
-              <h3 class="video-title">{{ video.title || 'Loading...' }}</h3>
+              <h3 class="video-title">
+                <span v-if="video.pinned" class="pin-badge">📌</span>
+                {{ video.title || 'Loading...' }}
+              </h3>
               <div class="video-meta">
                 <span class="channel">{{ video.channel }}</span>
                 <span class="duration">{{ formatDuration(video.duration) }}</span>
@@ -112,8 +117,14 @@
                     <Download :size="16" :stroke-width="2" />
                     <span class="kbd">D</span>
                   </button>
-                  <button 
-                    class="action-btn delete-btn" 
+                  <button
+                    :class="['action-btn', 'pin-btn', { 'is-active': video.pinned }]"
+                    @click.stop="togglePin(video)"
+                    :title="video.pinned ? 'Unpin' : 'Pin to top'">
+                    <Pin :size="16" :stroke-width="2" />
+                  </button>
+                  <button
+                    class="action-btn delete-btn"
                     @click.stop="confirmDeleteVideo(video)"
                     title="Delete Video">
                     <Trash2 :size="16" :stroke-width="2" />
@@ -470,12 +481,38 @@
       📥
       <span v-if="activeDownloadCount > 0" class="download-badge">{{ activeDownloadCount }}</span>
     </button>
+
+    <!-- 笔记悬浮预览（Teleport 到 body 避免被裁切） -->
+    <Teleport to="body">
+      <transition name="note-fade">
+        <div
+          v-if="notePreview.visible"
+          class="note-preview-card"
+          :style="notePreview.style"
+          @mouseenter="notePreview.hovering = true"
+          @mouseleave="onNotePreviewLeave"
+        >
+          <div class="note-preview-header">
+            <span class="note-preview-icon">📝</span>
+            <span class="note-preview-count">{{ notePreview.notes.length }} note{{ notePreview.notes.length > 1 ? 's' : '' }}</span>
+          </div>
+          <div v-for="note in notePreview.notes.slice(0, 3)" :key="note.id" class="note-preview-item">
+            <div class="note-preview-title">{{ note.title || 'Untitled' }}</div>
+            <div class="note-preview-text" v-html="note.contentHtml"></div>
+            <div class="note-preview-date">{{ formatNoteDate(note.updatedAt) }}</div>
+          </div>
+          <div v-if="notePreview.notes.length > 3" class="note-preview-more">
+            +{{ notePreview.notes.length - 3 }} more
+          </div>
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script>
 import axios from '../../utils/axios';
-import { Pencil, Download, Trash2, BookOpen, NotebookPen } from 'lucide-vue-next';
+import { Pencil, Download, Trash2, BookOpen, NotebookPen, Pin } from 'lucide-vue-next';
 
 export default {
   name: 'YoutubeImport',
@@ -484,7 +521,8 @@ export default {
     Download,
     Trash2,
     BookOpen,
-    NotebookPen
+    NotebookPen,
+    Pin
   },
   data() {
     return {
@@ -540,7 +578,17 @@ export default {
       activeDownloadCount: 0,
       selectedQuality: 'best',
       sseSource: null,
-      sseConnected: false
+      sseConnected: false,
+
+      // 笔记悬浮预览
+      notePreview: {
+        visible: false,
+        hovering: false,
+        notes: [],
+        style: {}
+      },
+      noteHoverTimer: null,
+      noteCache: {}
     };
   },
   computed: {
@@ -575,6 +623,9 @@ export default {
   },
   beforeUnmount() {
     this.clearPolling();
+    if (this.noteHoverTimer) {
+      clearTimeout(this.noteHoverTimer);
+    }
     if (this.taskPollInterval) {
       clearInterval(this.taskPollInterval);
     }
@@ -638,7 +689,8 @@ export default {
         duration: v.duration ?? 0,
         thumbnailUrl: v.thumbnailUrl ?? v.thumbnail_url ?? '',
         status: v.status ?? 'added',
-        sentenceCount: v.sentenceCount ?? v.sentence_count ?? 0
+        sentenceCount: v.sentenceCount ?? v.sentence_count ?? 0,
+        pinned: v.pinned ?? false
       };
     },
 
@@ -1350,9 +1402,96 @@ export default {
       this.$router.push(`/dashboard/study-workspace/${video.videoId}`);
     },
 
+    async togglePin(video) {
+      try {
+        const response = await axios.put(`/api/youtube/videos/${video.id}/pin`);
+        if (response.data.success) {
+          video.pinned = response.data.pinned;
+          this.loadMyVideos(this.currentPage);
+        }
+      } catch (error) {
+        console.error('Toggle pin failed:', error);
+      }
+    },
+
     getVideoTitle(videoId) {
       const video = this.myVideos.find(v => v.id === videoId);
       return video ? video.title : '未知视频';
+    },
+
+    // ========== 笔记悬浮预览 ==========
+
+    onCardHover(video, event) {
+      if (this.noteHoverTimer) clearTimeout(this.noteHoverTimer);
+      const cardEl = event.currentTarget;
+      this.noteHoverTimer = setTimeout(() => {
+        this.fetchAndShowNotePreview(video, cardEl);
+      }, 400);
+    },
+
+    onCardLeave() {
+      if (this.noteHoverTimer) clearTimeout(this.noteHoverTimer);
+      // 延迟关闭，让用户可以移到预览卡片上
+      setTimeout(() => {
+        if (!this.notePreview.hovering) {
+          this.notePreview.visible = false;
+        }
+      }, 150);
+    },
+
+    onNotePreviewLeave() {
+      this.notePreview.hovering = false;
+      this.notePreview.visible = false;
+    },
+
+    async fetchAndShowNotePreview(video, cardEl) {
+      const vid = video.videoId;
+      // 用缓存避免重复请求
+      if (this.noteCache[vid] !== undefined) {
+        this.showNotePreview(this.noteCache[vid], cardEl);
+        return;
+      }
+      try {
+        const res = await axios.get(`/api/study-notes/video/${vid}`);
+        const notes = res.data.notes || [];
+        this.noteCache[vid] = notes;
+        this.showNotePreview(notes, cardEl);
+      } catch (e) {
+        this.noteCache[vid] = [];
+      }
+    },
+
+    showNotePreview(notes, cardEl) {
+      if (!notes.length) return;
+      const rect = cardEl.getBoundingClientRect();
+      const viewportW = window.innerWidth;
+      // 默认显示在卡片右侧，空间不够则显示在左侧
+      let left = rect.right + 8;
+      if (left + 320 > viewportW) {
+        left = rect.left - 328;
+      }
+      if (left < 8) left = 8;
+      const top = Math.max(8, Math.min(rect.top, window.innerHeight - 300));
+      this.notePreview.notes = notes;
+      this.notePreview.style = {
+        position: 'fixed',
+        top: top + 'px',
+        left: left + 'px',
+        maxHeight: (window.innerHeight - top - 16) + 'px'
+      };
+      this.notePreview.hovering = false;
+      this.notePreview.visible = true;
+    },
+
+    stripHtml(html) {
+      if (!html) return '';
+      return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    },
+
+    formatNoteDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
   }
 };
