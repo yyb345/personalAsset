@@ -39,6 +39,12 @@ const router = createRouter({
           name: 'XiaohongshuImport',
           component: () => import('@/views/dashboard/XiaohongshuImport.vue'),
           meta: { requiresAuth: false }
+        },
+        {
+          path: 'study-workspace/:videoId',
+          name: 'StudyWorkspace',
+          component: () => import('@/views/dashboard/StudyWorkspace.vue'),
+          meta: { requiresAuth: false }
         }
       ]
     },
@@ -46,6 +52,12 @@ const router = createRouter({
       path: '/shadowing',
       name: 'Shadowing',
       component: () => import('@/views/Shadowing.vue'),
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/transcribe',
+      name: 'TranscribeRead',
+      component: () => import('@/views/TranscribeRead.vue'),
       meta: { requiresAuth: false }
     }
   ]

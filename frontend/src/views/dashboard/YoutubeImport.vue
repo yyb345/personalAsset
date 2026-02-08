@@ -89,8 +89,23 @@
                     <Pencil :size="16" :stroke-width="2" />
                     <span class="kbd">P</span>
                   </button>
-                  <button 
-                    class="action-btn download-btn" 
+                  <button
+                    class="action-btn read-btn"
+                    @click.stop="openTranscribeRead(video)"
+                    title="Read Transcript"
+                    v-if="video.status === 'completed'">
+                    <BookOpen :size="16" :stroke-width="2" />
+                    <span class="kbd">R</span>
+                  </button>
+                  <button
+                    class="action-btn study-btn"
+                    @click.stop="openStudyWorkspace(video)"
+                    title="Study Workspace">
+                    <NotebookPen :size="16" :stroke-width="2" />
+                    <span class="kbd">S</span>
+                  </button>
+                  <button
+                    class="action-btn download-btn"
                     @click.stop="showDownloadOptions(video)"
                     title="Download Video"
                     :disabled="video.status !== 'completed' && video.status !== 'added'">
@@ -420,7 +435,7 @@
                   <span class="task-type">{{ getDownloadTypeLabel(task.downloadType) }}</span>
                   <span v-if="task.quality" class="quality">{{ task.quality }}</span>
                 </div>
-                <div v-if="task.status === 'DOWNLOADING'" class="progress-bar">
+                <div v-if="task.status === 'DOWNLOADING' || task.status === 'QUEUED'" class="progress-bar">
                   <div class="progress-fill" :style="{ width: task.progress + '%' }"></div>
                 </div>
                 <p class="progress-text">{{ task.progressMessage }}</p>
@@ -460,14 +475,16 @@
 
 <script>
 import axios from '../../utils/axios';
-import { Pencil, Download, Trash2 } from 'lucide-vue-next';
+import { Pencil, Download, Trash2, BookOpen, NotebookPen } from 'lucide-vue-next';
 
 export default {
   name: 'YoutubeImport',
   components: {
     Pencil,
     Download,
-    Trash2
+    Trash2,
+    BookOpen,
+    NotebookPen
   },
   data() {
     return {
@@ -521,7 +538,9 @@ export default {
       showDownloadTasks: false,
       downloadPollInterval: null,
       activeDownloadCount: 0,
-      selectedQuality: 'best'
+      selectedQuality: 'best',
+      sseSource: null,
+      sseConnected: false
     };
   },
   computed: {
@@ -551,8 +570,8 @@ export default {
     this.checkMicrophonePermission();
     this.loadYoutubeAPI();
     this.loadDownloadTasks();
-    this.startDownloadPolling();
-    this.startVideoListPolling(); // 新增：启动视频列表轮询
+    this.connectSSE();
+    this.startVideoListPolling();
   },
   beforeUnmount() {
     this.clearPolling();
@@ -568,7 +587,11 @@ export default {
     if (this.downloadPollInterval) {
       clearInterval(this.downloadPollInterval);
     }
-    if (this.videoListPollInterval) { // 新增：清理视频列表轮询
+    if (this.sseSource) {
+      this.sseSource.close();
+      this.sseSource = null;
+    }
+    if (this.videoListPollInterval) {
       clearInterval(this.videoListPollInterval);
     }
   },
@@ -1198,8 +1221,67 @@ export default {
       }
     },
     
+    connectSSE() {
+      // 确定 SSE 端点 URL（与 axios baseURL 保持一致）
+      const baseUrl = window.location.origin;
+      const sseUrl = `${baseUrl}/api/youtube/download/progress/stream`;
+
+      try {
+        this.sseSource = new EventSource(sseUrl);
+
+        this.sseSource.addEventListener('download-progress', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            this.handleSseProgress(data);
+          } catch (e) {
+            console.error('SSE 解析失败:', e);
+          }
+        });
+
+        this.sseSource.onopen = () => {
+          this.sseConnected = true;
+          // SSE 连接成功后，停止轮询 fallback
+          if (this.downloadPollInterval) {
+            clearInterval(this.downloadPollInterval);
+            this.downloadPollInterval = null;
+          }
+        };
+
+        this.sseSource.onerror = () => {
+          this.sseConnected = false;
+          // SSE 断开，降级为轮询
+          if (!this.downloadPollInterval) {
+            this.startDownloadPolling();
+          }
+        };
+      } catch (e) {
+        console.warn('SSE 不可用，使用轮询 fallback');
+        this.startDownloadPolling();
+      }
+    },
+
+    handleSseProgress(data) {
+      const idx = this.downloadTasks.findIndex(t => t.id === data.taskId);
+      if (idx !== -1) {
+        // 就地更新已有任务
+        const task = this.downloadTasks[idx];
+        task.status = data.status;
+        task.progress = data.progress;
+        task.progressMessage = data.progressMessage;
+        task.downloadSpeed = data.downloadSpeed;
+        task.downloadedBytes = data.downloadedBytes;
+        task.totalBytes = data.totalBytes;
+        if (data.outputFile) task.outputFile = data.outputFile;
+        if (data.errorMessage) task.errorMessage = data.errorMessage;
+      } else {
+        // 新任务，重新加载整个列表
+        this.loadDownloadTasks();
+      }
+      this.updateActiveDownloadCount();
+    },
+
     startDownloadPolling() {
-      // 每3秒轮询下载任务状态
+      // 轮询 fallback（SSE 断开时使用）
       this.downloadPollInterval = setInterval(() => {
         this.loadDownloadTasks();
       }, 3000);
@@ -1207,7 +1289,7 @@ export default {
     
     updateActiveDownloadCount() {
       this.activeDownloadCount = this.downloadTasks.filter(
-        t => t.status === 'DOWNLOADING' || t.status === 'PARSING'
+        t => t.status === 'DOWNLOADING' || t.status === 'PARSING' || t.status === 'QUEUED'
       ).length;
     },
     
@@ -1238,6 +1320,7 @@ export default {
     getDownloadStatusLabel(status) {
       const labels = {
         'INIT': 'Waiting',
+        'QUEUED': 'Queued',
         'PARSING': 'Parsing',
         'DOWNLOADING': 'Downloading',
         'MERGING': 'Merging',
@@ -1256,6 +1339,17 @@ export default {
       return labels[type] || type;
     },
     
+    openTranscribeRead(video) {
+      this.$router.push({
+        path: '/transcribe',
+        query: { videoId: video.videoId }
+      });
+    },
+
+    openStudyWorkspace(video) {
+      this.$router.push(`/dashboard/study-workspace/${video.videoId}`);
+    },
+
     getVideoTitle(videoId) {
       const video = this.myVideos.find(v => v.id === videoId);
       return video ? video.title : '未知视频';

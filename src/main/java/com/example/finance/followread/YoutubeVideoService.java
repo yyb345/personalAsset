@@ -206,10 +206,19 @@ public class YoutubeVideoService {
         YoutubeVideo video = videoOpt.get();
         
         try {
+            // 清除旧的句子和字幕片段（重新解析时）
+            List<FollowReadSentence> oldSentences = sentenceRepository.findByYoutubeVideoId(video.getId());
+            if (!oldSentences.isEmpty()) {
+                log.info("🗑️ 清除旧句子: videoId={}, count={}", video.getVideoId(), oldSentences.size());
+                sentenceRepository.deleteAll(oldSentences);
+            }
+            segmentRepository.deleteByVideoId(video.getId());
+
             // 标记为解析中
             video.setStatus("parsing");
+            video.setSentenceCount(0);
             videoRepository.save(video);
-            
+
             // Step 1: 如果视频信息还未获取，先获取
             if ("Loading...".equals(video.getTitle()) || video.getTitle() == null) {
                 updateProgress(video, "正在获取视频信息...");
@@ -764,38 +773,79 @@ public class YoutubeVideoService {
         }
         
         List<String> lines = Files.readAllLines(path);
-        
+
+        // 检测是否为 YouTube 自动生成字幕（滚动格式：每个 cue 包含旧行 + 新行）
+        boolean isRollingFormat = false;
+        for (String l : lines) {
+            if (l.contains("<c>") || l.matches(".*<\\d{2}:\\d{2}:\\d{2}\\.\\d{3}>.*")) {
+                isRollingFormat = true;
+                break;
+            }
+        }
+
         int order = 0;
         int i = 0;
-        
+
         while (i < lines.size()) {
             String line = lines.get(i).trim();
-            
+
             // 跳过 WEBVTT 头部和空行
-            if (line.isEmpty() || line.startsWith("WEBVTT") || line.startsWith("NOTE")) {
+            if (line.isEmpty() || line.startsWith("WEBVTT") || line.startsWith("NOTE") || line.startsWith("Kind:") || line.startsWith("Language:")) {
                 i++;
                 continue;
             }
-            
+
             // 时间戳行格式: 00:00:00.000 --> 00:00:03.000 [可能有额外属性]
             if (line.contains("-->")) {
                 String[] times = line.split("-->");
                 // 清理时间戳，移除额外的属性（如 align:start position:0%）
                 String startTimeStr = times[0].trim();
                 String endTimeStr = times[1].trim().split("\\s+")[0]; // 只取第一个空格前的部分
-                
+
                 double startTime = parseVttTime(startTimeStr);
                 double endTime = parseVttTime(endTimeStr);
-                
-                // 读取文本内容
+
+                // 读取 cue 中所有文本行
                 i++;
-                StringBuilder text = new StringBuilder();
+                List<String> cueLines = new ArrayList<>();
                 while (i < lines.size() && !lines.get(i).trim().isEmpty() && !lines.get(i).contains("-->")) {
-                    text.append(lines.get(i).trim()).append(" ");
+                    cueLines.add(lines.get(i).trim());
                     i++;
                 }
-                
-                String rawText = text.toString().trim();
+
+                // 跳过零时长的 cue（YouTube 用来清屏旧文本的）
+                if (endTime - startTime < 0.05) {
+                    continue;
+                }
+
+                String rawText;
+                if (isRollingFormat) {
+                    // YouTube 滚动字幕格式：只取包含 <c> 标签的行（新内容行）
+                    // 另一行是上一条已显示过的纯文本（重复内容），跳过
+                    StringBuilder newContent = new StringBuilder();
+                    for (String cueLine : cueLines) {
+                        if (cueLine.contains("<c>") || cueLine.matches(".*<\\d{2}:\\d{2}:\\d{2}\\.\\d{3}>.*")) {
+                            newContent.append(cueLine).append(" ");
+                        }
+                    }
+                    rawText = newContent.toString().trim();
+                    // 如果没有带标签的行，说明不是滚动格式的 cue，取所有行
+                    if (rawText.isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (String cueLine : cueLines) {
+                            sb.append(cueLine).append(" ");
+                        }
+                        rawText = sb.toString().trim();
+                    }
+                } else {
+                    // 普通 VTT：取所有行
+                    StringBuilder sb = new StringBuilder();
+                    for (String cueLine : cueLines) {
+                        sb.append(cueLine).append(" ");
+                    }
+                    rawText = sb.toString().trim();
+                }
+
                 if (!rawText.isEmpty()) {
                     SubtitleSegment segment = new SubtitleSegment();
                     segment.setVideoId(videoId);
@@ -1062,18 +1112,18 @@ public class YoutubeVideoService {
             }
             return result.trim();
         } else {
-            // 英文等：使用空格分割
-        String[] words = text.toLowerCase().split("\\s+");
+            // 英文等：使用空格分割，保留原始大小写
+        String[] words = text.split("\\s+");
         StringBuilder result = new StringBuilder();
             Set<String> fillerWords = getFillerWords(language);
-        
+
         for (String word : words) {
-            String cleanWord = word.replaceAll("[^a-z]", "");
+            String cleanWord = word.toLowerCase().replaceAll("[^a-z]", "");
                 if (!fillerWords.contains(cleanWord)) {
                 result.append(word).append(" ");
             }
         }
-        
+
         return result.toString().trim();
     }
     }

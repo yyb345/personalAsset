@@ -73,8 +73,8 @@
             </router-link>
           </li>
           <li>
-            <router-link 
-              to="/dashboard/xiaohongshu" 
+            <router-link
+              to="/dashboard/xiaohongshu"
               class="menu-item"
               @click="closeMobileSidebar"
             >

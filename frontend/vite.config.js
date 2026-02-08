@@ -27,7 +27,8 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vue-vendor': ['vue', 'vue-router'],
-          'ui-vendor': ['lucide-vue-next']
+          'ui-vendor': ['lucide-vue-next'],
+          'editor-vendor': ['@tiptap/vue-3', '@tiptap/starter-kit', '@tiptap/pm', '@tiptap/core']
         }
       }
     },
