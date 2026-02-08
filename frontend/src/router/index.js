@@ -6,8 +6,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'Landing',
-      component: () => import('@/views/Landing.vue')
+      redirect: '/dashboard/youtube'
     },
     {
       path: '/login',
