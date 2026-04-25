@@ -198,12 +198,10 @@ start_app() {
         mkdir -p "$DATA_DIR"
     fi
 
-    # 停止并删除旧容器
-    if [ "$(docker ps -aq -f name=^${DOCKER_NAME}$)" ]; then
-        print_warn "发现已存在的应用容器，正在停止并删除..."
-        docker stop "$DOCKER_NAME" 2>/dev/null || true
-        docker rm "$DOCKER_NAME" 2>/dev/null || true
-    fi
+    # 强制停止并删除旧容器（兼容 Podman）
+    print_info "清理旧的应用容器..."
+    docker stop "$DOCKER_NAME" 2>/dev/null || true
+    docker rm -f "$DOCKER_NAME" 2>/dev/null || true
 
     print_info "启动应用容器..."
     if docker run \
@@ -228,12 +226,10 @@ start_app() {
 start_nginx() {
     print_info "========== 启动 Nginx 容器 =========="
 
-    # 停止并删除旧容器
-    if [ "$(docker ps -aq -f name=^${NGINX_NAME}$)" ]; then
-        print_warn "发现已存在的 Nginx 容器，正在停止并删除..."
-        docker stop "$NGINX_NAME" 2>/dev/null || true
-        docker rm "$NGINX_NAME" 2>/dev/null || true
-    fi
+    # 强制停止并删除旧容器（兼容 Podman）
+    print_info "清理旧的 Nginx 容器..."
+    docker stop "$NGINX_NAME" 2>/dev/null || true
+    docker rm -f "$NGINX_NAME" 2>/dev/null || true
 
     print_info "启动 Nginx 容器..."
     if docker run \
