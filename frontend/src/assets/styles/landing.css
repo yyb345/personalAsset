@@ -800,3 +800,120 @@ body {
     }
 }
 
+/* How It Works Section */
+.how-it-works {
+    padding: 60px 20px;
+    background: var(--bg-white);
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.step-card {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+}
+
+.step-number {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 32px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.step-icon {
+    font-size: 3rem;
+    margin: 2rem 0 1rem;
+}
+
+.step-card h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.step-card p {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+
+/* FAQ Section */
+.faq {
+    padding: 60px 20px;
+    background: var(--bg-light);
+}
+
+.faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.faq-question {
+    width: 100%;
+    padding: 1.25rem 1.5rem;
+    background: none;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    text-align: left;
+    transition: background-color 0.2s;
+}
+
+.faq-question:hover {
+    background: var(--bg-hover);
+}
+
+.faq-toggle {
+    font-size: 1.5rem;
+    color: var(--text-light);
+    font-weight: 300;
+}
+
+.faq-answer {
+    padding: 0 1.5rem 1.25rem;
+}
+
+.faq-answer p {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+

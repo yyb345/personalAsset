@@ -128,6 +128,45 @@
       </div>
     </section>
 
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+      <div class="container">
+        <div class="section-header">
+          <h2>How It Works</h2>
+          <p>Start learning English in 3 simple steps</p>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card" v-for="(step, index) in howItWorks" :key="index">
+            <div class="step-number">{{ index + 1 }}</div>
+            <div class="step-icon">{{ step.icon }}</div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+      <div class="container">
+        <div class="section-header">
+          <h2>Frequently Asked Questions</h2>
+          <p>Everything you need to know about X Learning</p>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item" v-for="(item, index) in faqs" :key="index">
+            <button class="faq-question" @click="toggleFaq(index)" :aria-expanded="openFaq === index">
+              <span>{{ item.question }}</span>
+              <span class="faq-toggle">{{ openFaq === index ? '−' : '+' }}</span>
+            </button>
+            <div class="faq-answer" v-show="openFaq === index">
+              <p>{{ item.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta">
       <div class="container">
@@ -198,6 +237,52 @@
 import { ref } from 'vue'
 
 const mobileMenuOpen = ref(false)
+const openFaq = ref(null)
+
+const toggleFaq = (index) => {
+  openFaq.value = openFaq.value === index ? null : index
+}
+
+const howItWorks = [
+  {
+    icon: '🔗',
+    title: 'Paste a YouTube Link',
+    description: 'Copy any YouTube video URL and paste it into X Learning. We support videos in any language with English content.'
+  },
+  {
+    icon: '⚡',
+    title: 'AI Generates Subtitles',
+    description: 'Our AI instantly transcribes the video and creates interactive subtitles with translations and word definitions.'
+  },
+  {
+    icon: '🎯',
+    title: 'Practice & Improve',
+    description: 'Use shadowing mode to practice pronunciation, repeat sentences, and track your progress over time.'
+  }
+]
+
+const faqs = [
+  {
+    question: 'What is X Learning?',
+    answer: 'X Learning is an AI-powered English learning platform that helps you learn from YouTube videos. You can import any video, get AI-generated subtitles, practice pronunciation with shadowing, and track your progress.'
+  },
+  {
+    question: 'Is X Learning free to use?',
+    answer: 'Yes! X Learning offers a free Basic plan that includes 5 videos per month, basic pronunciation feedback, and standard subtitles. For unlimited access and advanced features, you can upgrade to our Pro plan.'
+  },
+  {
+    question: 'How does the shadowing feature work?',
+    answer: 'Shadowing is a language learning technique where you listen to a sentence and immediately repeat it. X Learning plays each sentence, records your voice, and uses AI to analyze your pronunciation, giving you instant feedback on accuracy and fluency.'
+  },
+  {
+    question: 'Can I use X Learning on my phone?',
+    answer: 'Absolutely! X Learning is fully responsive and works on desktop, tablet, and mobile devices. You can learn anywhere, anytime, on any device with an internet connection.'
+  },
+  {
+    question: 'What types of YouTube videos work best?',
+    answer: 'Any YouTube video with clear English speech works great. Popular choices include TED Talks, interviews, podcasts, movie clips, and educational content. Videos with one speaker and minimal background noise give the best results.'
+  }
+]
 
 const features = [
   {
