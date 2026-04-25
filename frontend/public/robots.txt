@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: http://www.xlearning.top/sitemap.xml
+Sitemap: https://www.xlearning.top/sitemap.xml
