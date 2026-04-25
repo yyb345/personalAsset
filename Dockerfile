@@ -15,8 +15,8 @@ RUN npm ci
 COPY frontend/ ./
 
 # 设置 Node.js 内存限制并构建前端应用
-# 对于低内存服务器（1GB），使用较小的内存限制
-ENV NODE_OPTIONS="--max-old-space-size=768"
+# 对于低内存服务器（2GB），使用较小的内存限制
+ENV NODE_OPTIONS="--max-old-space-size=1536"
 RUN npm run build
 
 # ============================================
