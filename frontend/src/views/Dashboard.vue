@@ -3,10 +3,18 @@
     <!-- 移动端菜单按钮 -->
     <button class="mobile-menu-toggle" @click="toggleMobileSidebar">☰</button>
 
+    <!-- 语言切换 - 右上角 -->
+    <div class="language-switcher">
+      <select v-model="currentLocale" @change="changeLanguage" class="language-select">
+        <option value="zh-CN">中文</option>
+        <option value="en-US">English</option>
+      </select>
+    </div>
+
     <!-- 侧边栏遮罩层 -->
-    <div 
-      class="sidebar-overlay" 
-      :class="{ active: sidebarOpen }" 
+    <div
+      class="sidebar-overlay"
+      :class="{ active: sidebarOpen }"
       @click="closeMobileSidebar"
     ></div>
 
@@ -21,66 +29,66 @@
             </div>
           </div>
           <div class="profile-info">
-            <h2 class="profile-name">{{ userName || 'Guest User' }}</h2>
+            <h2 class="profile-name">{{ userName || $t('common.guestUser') }}</h2>
             <div class="profile-id">ID: {{ userId || 'guest_' + Date.now() }}</div>
           </div>
         </div>
-        
+
         <div class="profile-bio" v-if="userBio">
           <p>{{ userBio }}</p>
         </div>
-        
+
         <div class="profile-stats">
           <div class="stat-item">
             <div class="stat-info">
-              <div class="stat-label">Study Days</div>
+              <div class="stat-label">{{ $t('dashboard.studyDays') }}</div>
               <div class="stat-value">{{ studyDays }}</div>
             </div>
           </div>
           <div class="stat-item">
             <div class="stat-info">
-              <div class="stat-label">Library</div>
+              <div class="stat-label">{{ $t('dashboard.library') }}</div>
               <div class="stat-value">{{ completedVideos }}</div>
             </div>
           </div>
         </div>
-        
+
         <div class="profile-tags">
-          <span class="tag">{{ userGender || '🙋' }}</span>
-          <span class="tag">{{ userLocation || '📍 Unknown' }}</span>
-          <span class="tag">{{ userLevel || '🌟 Learner' }}</span>
+          <span class="tag">{{ userGender || $t('dashboard.profile.gender') }}</span>
+          <span class="tag">{{ userLocation || $t('dashboard.profile.location') }}</span>
+          <span class="tag">{{ userLevel || $t('dashboard.profile.level') }}</span>
         </div>
-        
+
         <div class="profile-actions">
           <button v-if="isAuthenticated" class="btn-profile-action btn-logout" @click="handleLogout">
-            <span>🚪</span> Logout
+            <span>🚪</span> {{ $t('common.logout') }}
           </button>
           <button v-else class="btn-profile-action btn-login" @click="handleLogin">
-            <span>👋</span> Login
+            <span>👋</span> {{ $t('common.login') }}
           </button>
         </div>
       </div>
-      
+
       <nav class="menu">
         <ul>
           <li>
-            <router-link 
-              to="/dashboard/youtube" 
-              class="menu-item"
-              @click="closeMobileSidebar"
-            >
-              <span class="menu-text">YouTube Videos</span>
-            </router-link>
-          </li>
-          <li>
             <router-link
-              to="/dashboard/xiaohongshu"
+              to="/dashboard/youtube"
               class="menu-item"
               @click="closeMobileSidebar"
             >
-              <span class="menu-text">小红书视频</span>
+              <span class="menu-text">{{ $t('dashboard.youtubeVideos') }}</span>
             </router-link>
           </li>
+<!--          <li>-->
+<!--            <router-link-->
+<!--              to="/dashboard/xiaohongshu"-->
+<!--              class="menu-item"-->
+<!--              @click="closeMobileSidebar"-->
+<!--            >-->
+<!--              <span class="menu-text">{{ $t('dashboard.xiaohongshuVideos') }}</span>-->
+<!--            </router-link>-->
+<!--          </li>-->
         </ul>
       </nav>
     </aside>
@@ -103,21 +111,25 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { logout } from '@/utils/auth'
+import { setLocale, getLocale } from '@/i18n'
 import axios from '@/utils/axios'
 
+const { t } = useI18n()
 const router = useRouter()
 const userName = ref('')
 const userId = ref('')
 const userAvatar = ref('')
 const userBio = ref('')
-const userGender = ref('🙋')
-const userLocation = ref('📍 中国')
-const userLevel = ref('🌟 初学者')
+const userGender = ref('')
+const userLocation = ref('')
+const userLevel = ref('')
 const studyDays = ref(0)
 const completedVideos = ref(0)
 const isAuthenticated = ref(false)
 const sidebarOpen = ref(false)
+const currentLocale = ref(getLocale())
 
 // 拖拽调整大小相关
 const isResizing = ref(false)
@@ -209,19 +221,23 @@ const handleLogin = () => {
 }
 
 const handleLogout = async () => {
-  if (confirm('Are you sure you want to logout?')) {
+  if (confirm(t('auth.logoutConfirm'))) {
     try {
       await logout()
       router.push('/login')
     } catch (error) {
       console.error('Logout failed:', error)
-      alert('Logout failed, please try again')
+      alert(t('auth.logoutFailed'))
     }
   }
 }
 
 const handleSettings = () => {
-  alert('Settings feature is under development...')
+  alert(t('settings.developing'))
+}
+
+const changeLanguage = () => {
+  setLocale(currentLocale.value)
 }
 
 // 拖拽调整大小功能

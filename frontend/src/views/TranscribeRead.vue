@@ -36,11 +36,28 @@
       <!-- Right: Transcript Reading Area -->
       <div class="right-panel">
         <div class="transcript-header">
-          <h1 class="transcript-title">Transcript</h1>
+          <div class="header-top">
+            <h1 class="transcript-title">Transcript</h1>
+            <div class="export-dropdown" ref="exportDropdown">
+              <button class="export-btn" @click="toggleExportMenu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+              </button>
+              <div v-if="showExportMenu" class="export-menu">
+                <button @click="exportAs('pdf')">PDF</button>
+                <button @click="exportAs('word')">Word</button>
+                <button @click="exportAs('markdown')">Markdown</button>
+              </div>
+            </div>
+          </div>
           <p class="transcript-subtitle">{{ videoData.videoTitle }}</p>
         </div>
 
-        <div class="transcript-content" ref="transcriptContent">
+        <div class="transcript-content" ref="transcriptContent" @click="handleTranscriptClick">
           <div
             v-for="(paragraph, pIndex) in paragraphs"
             :key="pIndex"
@@ -54,9 +71,30 @@
                 :key="sentence.id"
                 :class="['sentence', { 'current': currentSentenceId === sentence.id }]"
                 @click.stop="seekToSentence(sentence)"
-              >{{ sentence.text }} </span>
+                v-html="renderHighlightedText(sentence)"
+              ></span>
             </p>
           </div>
+        </div>
+
+        <!-- Highlight Toolbar -->
+        <div
+          v-if="showHighlightToolbar"
+          class="highlight-toolbar"
+          :style="{ top: toolbarPosition.top + 'px', left: toolbarPosition.left + 'px' }"
+        >
+          <button @click="addHighlight('yellow')" class="highlight-btn yellow" title="黄色高亮">
+            <span class="color-dot"></span>
+          </button>
+          <button @click="addHighlight('green')" class="highlight-btn green" title="绿色高亮">
+            <span class="color-dot"></span>
+          </button>
+          <button @click="addHighlight('blue')" class="highlight-btn blue" title="蓝色高亮">
+            <span class="color-dot"></span>
+          </button>
+          <button @click="addHighlight('pink')" class="highlight-btn pink" title="粉色高亮">
+            <span class="color-dot"></span>
+          </button>
         </div>
 
         <!-- Bottom floating stats -->
@@ -72,6 +110,9 @@
 
 <script>
 import axios from '../utils/axios'
+import { jsPDF } from 'jspdf'
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx'
+import { saveAs } from 'file-saver'
 
 export default {
   name: 'TranscribeRead',
@@ -86,7 +127,14 @@ export default {
       playerReady: false,
       currentTime: 0,
       currentSentenceId: null,
-      timeUpdateInterval: null
+      timeUpdateInterval: null,
+      // Highlight feature
+      highlights: [],
+      showHighlightToolbar: false,
+      toolbarPosition: { top: 0, left: 0 },
+      pendingSelection: null,
+      // Export feature
+      showExportMenu: false
     }
   },
   computed: {
@@ -125,6 +173,13 @@ export default {
 
     await this.loadYouTubeAPI()
     await this.loadVideoData()
+
+    // Load saved highlights
+    this.loadHighlights()
+
+    // Listen for text selection
+    document.addEventListener('mouseup', this.handleTextSelection)
+    document.addEventListener('click', this.handleDocumentClick)
   },
   beforeUnmount() {
     if (this.timeUpdateInterval) {
@@ -133,6 +188,8 @@ export default {
     if (this.player) {
       this.player.destroy()
     }
+    document.removeEventListener('mouseup', this.handleTextSelection)
+    document.removeEventListener('click', this.handleDocumentClick)
   },
   methods: {
     async loadVideoData() {
@@ -270,6 +327,278 @@ export default {
 
     goBack() {
       this.$router.push('/dashboard/youtube')
+    },
+
+    // Highlight methods
+    handleTextSelection(e) {
+      const selection = window.getSelection()
+      const selectedText = selection.toString().trim()
+
+      if (!selectedText || selectedText.length < 2) {
+        return
+      }
+
+      // Check if selection is within transcript content
+      const transcriptContent = this.$refs.transcriptContent
+      if (!transcriptContent || !transcriptContent.contains(selection.anchorNode)) {
+        return
+      }
+
+      // Find which sentence contains the selection
+      const sentenceEl = selection.anchorNode.parentElement?.closest('.sentence')
+      if (!sentenceEl) return
+
+      const sentenceId = this.findSentenceIdFromElement(sentenceEl)
+      if (!sentenceId) return
+
+      // Get position for toolbar (use fixed positioning)
+      const range = selection.getRangeAt(0)
+      const rect = range.getBoundingClientRect()
+
+      this.toolbarPosition = {
+        top: rect.top - 45,
+        left: rect.left + rect.width / 2 - 70
+      }
+
+      this.pendingSelection = {
+        text: selectedText,
+        sentenceId: sentenceId
+      }
+
+      this.showHighlightToolbar = true
+    },
+
+    handleDocumentClick(e) {
+      if (!e.target.closest('.highlight-toolbar')) {
+        this.showHighlightToolbar = false
+        this.pendingSelection = null
+      }
+      // Close export menu when clicking outside
+      if (!e.target.closest('.export-dropdown')) {
+        this.showExportMenu = false
+      }
+    },
+
+    handleTranscriptClick(e) {
+      const highlightEl = e.target.closest('.highlight')
+      if (highlightEl) {
+        const highlightId = parseInt(highlightEl.dataset.id)
+        if (highlightId && confirm('删除这个高亮？')) {
+          this.removeHighlight(highlightId)
+        }
+      }
+    },
+
+    findSentenceIdFromElement(el) {
+      if (!this.videoData?.sentences) return null
+      const index = Array.from(this.$refs.transcriptContent.querySelectorAll('.sentence')).indexOf(el)
+      if (index >= 0 && this.videoData.sentences[index]) {
+        return this.videoData.sentences[index].id
+      }
+      return null
+    },
+
+    addHighlight(color) {
+      if (!this.pendingSelection) return
+
+      const highlight = {
+        id: Date.now(),
+        text: this.pendingSelection.text,
+        sentenceId: this.pendingSelection.sentenceId,
+        color: color,
+        createdAt: new Date().toISOString()
+      }
+
+      this.highlights.push(highlight)
+      this.saveHighlights()
+
+      this.showHighlightToolbar = false
+      this.pendingSelection = null
+      window.getSelection().removeAllRanges()
+    },
+
+    removeHighlight(highlightId) {
+      this.highlights = this.highlights.filter(h => h.id !== highlightId)
+      this.saveHighlights()
+    },
+
+    loadHighlights() {
+      const key = `highlights_${this.videoId}`
+      const saved = localStorage.getItem(key)
+      if (saved) {
+        try {
+          this.highlights = JSON.parse(saved)
+        } catch (e) {
+          this.highlights = []
+        }
+      }
+    },
+
+    saveHighlights() {
+      const key = `highlights_${this.videoId}`
+      localStorage.setItem(key, JSON.stringify(this.highlights))
+    },
+
+    renderHighlightedText(sentence) {
+      let text = sentence.text + ' '
+      const sentenceHighlights = this.highlights.filter(h => h.sentenceId === sentence.id)
+
+      if (sentenceHighlights.length === 0) {
+        return this.escapeHtml(text)
+      }
+
+      // Sort by text length (longer first) to handle overlapping
+      sentenceHighlights.sort((a, b) => b.text.length - a.text.length)
+
+      // Create a map of positions to highlight
+      let result = text
+      for (const hl of sentenceHighlights) {
+        const escapedText = this.escapeHtml(hl.text)
+        const regex = new RegExp(this.escapeRegex(hl.text), 'gi')
+        result = result.replace(regex, `<mark class="highlight highlight-${hl.color}" data-id="${hl.id}">${escapedText}</mark>`)
+      }
+
+      return result
+    },
+
+    escapeHtml(text) {
+      const div = document.createElement('div')
+      div.textContent = text
+      return div.innerHTML
+    },
+
+    escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    },
+
+    // Export methods
+    toggleExportMenu() {
+      this.showExportMenu = !this.showExportMenu
+    },
+
+    getPlainTranscript() {
+      if (!this.videoData?.sentences) return ''
+      return this.videoData.sentences.map(s => s.text).join(' ')
+    },
+
+    getTranscriptWithTimestamps() {
+      if (!this.paragraphs) return []
+      return this.paragraphs.map(p => ({
+        time: this.formatTime(p.startTime),
+        text: p.sentences.map(s => s.text).join(' ')
+      }))
+    },
+
+    async exportAs(format) {
+      this.showExportMenu = false
+      const title = this.videoData?.videoTitle || 'Transcript'
+      const safeTitle = title.replace(/[<>:"/\\|?*]/g, '_').substring(0, 100)
+
+      try {
+        switch (format) {
+          case 'pdf':
+            await this.exportPDF(title, safeTitle)
+            break
+          case 'word':
+            await this.exportWord(title, safeTitle)
+            break
+          case 'markdown':
+            this.exportMarkdown(title, safeTitle)
+            break
+        }
+      } catch (err) {
+        console.error('Export failed:', err)
+        alert('导出失败: ' + err.message)
+      }
+    },
+
+    async exportPDF(title, filename) {
+      const doc = new jsPDF()
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const margin = 20
+      const maxWidth = pageWidth - margin * 2
+      let y = 20
+
+      // Title
+      doc.setFontSize(18)
+      doc.setFont(undefined, 'bold')
+      const titleLines = doc.splitTextToSize(title, maxWidth)
+      doc.text(titleLines, margin, y)
+      y += titleLines.length * 8 + 10
+
+      // Content
+      doc.setFontSize(11)
+      doc.setFont(undefined, 'normal')
+
+      const paragraphs = this.getTranscriptWithTimestamps()
+      for (const p of paragraphs) {
+        // Check if need new page
+        if (y > 270) {
+          doc.addPage()
+          y = 20
+        }
+
+        // Timestamp
+        doc.setTextColor(150)
+        doc.text(p.time, margin, y)
+        y += 6
+
+        // Text
+        doc.setTextColor(0)
+        const lines = doc.splitTextToSize(p.text, maxWidth)
+        doc.text(lines, margin, y)
+        y += lines.length * 5 + 8
+      }
+
+      doc.save(`${filename}.pdf`)
+    },
+
+    async exportWord(title, filename) {
+      const paragraphs = this.getTranscriptWithTimestamps()
+
+      const children = [
+        new Paragraph({
+          text: title,
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 300 }
+        })
+      ]
+
+      for (const p of paragraphs) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: p.time, color: '999999', size: 20 })
+            ],
+            spacing: { before: 200 }
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: p.text, size: 24 })
+            ],
+            spacing: { after: 100 }
+          })
+        )
+      }
+
+      const doc = new Document({
+        sections: [{ children }]
+      })
+
+      const blob = await Packer.toBlob(doc)
+      saveAs(blob, `${filename}.docx`)
+    },
+
+    exportMarkdown(title, filename) {
+      const paragraphs = this.getTranscriptWithTimestamps()
+      let md = `# ${title}\n\n`
+
+      for (const p of paragraphs) {
+        md += `**${p.time}**\n\n${p.text}\n\n`
+      }
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
+      saveAs(blob, `${filename}.md`)
     }
   }
 }
@@ -436,11 +765,80 @@ export default {
   flex-shrink: 0;
 }
 
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .transcript-title {
   font-size: 28px;
   font-weight: 700;
-  margin: 0 0 4px 0;
+  margin: 0;
   color: #1a1a1a;
+}
+
+/* Export Dropdown */
+.export-dropdown {
+  position: relative;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.export-btn:hover {
+  background: #e5e7eb;
+}
+
+.export-btn svg {
+  flex-shrink: 0;
+}
+
+.export-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 50;
+  min-width: 120px;
+}
+
+.export-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.export-menu button:hover {
+  background: #f3f4f6;
+}
+
+.export-menu button:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .transcript-subtitle {
@@ -509,6 +907,76 @@ export default {
   padding: 1px 4px;
   margin: 0 -4px;
 }
+
+/* Highlight Toolbar */
+.highlight-toolbar {
+  position: fixed;
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #1f2937;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.highlight-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+}
+
+.highlight-btn:hover {
+  transform: scale(1.15);
+}
+
+.highlight-btn .color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.highlight-btn.yellow { background: #fef3c7; }
+.highlight-btn.yellow .color-dot { background: #fbbf24; }
+
+.highlight-btn.green { background: #d1fae5; }
+.highlight-btn.green .color-dot { background: #34d399; }
+
+.highlight-btn.blue { background: #dbeafe; }
+.highlight-btn.blue .color-dot { background: #60a5fa; }
+
+.highlight-btn.pink { background: #fce7f3; }
+.highlight-btn.pink .color-dot { background: #f472b6; }
+
+/* Highlight Marks (use :deep for v-html content) */
+:deep(.highlight) {
+  border-radius: 3px;
+  padding: 1px 2px;
+  margin: 0 -2px;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+:deep(.highlight:hover) {
+  filter: brightness(0.95);
+}
+
+:deep(.highlight-yellow) { background: #fef08a; }
+:deep(.highlight-green) { background: #bbf7d0; }
+:deep(.highlight-blue) { background: #bfdbfe; }
+:deep(.highlight-pink) { background: #fbcfe8; }
 
 /* Reading Stats */
 .reading-stats {

@@ -1,21 +1,21 @@
 <template>
   <div class="youtube-import-container">
     <div class="header">
-      <h1>AI-powered YouTube Shadowing</h1>
-      <p class="subtitle">Turn any YouTube video into intelligent English shadowing practice</p>
+      <h1>{{ $t('youtube.title') }}</h1>
+      <p class="subtitle">{{ $t('youtube.subtitle') }}</p>
     </div>
 
     <!-- YouTube URL 输入区 -->
     <div v-if="!selectedVideo" class="import-section">
       <div class="url-input-card">
-        <p class="hint">Paste a YouTube link. We'll generate shadowing practice instantly.</p>
-        
+        <p class="hint">{{ $t('youtube.pasteHint') }}</p>
+
         <div class="input-group">
           <div class="command-input-wrapper">
             <span class="command-prefix">▶</span>
-            <input 
-              v-model="youtubeUrl" 
-              type="text" 
+            <input
+              v-model="youtubeUrl"
+              type="text"
               placeholder="youtube.com/watch?v=..."
               class="url-input"
               @keyup.enter="addVideoToLibrary"
@@ -24,35 +24,35 @@
         </div>
 
 
-        <button 
-          class="parse-btn" 
+        <button
+          class="parse-btn"
           @click="addVideoToLibrary"
           :disabled="!youtubeUrl || isAdding"
         >
-          <span v-if="!isAdding">Generate Practice</span>
+          <span v-if="!isAdding">{{ $t('youtube.generatePractice') }}</span>
           <span v-else class="ai-processing">
             <span class="processing-text">
-              <span class="stage">Analyzing video</span>
+              <span class="stage">{{ $t('youtube.analyzing') }}</span>
               <span class="separator">·</span>
-              <span class="stage">Extracting subtitles</span>
+              <span class="stage">{{ $t('youtube.extracting') }}</span>
               <span class="separator">·</span>
-              <span class="stage">Generating practice</span>
+              <span class="stage">{{ $t('youtube.generating') }}</span>
             </span>
           </span>
         </button>
 
         <!-- 系统状态检查 -->
         <div v-if="!systemReady" class="warning-box">
-          <p>⚠️ 系统未就绪：yt-dlp 未安装</p>
-          <p class="hint-text">请在服务器上安装 yt-dlp: <code>pip install yt-dlp</code></p>
+          <p>⚠️ {{ $t('youtube.systemNotReady') }}</p>
+          <p class="hint-text">{{ $t('youtube.installHint') }}: <code>pip install yt-dlp</code></p>
         </div>
       </div>
 
       <!-- 我的视频列表 -->
       <div class="my-videos-section">
-        <h2>My Library <span v-if="totalElements > 0" class="total-count">({{ totalElements }} videos)</span></h2>
+        <h2>{{ $t('youtube.myLibrary') }} <span v-if="totalElements > 0" class="total-count">({{ totalElements }} {{ $t('youtube.videoCount', { count: '' }).replace('{count}', '').trim() }})</span></h2>
         <div v-if="myVideos.length === 0" class="empty-state">
-          <p>No videos yet</p>
+          <p>{{ $t('youtube.noVideos') }}</p>
         </div>
         <div v-else class="video-list">
           <div
@@ -143,7 +143,7 @@
             @click="previousPage"
             :disabled="!hasPrevious"
           >
-            ← Previous
+            {{ $t('youtube.pagination.previous') }}
           </button>
 
           <div class="page-numbers">
@@ -162,7 +162,7 @@
             @click="nextPage"
             :disabled="!hasNext"
           >
-            Next →
+            {{ $t('youtube.pagination.next') }}
           </button>
         </div>
       </div>
@@ -171,24 +171,24 @@
     <!-- 解析进度展示 -->
     <div v-if="parsingVideo" class="parsing-progress">
       <div class="progress-card">
-        <h2>Processing video...</h2>
+        <h2>{{ $t('youtube.processing') }}</h2>
         <div class="progress-info">
-          <p><strong>Video ID:</strong> {{ parsingVideo.videoId }}</p>
-          <p><strong>Status:</strong> {{ getStatusLabel(parsingVideo.status) }}</p>
+          <p><strong>{{ $t('youtube.videoId') }}:</strong> {{ parsingVideo.videoId }}</p>
+          <p><strong>{{ $t('youtube.status.added') }}:</strong> {{ getStatusLabel(parsingVideo.status) }}</p>
         </div>
-        
+
         <div class="progress-bar">
           <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
         </div>
         <p class="progress-text">{{ progressText }}</p>
 
-        <button class="cancel-btn" @click="cancelParsing">Cancel</button>
+        <button class="cancel-btn" @click="cancelParsing">{{ $t('common.cancel') }}</button>
       </div>
     </div>
 
     <!-- 视频详情和句子列表 -->
     <div v-if="selectedVideo" class="video-details">
-      <button class="back-btn" @click="backToList">← Back</button>
+      <button class="back-btn" @click="backToList">← {{ $t('common.back') }}</button>
       
       <div class="video-header">
         <div class="video-thumbnail-large">
@@ -207,9 +207,9 @@
 
       <!-- 句子列表 -->
       <div class="sentences-section">
-        <h2>Practice Sentences</h2>
+        <h2>{{ $t('youtube.practice.title') }}</h2>
         <div v-if="!videoSentences || videoSentences.length === 0" class="empty-state">
-          <p>No sentences available</p>
+          <p>{{ $t('youtube.practice.noSentences') }}</p>
         </div>
         <div v-else class="sentence-list">
           <div 
@@ -235,36 +235,35 @@
                 </div>
               </div>
               <button class="practice-btn" @click.stop="togglePractice(sentence)">
-                {{ practicingSentence?.id === sentence.id ? 'Collapse' : 'Practice' }}
+                {{ practicingSentence?.id === sentence.id ? $t('youtube.practice.collapse') : $t('youtube.practice.practice') }}
               </button>
             </div>
 
-            <!-- 折叠的练习区域 -->
             <transition name="slide-down">
               <div v-if="practicingSentence?.id === sentence.id" class="practice-panel">
                 <!-- YouTube播放器 -->
                 <div class="practice-player">
-                  <h3>Reference Audio</h3>
+                  <h3>{{ $t('youtube.practice.referenceAudio') }}</h3>
                   <div :id="'youtube-practice-' + sentence.id" class="youtube-practice-container"></div>
-                  <button 
-                    class="play-segment-btn" 
+                  <button
+                    class="play-segment-btn"
                     @click="playYoutubeSegment"
                     :disabled="!youtubePlayerReady"
                   >
-                    {{ isPlayingStandard ? 'Stop' : 'Play' }}
+                    {{ isPlayingStandard ? $t('youtube.practice.stop') : $t('youtube.practice.play') }}
                   </button>
                   <p class="time-hint">{{ formatTime(sentence.startTime) }} - {{ formatTime(sentence.endTime) }}</p>
                 </div>
 
                 <!-- 录音区域 -->
                 <div class="practice-recording">
-                  <h3>Your Recording</h3>
-                  
+                  <h3>{{ $t('youtube.practice.yourRecording') }}</h3>
+
                   <!-- 未录音状态 -->
                   <div v-if="!isRecording && !userAudioUrl" class="record-ready">
-                    <p>Ready to practice?</p>
+                    <p>{{ $t('youtube.practice.readyToPractice') }}</p>
                     <button class="record-btn" @click="startRecording" :disabled="!canRecord">
-                      Start Recording
+                      {{ $t('youtube.practice.startRecording') }}
                     </button>
                   </div>
 
@@ -272,10 +271,10 @@
                   <div v-if="isRecording" class="recording-active">
                     <div class="recording-indicator">
                       <span class="pulse"></span>
-                      Recording...
+                      {{ $t('youtube.practice.recording') }}
                     </div>
                     <button class="stop-record-btn" @click="stopRecording">
-                      Stop
+                      {{ $t('youtube.practice.stopRecording') }}
                     </button>
                   </div>
 
@@ -283,7 +282,7 @@
                   <div v-if="userAudioUrl" class="recorded">
                     <audio :src="userAudioUrl" controls></audio>
                     <button class="rerecord-btn" @click="reRecord">
-                      Re-record
+                      {{ $t('youtube.practice.reRecord') }}
                     </button>
                   </div>
 
@@ -292,42 +291,42 @@
                     <div class="overall-score">
                       <div class="score-circle" :class="getScoreClass(taskResult.task.overallScore)">
                         <span class="score-value">{{ taskResult.task.overallScore }}</span>
-                        <span class="score-label">Score</span>
+                        <span class="score-label">{{ $t('youtube.practice.score') }}</span>
                       </div>
                     </div>
-                    
+
                     <div class="score-details">
                       <div class="score-bar-item">
-                        <span>Pronunciation</span>
+                        <span>{{ $t('youtube.practice.pronunciation') }}</span>
                         <div class="bar">
                           <div class="fill" :style="{ width: taskResult.task.pronunciationScore + '%' }"></div>
                         </div>
                         <span>{{ taskResult.task.pronunciationScore }}</span>
                       </div>
                       <div class="score-bar-item">
-                        <span>Fluency</span>
+                        <span>{{ $t('youtube.practice.fluency') }}</span>
                         <div class="bar">
                           <div class="fill fluency" :style="{ width: taskResult.task.fluencyScore + '%' }"></div>
                         </div>
                         <span>{{ taskResult.task.fluencyScore }}</span>
                       </div>
                       <div class="score-bar-item">
-                        <span>Intonation</span>
+                        <span>{{ $t('youtube.practice.intonation') }}</span>
                         <div class="bar">
                           <div class="fill intonation" :style="{ width: taskResult.task.intonationScore + '%' }"></div>
                         </div>
                         <span>{{ taskResult.task.intonationScore }}</span>
                       </div>
                     </div>
-                    
+
                     <!-- 单词级别详细反馈 -->
                     <div class="word-feedback-section">
-                      <h3>Word-level Feedback</h3>
-                      
+                      <h3>{{ $t('youtube.practice.wordFeedback') }}</h3>
+
                       <!-- 单词卡片列表 -->
                       <div class="words-container">
-                        <div 
-                          v-for="(result, index) in taskResult.results" 
+                        <div
+                          v-for="(result, index) in taskResult.results"
                           :key="index"
                           :class="['word-item', result.status]"
                           :title="result.feedback"
@@ -336,22 +335,22 @@
                           <span class="word-score">{{ result.score }}</span>
                         </div>
                       </div>
-                      
+
                       <!-- 发音提示说明 -->
                       <div class="legend">
                         <span class="legend-item">
-                          <span class="dot correct"></span> Correct
+                          <span class="dot correct"></span> {{ $t('youtube.practice.correct') }}
                         </span>
                         <span class="legend-item">
-                          <span class="dot incorrect"></span> Need improvement
+                          <span class="dot incorrect"></span> {{ $t('youtube.practice.needImprovement') }}
                         </span>
                       </div>
-                      
+
                       <!-- 错误单词详细提示 -->
                       <div v-if="incorrectWords.length > 0" class="error-tips">
-                        <h4>Suggestions</h4>
-                        <div 
-                          v-for="result in incorrectWords" 
+                        <h4>{{ $t('youtube.practice.suggestions') }}</h4>
+                        <div
+                          v-for="result in incorrectWords"
                           :key="result.wordPosition"
                           class="error-tip"
                         >
@@ -359,9 +358,9 @@
                           <span class="error-feedback">{{ result.feedback }}</span>
                         </div>
                       </div>
-                      
+
                       <div v-else class="all-correct">
-                        <p>🎉 Perfect! All words are pronounced correctly!</p>
+                        <p>{{ $t('youtube.practice.allCorrect') }}</p>
                       </div>
                     </div>
                   </div>
@@ -377,40 +376,40 @@
     <div v-if="showDownloadDialog" class="modal-overlay" @click="closeDownloadDialog">
       <div class="download-dialog" @click.stop>
       <div class="dialog-header">
-        <h2>Download Video</h2>
+        <h2>{{ $t('youtube.download.title') }}</h2>
           <button class="close-btn" @click="closeDownloadDialog">×</button>
         </div>
-        
+
         <div class="dialog-content">
           <h3>{{ downloadingVideo?.title }}</h3>
-          
+
           <div class="quality-selector">
-            <label>Video Quality</label>
+            <label>{{ $t('youtube.download.quality') }}</label>
             <select v-model="selectedQuality" class="quality-select">
-              <option value="best">Best (Auto)</option>
-              <option value="4k">4K (2160p)</option>
-              <option value="2k">2K (1440p)</option>
-              <option value="1080p">Full HD (1080p)</option>
-              <option value="720p">HD (720p)</option>
-              <option value="480p">SD (480p)</option>
+              <option value="best">{{ $t('youtube.download.best') }}</option>
+              <option value="4k">{{ $t('youtube.download.4k') }}</option>
+              <option value="2k">{{ $t('youtube.download.2k') }}</option>
+              <option value="1080p">{{ $t('youtube.download.1080p') }}</option>
+              <option value="720p">{{ $t('youtube.download.720p') }}</option>
+              <option value="480p">{{ $t('youtube.download.480p') }}</option>
             </select>
-            <p class="quality-hint">Tip: Choose 1080p for learning, best quality for archiving</p>
+            <p class="quality-hint">{{ $t('youtube.download.qualityHint') }}</p>
           </div>
-          
+
           <div class="download-options">
             <div class="option-card" @click="downloadWithQuality('video')">
               <div class="option-icon">🎬</div>
               <div class="option-info">
-                <h4>Download Video</h4>
+                <h4>{{ $t('youtube.download.downloadVideo') }}</h4>
                 <p>{{ getQualityDescription(selectedQuality) }}</p>
               </div>
             </div>
-            
+
             <div class="option-card" @click="quickDownload('audio')">
               <div class="option-icon">🎵</div>
               <div class="option-info">
-                <h4>Audio Only (MP3)</h4>
-                <p>Extract and convert to MP3 format</p>
+                <h4>{{ $t('youtube.download.audioOnly') }}</h4>
+                <p>{{ $t('youtube.download.extractMp3') }}</p>
               </div>
             </div>
           </div>
@@ -422,13 +421,13 @@
     <div v-if="showDownloadTasks" class="modal-overlay" @click="showDownloadTasks = false">
       <div class="download-tasks-dialog" @click.stop>
         <div class="dialog-header">
-          <h2>My Downloads</h2>
+          <h2>{{ $t('youtube.download.myDownloads') }}</h2>
           <button class="close-btn" @click="showDownloadTasks = false">×</button>
         </div>
-        
+
         <div class="dialog-content">
           <div v-if="downloadTasks.length === 0" class="empty-state">
-            <p>No download tasks</p>
+            <p>{{ $t('youtube.download.noTasks') }}</p>
           </div>
           
           <div v-else class="task-list">
@@ -513,6 +512,7 @@
 <script>
 import axios from '../../utils/axios';
 import { Pencil, Download, Trash2, BookOpen, NotebookPen, Pin } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'YoutubeImport',
@@ -523,6 +523,10 @@ export default {
     BookOpen,
     NotebookPen,
     Pin
+  },
+  setup() {
+    const { t } = useI18n();
+    return { t };
   },
   data() {
     return {
@@ -542,7 +546,7 @@ export default {
       // 分页相关
       currentPage: 0,
       totalPages: 0,
-      pageSize: 10,
+      pageSize: 9,
       totalElements: 0,
       hasNext: false,
       hasPrevious: false,
@@ -721,12 +725,12 @@ export default {
     
     async addVideoToLibrary() {
       if (!this.youtubeUrl) {
-        alert('Please enter a YouTube video link');
+        alert(this.t('youtube.enterUrl'));
         return;
       }
-      
+
       if (!this.systemReady) {
-        alert('System not ready. Please install yt-dlp first');
+        alert(this.t('youtube.systemNotReady'));
         return;
       }
       
@@ -744,33 +748,33 @@ export default {
         }
       } catch (error) {
         console.error('添加视频失败:', error);
-        alert(error.response?.data?.error || 'Failed to add video. Please check the URL');
+        alert(error.response?.data?.error || this.t('youtube.addFailed'));
       } finally {
         this.isAdding = false;
       }
     },
-    
+
     async parseSubtitles(video) {
       if (video.status === 'parsing') {
-        alert('Subtitles are being parsed. Please wait...');
+        alert(this.t('youtube.isParsing'));
         return;
       }
-      
+
       if (video.status === 'completed') {
-        alert('Subtitles already parsed');
+        alert(this.t('youtube.status.completed'));
         return;
       }
-      
-      if (!confirm(`Parse subtitles for "${video.title}"?\nThis may take a few minutes.`)) {
+
+      if (!confirm(this.t('youtube.parseConfirm', { title: video.title }))) {
         return;
       }
       
       try {
         const response = await axios.post(`/api/youtube/videos/${video.id}/parse-subtitles`);
-        
+
         if (response.data.success) {
-          alert('✅ Subtitle parsing started!\nYou can check the progress in the list');
-          
+          alert(this.t('youtube.parseStarted'));
+
           // 开始轮询状态
           this.parsingVideo = {
             id: video.id,
@@ -782,7 +786,7 @@ export default {
         }
       } catch (error) {
         console.error('解析字幕失败:', error);
-        alert(error.response?.data?.error || 'Failed to parse. Please try again');
+        alert(error.response?.data?.error || this.t('youtube.parseFailed'));
       }
     },
     
@@ -803,19 +807,19 @@ export default {
             this.progressText = 'Processing subtitles...';
           } else if (video.status === 'completed') {
             this.progressPercent = 100;
-            this.progressText = 'Completed!';
-            
+            this.progressText = this.t('common.success');
+
             setTimeout(() => {
               this.clearPolling();
               this.isParsing = false;
               this.parsingVideo = null;
               this.loadMyVideos();
-              alert(`Success! Generated ${video.sentenceCount} practice sentences`);
+              alert(this.t('youtube.parseSuccess', { count: video.sentenceCount }));
             }, 1000);
           } else if (video.status === 'failed') {
             this.clearPolling();
             this.isParsing = false;
-            alert('Parsing failed: ' + video.errorMessage);
+            alert(this.t('youtube.parseFailed') + ': ' + video.errorMessage);
             this.parsingVideo = null;
           }
         } catch (error) {
@@ -839,17 +843,17 @@ export default {
     
     async viewVideoDetails(video) {
       if (video.status === 'added') {
-        alert('Subtitles not parsed yet\nClick the 📝 button to parse and generate sentences');
+        alert(this.t('youtube.notParsed'));
         return;
       }
-      
+
       if (video.status === 'parsing') {
-        alert('Subtitles are being parsed. Please check back later');
+        alert(this.t('youtube.isParsing'));
         return;
       }
-      
+
       if (video.status !== 'completed') {
-        alert('Video parsing incomplete. Please check back later');
+        alert(this.t('youtube.notCompleted'));
         return;
       }
       
@@ -987,7 +991,7 @@ export default {
     
     playYoutubeSegment() {
       if (!this.youtubePlayer || !this.youtubePlayerReady) {
-        alert('Player not ready. Please wait...');
+        alert(this.t('youtube.practice.playerNotReady'));
         return;
       }
       
@@ -1020,24 +1024,24 @@ export default {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         this.mediaRecorder = new MediaRecorder(stream);
         this.audioChunks = [];
-        
+
         this.mediaRecorder.ondataavailable = (event) => {
           this.audioChunks.push(event.data);
         };
-        
+
         this.mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
           this.userAudioUrl = URL.createObjectURL(audioBlob);
-          
+
           await this.uploadRecording(audioBlob);
           stream.getTracks().forEach(track => track.stop());
         };
-        
+
         this.mediaRecorder.start();
         this.isRecording = true;
       } catch (error) {
         console.error('录音失败:', error);
-        alert('Recording failed. Please check microphone permissions');
+        alert(this.t('youtube.practice.recordFailed'));
       }
     },
     
@@ -1052,23 +1056,23 @@ export default {
       try {
         if (!this.currentTask || !this.currentTask.id) {
           console.error('上传录音失败: 任务未创建');
-          alert('Task not created. Please try again.');
+          alert(this.t('youtube.practice.taskNotCreated'));
           return;
         }
-        
+
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.wav');
-        
+
         await axios.post(`/api/follow-read/tasks/${this.currentTask.id}/submit`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
-        
+
         this.pollTaskResult();
       } catch (error) {
         console.error('上传录音失败:', error);
-        alert('Upload failed. Please try again');
+        alert(this.t('youtube.practice.uploadFailed'));
       }
     },
     
@@ -1134,61 +1138,61 @@ export default {
     
     getStatusLabel(status) {
       const labels = {
-        'added': 'Added',
-        'parsing': 'Processing',
-        'completed': 'Ready',
-        'failed': 'Failed'
+        'added': this.t('youtube.status.added'),
+        'parsing': this.t('youtube.status.parsing'),
+        'completed': this.t('youtube.status.completed'),
+        'failed': this.t('youtube.status.failed')
       };
       return labels[status] || status;
     },
-    
+
     getDifficultyLabel(difficulty) {
       const labels = {
-        'easy': 'Easy',
-        'medium': 'Medium',
-        'hard': 'Hard'
+        'easy': this.t('youtube.difficulty.easy'),
+        'medium': this.t('youtube.difficulty.medium'),
+        'hard': this.t('youtube.difficulty.hard')
       };
       return labels[difficulty] || difficulty;
     },
-    
+
     confirmDeleteVideo(video) {
       const title = video.title || 'this video';
-      const sentenceInfo = video.sentenceCount ? `and its ${video.sentenceCount} practice sentences` : '';
-      
-      if (confirm(`Delete "${title}" ${sentenceInfo}?\n\nThis action cannot be undone!`)) {
+      const sentenceInfo = video.sentenceCount ? this.t('youtube.andSentences', { count: video.sentenceCount }) : '';
+
+      if (confirm(this.t('youtube.deleteConfirm', { title, sentenceInfo }))) {
         this.deleteVideo(video.id);
       }
     },
-    
+
     async deleteVideo(videoId) {
       try {
         await axios.delete(`/api/youtube/videos/${videoId}`);
-        
+
         // 从列表中移除
         this.myVideos = this.myVideos.filter(v => v.id !== videoId);
-        
+
         // 如果当前正在查看这个视频的详情，返回列表
         if (this.selectedVideo && this.selectedVideo.id === videoId) {
           this.backToList();
         }
-        
-        alert('Video deleted successfully');
+
+        alert(this.t('youtube.deleteSuccess'));
       } catch (error) {
         console.error('删除视频失败:', error);
-        alert('Delete failed: ' + (error.response?.data?.error || 'Please try again'));
+        alert(this.t('youtube.deleteFailed') + ': ' + (error.response?.data?.error || ''));
       }
     },
     
     // ========== 下载相关方法 ==========
-    
+
     showDownloadOptions(video) {
       if (video.status === 'parsing') {
-        alert('Video is being parsed. Please wait until completion');
+        alert(this.t('youtube.download.isParsing'));
         return;
       }
-      
+
       if (video.status === 'failed') {
-        alert('Video parsing failed. Cannot download');
+        alert(this.t('youtube.download.isFailed'));
         return;
       }
       this.downloadingVideo = video;
@@ -1209,58 +1213,58 @@ export default {
           quality: this.selectedQuality,
           formatId: null
         });
-        
+
         if (response.data.success) {
           const qualityText = this.getQualityText(this.selectedQuality);
-          alert(`✅ Download task created!\nQuality: ${qualityText}\nCheck progress in the bottom right corner`);
+          alert(this.t('youtube.download.taskCreated', { quality: qualityText }));
           this.closeDownloadDialog();
           this.loadDownloadTasks();
         }
       } catch (error) {
         console.error('创建下载任务失败:', error);
-        alert('Download failed: ' + (error.response?.data?.error || 'Please try again'));
+        alert(this.t('youtube.download.downloadFailed') + ': ' + (error.response?.data?.error || ''));
       }
     },
-    
+
     async quickDownload(type) {
       try {
         const response = await axios.post(`/api/youtube/download/quick/${this.downloadingVideo.id}`, null, {
           params: { type }
         });
-        
+
         if (response.data.success) {
-          alert('Download task created! Check progress in the bottom right corner');
+          alert(this.t('youtube.download.taskCreated', { quality: '' }));
           this.closeDownloadDialog();
           this.loadDownloadTasks();
         }
       } catch (error) {
         console.error('创建下载任务失败:', error);
-        alert('Download failed: ' + (error.response?.data?.error || 'Please try again'));
+        alert(this.t('youtube.download.downloadFailed') + ': ' + (error.response?.data?.error || ''));
       }
     },
-    
+
     getQualityText(quality) {
       const labels = {
-        'best': 'Best (Auto)',
-        '4k': '4K (2160p)',
-        '2k': '2K (1440p)',
-        '1080p': 'Full HD (1080p)',
-        '720p': 'HD (720p)',
-        '480p': 'SD (480p)'
+        'best': this.t('youtube.download.best'),
+        '4k': this.t('youtube.download.4k'),
+        '2k': this.t('youtube.download.2k'),
+        '1080p': this.t('youtube.download.1080p'),
+        '720p': this.t('youtube.download.720p'),
+        '480p': this.t('youtube.download.480p')
       };
       return labels[quality] || quality;
     },
-    
+
     getQualityDescription(quality) {
       const descriptions = {
-        'best': 'Auto-select highest available quality',
-        '4k': 'Ultra HD video, large file size',
-        '2k': '2K high definition video',
-        '1080p': 'Full HD video, recommended',
-        '720p': 'HD video, moderate file size',
-        '480p': 'Standard definition, smaller file'
+        'best': this.t('youtube.download.qualityDesc.best'),
+        '4k': this.t('youtube.download.qualityDesc.4k'),
+        '2k': this.t('youtube.download.qualityDesc.2k'),
+        '1080p': this.t('youtube.download.qualityDesc.1080p'),
+        '720p': this.t('youtube.download.qualityDesc.720p'),
+        '480p': this.t('youtube.download.qualityDesc.480p')
       };
-      return descriptions[quality] || 'Download video file';
+      return descriptions[quality] || this.t('youtube.download.downloadVideo');
     },
     
     async loadDownloadTasks() {
@@ -1350,43 +1354,43 @@ export default {
         window.location.href = `/api/youtube/download/file/${taskId}`;
       } catch (error) {
         console.error('下载文件失败:', error);
-        alert('Download failed. Please try again');
+        alert(this.t('youtube.download.downloadFailed'));
       }
     },
-    
+
     async deleteDownloadTask(taskId) {
-      if (!confirm('Delete this download task? The downloaded file will also be deleted.')) {
+      if (!confirm(this.t('youtube.download.deleteTask'))) {
         return;
       }
-      
+
       try {
         await axios.delete(`/api/youtube/download/tasks/${taskId}`);
         this.loadDownloadTasks();
-        alert('Download task deleted');
+        alert(this.t('youtube.download.taskDeleted'));
       } catch (error) {
         console.error('删除下载任务失败:', error);
-        alert('Delete failed: ' + (error.response?.data?.error || 'Please try again'));
+        alert(this.t('youtube.download.downloadFailed') + ': ' + (error.response?.data?.error || ''));
       }
     },
-    
+
     getDownloadStatusLabel(status) {
       const labels = {
-        'INIT': 'Waiting',
-        'QUEUED': 'Queued',
-        'PARSING': 'Parsing',
-        'DOWNLOADING': 'Downloading',
-        'MERGING': 'Merging',
-        'SUCCESS': 'Completed',
-        'FAILED': 'Failed'
+        'INIT': this.t('youtube.download.status.init'),
+        'QUEUED': this.t('youtube.download.status.queued'),
+        'PARSING': this.t('youtube.download.status.parsing'),
+        'DOWNLOADING': this.t('youtube.download.status.downloading'),
+        'MERGING': this.t('youtube.download.status.merging'),
+        'SUCCESS': this.t('youtube.download.status.success'),
+        'FAILED': this.t('youtube.download.status.failed')
       };
       return labels[status] || status;
     },
-    
+
     getDownloadTypeLabel(type) {
       const labels = {
-        'video': 'Video',
-        'audio': 'Audio',
-        'video_audio': 'Video+Audio'
+        'video': this.t('youtube.download.type.video'),
+        'audio': this.t('youtube.download.type.audio'),
+        'video_audio': this.t('youtube.download.type.videoAudio')
       };
       return labels[type] || type;
     },

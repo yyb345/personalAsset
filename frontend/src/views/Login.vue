@@ -12,8 +12,8 @@
         <span class="logo-text">X Learning</span>
       </router-link>
       <div class="login-header">
-        <h1>Welcome Back</h1>
-        <p>Sign in to continue your learning journey</p>
+        <h1>{{ $t('auth.welcomeBack') }}</h1>
+        <p>{{ $t('auth.signInContinue') }}</p>
       </div>
 
       <div v-if="alertMessage" :class="['alert', `alert-${alertType}`]">
@@ -22,37 +22,37 @@
 
       <form @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="username">Username</label>
-          <input 
-            type="text" 
-            id="username" 
-            v-model="form.username" 
-            required 
+          <label for="username">{{ $t('auth.username') }}</label>
+          <input
+            type="text"
+            id="username"
+            v-model="form.username"
+            required
             autocomplete="username"
-            placeholder="Enter your username"
+            :placeholder="$t('auth.enterUsername')"
           >
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            v-model="form.password" 
-            required 
+          <label for="password">{{ $t('auth.password') }}</label>
+          <input
+            type="password"
+            id="password"
+            v-model="form.password"
+            required
             autocomplete="current-password"
-            placeholder="Enter your password"
+            :placeholder="$t('auth.enterPassword')"
           >
         </div>
 
         <button type="submit" class="btn-login" :disabled="loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+          {{ loading ? $t('auth.signingIn') : $t('auth.signIn') }}
         </button>
       </form>
 
       <!-- OAuth2 分隔线 -->
       <div class="oauth-divider">
-        <span>or continue with</span>
+        <span>{{ $t('auth.orContinueWith') }}</span>
       </div>
 
       <!-- OAuth2 登录按钮 -->
@@ -64,17 +64,17 @@
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          <span>Sign in with Google</span>
+          <span>{{ $t('auth.signInWithGoogle') }}</span>
         </a>
       </div>
 
       <div class="login-footer">
-        Don't have an account? <router-link to="/register">Sign Up</router-link>
+        {{ $t('auth.noAccount') }} <router-link to="/register">{{ $t('auth.signUp') }}</router-link>
       </div>
     </div>
 
     <div class="back-home">
-      <router-link to="/">← Back to Home</router-link>
+      <router-link to="/">{{ $t('auth.backToHome') }}</router-link>
     </div>
   </div>
 </template>
@@ -82,8 +82,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { login, checkAuth } from '@/utils/auth'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const form = ref({
@@ -104,7 +106,7 @@ const googleLoginUrl = computed(() => {
 onMounted(async () => {
   // 检查 URL 中是否有 OAuth2 错误参数
   if (route.query.error === 'oauth2') {
-    showAlert('OAuth2 login failed. Please try again or use username/password.')
+    showAlert(t('auth.oauth2Failed'))
   }
 
   // 检查是否已登录
@@ -128,12 +130,12 @@ const handleLogin = async () => {
   loading.value = true
   try {
     await login(form.value.username, form.value.password)
-    showAlert('Login successful! Redirecting...', 'success')
+    showAlert(t('auth.loginSuccess'), 'success')
     setTimeout(() => {
       router.push('/dashboard')
     }, 1000)
   } catch (error) {
-    showAlert(error.response?.data?.message || 'Login failed. Please try again.')
+    showAlert(error.response?.data?.message || t('auth.loginFailed'))
   } finally {
     loading.value = false
   }
