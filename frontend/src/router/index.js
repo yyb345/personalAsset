@@ -90,6 +90,15 @@ router.beforeEach(async (to, from, next) => {
   }
 })
 
+// Google Analytics 页面追踪
+router.afterEach((to) => {
+  if (window.gtag) {
+    window.gtag('config', 'G-6MKRR655RZ', {
+      page_path: to.fullPath
+    })
+  }
+})
+
 export default router
 
 
