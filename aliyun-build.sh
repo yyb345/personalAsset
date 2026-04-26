@@ -11,13 +11,19 @@ DOCKERFILE_PATH="Dockerfile"
 DOCKER_NAME="finance-app"
 NGINX_NAME="nginx-proxy"
 CERTBOT_NAME="certbot"
+ES_NAME="es-subtitle"
 NETWORK_NAME="finance-network"
 APP_PORT="80"
 DATA_DIR="/home/data/finance"
 CERT_DIR="/home/data/certbot"
 NGINX_CONF_DIR="/home/data/nginx"
+ES_DATA_DIR="/home/data/elasticsearch"
 DOMAIN="www.xlearning.top"
 EMAIL="yybsduhpc@gmail.com"  # 修改为你的邮箱
+
+# ES 配置（设为 false 可禁用 ES）
+ES_ENABLED="true"
+ES_MEMORY="512m"
 
 # 颜色输出
 GREEN='\033[0;32m'
@@ -47,6 +53,68 @@ setup_network() {
     else
         print_info "Docker 网络已存在: $NETWORK_NAME"
     fi
+}
+
+# ==================== 启动 Elasticsearch ====================
+start_elasticsearch() {
+    if [ "$ES_ENABLED" != "true" ]; then
+        print_warn "Elasticsearch 已禁用，跳过启动"
+        return 0
+    fi
+
+    print_info "========== 启动 Elasticsearch =========="
+
+    # 创建数据目录
+    if [ ! -d "$ES_DATA_DIR" ]; then
+        print_info "创建 ES 数据目录: $ES_DATA_DIR"
+        mkdir -p "$ES_DATA_DIR"
+        chmod 777 "$ES_DATA_DIR"
+    fi
+
+    # 检查是否已在运行
+    if docker ps -q -f name="$ES_NAME" | grep -q .; then
+        print_info "Elasticsearch 已在运行"
+        return 0
+    fi
+
+    # 清理旧容器
+    print_info "清理旧的 ES 容器..."
+    docker stop "$ES_NAME" 2>/dev/null || true
+    docker rm -f "$ES_NAME" 2>/dev/null || true
+
+    print_info "启动 Elasticsearch 容器..."
+    if docker run \
+        --name "$ES_NAME" \
+        --network "$NETWORK_NAME" \
+        -e "discovery.type=single-node" \
+        -e "xpack.security.enabled=false" \
+        -e "ES_JAVA_OPTS=-Xms${ES_MEMORY} -Xmx${ES_MEMORY}" \
+        -e "cluster.name=subtitle-cluster" \
+        -v "$ES_DATA_DIR:/usr/share/elasticsearch/data" \
+        -d \
+        --restart unless-stopped \
+        elasticsearch:8.12.0; then
+        print_info "✓ Elasticsearch 容器启动成功"
+    else
+        print_error "✗ Elasticsearch 容器启动失败"
+        print_warn "将禁用 ES 功能继续部署..."
+        ES_ENABLED="false"
+        return 1
+    fi
+
+    # 等待 ES 就绪
+    print_info "等待 Elasticsearch 就绪..."
+    for i in {1..30}; do
+        if docker exec "$ES_NAME" curl -s http://localhost:9200 > /dev/null 2>&1; then
+            print_info "✓ Elasticsearch 已就绪"
+            return 0
+        fi
+        sleep 2
+        echo -n "."
+    done
+
+    print_warn "Elasticsearch 启动超时，但将继续部署"
+    return 0
 }
 
 # ==================== 创建 Nginx 配置 ====================
@@ -203,6 +271,16 @@ start_app() {
     docker stop "$DOCKER_NAME" 2>/dev/null || true
     docker rm -f "$DOCKER_NAME" 2>/dev/null || true
 
+    # 构建 ES 环境变量
+    ES_ENV=""
+    if [ "$ES_ENABLED" = "true" ]; then
+        ES_ENV="-e ES_HOST=$ES_NAME -e ES_PORT=9200 -e ES_ENABLED=true"
+        print_info "ES 已启用，连接到: $ES_NAME:9200"
+    else
+        ES_ENV="-e ES_ENABLED=false"
+        print_info "ES 已禁用"
+    fi
+
     print_info "启动应用容器..."
     if docker run \
         --name "$DOCKER_NAME" \
@@ -212,6 +290,7 @@ start_app() {
         -e SERVER_PORT=$APP_PORT \
         -e SPRING_DATASOURCE_URL=jdbc:sqlite:/data/finance.db \
         -e JAVA_OPTS="-Xmx1g -Xms512m" \
+        $ES_ENV \
         -d \
         --restart unless-stopped \
         "$DOCKER_NAME:latest"; then
@@ -361,15 +440,23 @@ show_info() {
     print_info "应用名称: $DOCKER_NAME"
     print_info "访问地址: https://$DOMAIN"
     print_info "健康检查: https://$DOMAIN/actuator/health"
+    if [ "$ES_ENABLED" = "true" ]; then
+        print_info "ES 状态:  已启用 (容器: $ES_NAME)"
+        print_info "搜索接口: https://$DOMAIN/api/subtitle-search?q=关键词"
+    else
+        print_info "ES 状态:  已禁用"
+    fi
     print_info ""
     print_info "容器状态："
-    docker ps -f name="$DOCKER_NAME" -f name="$NGINX_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+    docker ps -f name="$DOCKER_NAME" -f name="$NGINX_NAME" -f name="$ES_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
     print_info ""
     print_info "常用命令："
     print_info "  查看应用日志: docker logs -f $DOCKER_NAME"
     print_info "  查看Nginx日志: docker logs -f $NGINX_NAME"
+    print_info "  查看ES日志: docker logs -f $ES_NAME"
     print_info "  重启应用: docker restart $DOCKER_NAME"
     print_info "  重启Nginx: docker restart $NGINX_NAME"
+    print_info "  重启ES: docker restart $ES_NAME"
     print_info "  手动续期证书: $CERT_DIR/renew.sh"
     print_info "=========================================="
 }
@@ -423,6 +510,11 @@ main() {
     fi
 
     setup_nginx_config
+
+    # 先启动 ES（如果启用）
+    start_elasticsearch
+
+    # 再启动应用
     start_app
     start_nginx
 

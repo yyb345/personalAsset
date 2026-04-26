@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.finance.search.service.SubtitleSearchService;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -34,6 +36,9 @@ public class YoutubeVideoService {
 
     @Autowired
     private FollowReadSentenceRepository sentenceRepository;
+
+    @Autowired(required = false)
+    private SubtitleSearchService subtitleSearchService;
 
     private static final String SUBTITLE_DIR = "uploads/subtitles/";
     private static final String AUDIO_DIR = "uploads/audio/";
@@ -246,7 +251,16 @@ public class YoutubeVideoService {
             video.setProgressMessage("字幕解析完成！");
             video.setCompletedAt(LocalDateTime.now());
             videoRepository.save(video);
-            
+
+            // 索引到 Elasticsearch
+            if (subtitleSearchService != null) {
+                try {
+                    subtitleSearchService.indexVideo(video, segments);
+                } catch (Exception e) {
+                    log.warn("⚠️ ES索引失败，不影响主流程: {}", e.getMessage());
+                }
+            }
+
             log.info("✅ 字幕解析完成: videoId={}, sentences={}", video.getVideoId(), video.getSentenceCount());
             
         } catch (Exception e) {
@@ -1276,8 +1290,17 @@ public class YoutubeVideoService {
         // 3. 删除视频记录
         videoRepository.delete(video);
         log.info("已删除视频记录: {}", video.getVideoId());
-        
-        // 4. 可选：删除字幕文件
+
+        // 4. 删除 ES 索引
+        if (subtitleSearchService != null) {
+            try {
+                subtitleSearchService.deleteVideo(video.getVideoId());
+            } catch (Exception e) {
+                log.warn("⚠️ 删除ES索引失败: {}", e.getMessage());
+            }
+        }
+
+        // 5. 可选：删除字幕文件
         try {
             // 根据视频的语言选择字幕文件名
             String langCode = video.getSubtitleLanguage() != null ? 
@@ -1371,13 +1394,22 @@ public class YoutubeVideoService {
             
             // 生成学习句子
             generateLearningSentences(video, segments);
-            
+
             // 标记完成
             video.setStatus("completed");
             video.setProgressMessage("字幕解析完成！");
             video.setCompletedAt(LocalDateTime.now());
             videoRepository.save(video);
-            
+
+            // 索引到 Elasticsearch
+            if (subtitleSearchService != null) {
+                try {
+                    subtitleSearchService.indexVideo(video, segments);
+                } catch (Exception e) {
+                    log.warn("⚠️ ES索引失败，不影响主流程: {}", e.getMessage());
+                }
+            }
+
             log.info("✅ 浏览器字幕处理完成: videoId={}, sentences={}", 
                 video.getVideoId(), video.getSentenceCount());
             

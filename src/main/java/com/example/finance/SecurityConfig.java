@@ -67,6 +67,8 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/register", "/dashboard", "/dashboard/**", "/shadowing").permitAll()
                 // Chrome 插件 API（公开访问）
                 .requestMatchers("/api/youtube/**").permitAll()
+                // 字幕搜索 API（公开访问）
+                .requestMatchers("/api/subtitle-search/**").permitAll()
                 // OAuth2 相关端点（公开访问）
                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 // 需要认证的API
