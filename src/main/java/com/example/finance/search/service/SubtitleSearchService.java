@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.search.*;
+import co.elastic.clients.json.JsonData;
 import com.example.finance.followread.SubtitleSegment;
 import com.example.finance.followread.YoutubeVideo;
 import com.example.finance.search.dto.*;
@@ -304,7 +305,7 @@ public class SubtitleSearchService {
 
             InnerHitsResult innerHitsResult = hit.innerHits().get("segments");
             if (innerHitsResult != null && innerHitsResult.hits() != null) {
-                for (Hit<Object> innerHit : innerHitsResult.hits().hits()) {
+                for (Hit<JsonData> innerHit : innerHitsResult.hits().hits()) {
                     if (innerHit.source() instanceof Map) {
                         Map<String, Object> segSource = (Map<String, Object>) innerHit.source();
                         SegmentMatch match = new SegmentMatch();
