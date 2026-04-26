@@ -306,20 +306,25 @@ public class SubtitleSearchService {
             InnerHitsResult innerHitsResult = hit.innerHits().get("segments");
             if (innerHitsResult != null && innerHitsResult.hits() != null) {
                 for (Hit<JsonData> innerHit : innerHitsResult.hits().hits()) {
-                    if (innerHit.source() instanceof Map) {
-                        Map<String, Object> segSource = (Map<String, Object>) innerHit.source();
+                    try {
                         SegmentMatch match = new SegmentMatch();
 
-                        Object startTime = segSource.get("start_time");
-                        Object endTime = segSource.get("end_time");
+                        // JsonData 需要转换为 Map
+                        JsonData source = innerHit.source();
+                        if (source != null) {
+                            Map<String, Object> segSource = source.to(Map.class);
 
-                        if (startTime instanceof Number) {
-                            match.setStartTime(((Number) startTime).doubleValue());
+                            Object startTime = segSource.get("start_time");
+                            Object endTime = segSource.get("end_time");
+
+                            if (startTime instanceof Number) {
+                                match.setStartTime(((Number) startTime).doubleValue());
+                            }
+                            if (endTime instanceof Number) {
+                                match.setEndTime(((Number) endTime).doubleValue());
+                            }
+                            match.setText((String) segSource.get("text"));
                         }
-                        if (endTime instanceof Number) {
-                            match.setEndTime(((Number) endTime).doubleValue());
-                        }
-                        match.setText((String) segSource.get("text"));
 
                         // 高亮文本
                         if (innerHit.highlight() != null &&
@@ -331,6 +336,8 @@ public class SubtitleSearchService {
                         }
 
                         matches.add(match);
+                    } catch (Exception e) {
+                        log.warn("解析 inner_hit 失败", e);
                     }
                 }
             }

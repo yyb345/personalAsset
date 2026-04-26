@@ -203,6 +203,18 @@ export default {
     notePreview: {
       notes: '{count} note | {count} notes',
       more: '+{count} more'
+    },
+
+    search: {
+      title: 'Search Subtitles',
+      placeholder: 'Search keywords in video subtitles...',
+      search: 'Search',
+      searching: 'Searching...',
+      results: 'Found {count} results',
+      noResults: 'No matching results found',
+      close: 'Close',
+      esNotEnabled: 'Search service is not enabled. Please configure Elasticsearch first.',
+      searchFailed: 'Search failed'
     }
   },
 

@@ -7,7 +7,7 @@
 
     <!-- YouTube URL 输入区 -->
     <div v-if="!selectedVideo" class="import-section">
-      <div class="url-input-card">
+      <div v-if="isDebugMode" class="url-input-card">
         <p class="hint">{{ $t('youtube.pasteHint') }}</p>
 
         <div class="input-group">
@@ -45,6 +45,105 @@
         <div v-if="!systemReady" class="warning-box">
           <p>⚠️ {{ $t('youtube.systemNotReady') }}</p>
           <p class="hint-text">{{ $t('youtube.installHint') }}: <code>pip install yt-dlp</code></p>
+        </div>
+      </div>
+
+      <!-- 字幕搜索区域 -->
+      <div class="subtitle-search-section">
+        <div class="search-header">
+          <h2>{{ $t('youtube.search.title') }}</h2>
+        </div>
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input
+            v-model="searchKeyword"
+            type="text"
+            :placeholder="$t('youtube.search.placeholder')"
+            class="search-input"
+            @keyup.enter="performSearch"
+          />
+          <button
+            v-if="searchKeyword"
+            class="clear-search-btn"
+            @click="clearSearch"
+          >×</button>
+          <button
+            class="search-btn"
+            @click="performSearch"
+            :disabled="!searchKeyword || isSearching"
+          >
+            <span v-if="!isSearching">{{ $t('youtube.search.search') }}</span>
+            <span v-else>{{ $t('youtube.search.searching') }}</span>
+          </button>
+        </div>
+
+        <!-- 搜索结果 -->
+        <div v-if="searchResults.length > 0 || hasSearched" class="search-results">
+          <div class="search-results-header">
+            <span>{{ $t('youtube.search.results', { count: searchTotal }) }}</span>
+            <button class="close-results-btn" @click="clearSearch">{{ $t('youtube.search.close') }}</button>
+          </div>
+
+          <div v-if="searchResults.length === 0 && hasSearched" class="no-results">
+            <p>{{ $t('youtube.search.noResults') }}</p>
+          </div>
+
+          <div v-else class="search-result-list">
+            <div
+              v-for="result in searchResults"
+              :key="result.videoId"
+              class="search-result-card"
+            >
+              <div class="result-thumbnail" @click="goToVideo(result.videoId)">
+                <img v-if="result.thumbnailUrl" :src="result.thumbnailUrl" alt="thumbnail" />
+                <div v-else class="thumbnail-placeholder">📹</div>
+              </div>
+              <div class="result-content">
+                <h3 class="result-title" @click="goToVideo(result.videoId)">{{ result.title }}</h3>
+                <div class="result-meta">
+                  <span class="channel">{{ result.channel }}</span>
+                  <span class="duration">{{ formatDuration(result.duration) }}</span>
+                  <span v-if="result.language" class="language">{{ result.language }}</span>
+                </div>
+                <!-- 匹配的字幕片段 -->
+                <div v-if="result.matchedSegments && result.matchedSegments.length > 0" class="matched-segments">
+                  <div
+                    v-for="(seg, idx) in result.matchedSegments.slice(0, 3)"
+                    :key="idx"
+                    class="segment-item"
+                    @click="goToVideoAtTime(result.videoId, seg.startTime)"
+                  >
+                    <span class="segment-time">{{ formatTime(seg.startTime) }}</span>
+                    <span class="segment-text" v-html="seg.highlightedText || seg.text"></span>
+                  </div>
+                </div>
+                <!-- 高亮摘要 -->
+                <div v-else-if="result.highlights && result.highlights.length > 0" class="highlights">
+                  <div
+                    v-for="(hl, idx) in result.highlights.slice(0, 2)"
+                    :key="idx"
+                    class="highlight-item"
+                    v-html="hl"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 搜索分页 -->
+          <div v-if="searchTotalPages > 1" class="search-pagination">
+            <button
+              class="page-btn"
+              @click="searchPreviousPage"
+              :disabled="searchPage === 0"
+            >{{ $t('youtube.pagination.previous') }}</button>
+            <span class="page-info">{{ searchPage + 1 }} / {{ searchTotalPages }}</span>
+            <button
+              class="page-btn"
+              @click="searchNextPage"
+              :disabled="searchPage >= searchTotalPages - 1"
+            >{{ $t('youtube.pagination.next') }}</button>
+          </div>
         </div>
       </div>
 
@@ -533,6 +632,7 @@ export default {
       youtubeUrl: '',
       difficulty: 'auto', // 固定使用 auto，让 AI 自动判断
       systemReady: true,
+      isDebugMode: false, // 只在 URL 包含 ?debug=true 时显示 url-input-card
       isAdding: false,
       isParsing: false,
       parsingVideo: null,
@@ -592,7 +692,17 @@ export default {
         style: {}
       },
       noteHoverTimer: null,
-      noteCache: {}
+      noteCache: {},
+
+      // 字幕搜索相关
+      searchKeyword: '',
+      searchResults: [],
+      searchTotal: 0,
+      searchPage: 0,
+      searchPageSize: 10,
+      searchTotalPages: 0,
+      isSearching: false,
+      hasSearched: false
     };
   },
   computed: {
@@ -617,6 +727,8 @@ export default {
     }
   },
   mounted() {
+    // 检查 URL 参数是否包含 debug=true
+    this.isDebugMode = this.$route.query.debug === 'true';
     this.checkSystemStatus();
     this.loadMyVideos();
     this.checkMicrophonePermission();
@@ -1496,6 +1608,80 @@ export default {
       if (!dateStr) return '';
       const d = new Date(dateStr);
       return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    },
+
+    // ========== 字幕搜索方法 ==========
+
+    async performSearch(page = 0) {
+      if (!this.searchKeyword || !this.searchKeyword.trim()) {
+        return;
+      }
+
+      this.isSearching = true;
+      this.searchPage = page;
+
+      try {
+        const response = await axios.get('/api/subtitle-search/locate', {
+          params: {
+            q: this.searchKeyword.trim(),
+            limit: 20
+          }
+        });
+
+        this.searchResults = response.data || [];
+        this.searchTotal = this.searchResults.length;
+        this.searchTotalPages = 1;
+        this.hasSearched = true;
+
+      } catch (error) {
+        console.error('搜索失败:', error);
+        // 如果 ES 未启用，尝试使用基础搜索
+        if (error.response?.status === 503 || error.response?.data?.error?.includes('未启用')) {
+          this.searchResults = [];
+          this.searchTotal = 0;
+          this.hasSearched = true;
+          alert(this.t('youtube.search.esNotEnabled'));
+        } else {
+          alert(this.t('youtube.search.searchFailed') + ': ' + (error.response?.data?.error || error.message));
+        }
+      } finally {
+        this.isSearching = false;
+      }
+    },
+
+    clearSearch() {
+      this.searchKeyword = '';
+      this.searchResults = [];
+      this.searchTotal = 0;
+      this.searchPage = 0;
+      this.searchTotalPages = 0;
+      this.hasSearched = false;
+    },
+
+    searchPreviousPage() {
+      if (this.searchPage > 0) {
+        this.performSearch(this.searchPage - 1);
+      }
+    },
+
+    searchNextPage() {
+      if (this.searchPage < this.searchTotalPages - 1) {
+        this.performSearch(this.searchPage + 1);
+      }
+    },
+
+    goToVideo(videoId) {
+      this.$router.push({
+        path: '/shadowing',
+        query: { videoId: videoId }
+      });
+    },
+
+    goToVideoAtTime(videoId, startTime) {
+      this.$router.push({
+        path: '/shadowing',
+        query: { videoId: videoId, t: Math.floor(startTime) }
+      });
     }
   }
 };

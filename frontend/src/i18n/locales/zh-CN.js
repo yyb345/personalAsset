@@ -203,6 +203,18 @@ export default {
     notePreview: {
       notes: '{count} 条笔记',
       more: '+{count} 更多'
+    },
+
+    search: {
+      title: '搜索字幕',
+      placeholder: '在视频字幕中搜索关键词...',
+      search: '搜索',
+      searching: '搜索中...',
+      results: '找到 {count} 个结果',
+      noResults: '未找到匹配的结果',
+      close: '关闭',
+      esNotEnabled: '搜索服务未启用，请先配置 Elasticsearch',
+      searchFailed: '搜索失败'
     }
   },
 
