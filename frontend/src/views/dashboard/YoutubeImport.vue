@@ -971,7 +971,7 @@ export default {
       
       // 跳转到新页面，使用数据库的 id
       this.$router.push({
-        path: '/shadowing',
+        path: '/transcribe',
         query: { videoId: video.videoId }
       });
     },
@@ -1672,14 +1672,14 @@ export default {
 
     goToVideo(videoId) {
       this.$router.push({
-        path: '/shadowing',
+        path: '/transcribe',
         query: { videoId: videoId }
       });
     },
 
     goToVideoAtTime(videoId, startTime) {
       this.$router.push({
-        path: '/shadowing',
+        path: '/transcribe',
         query: { videoId: videoId, t: Math.floor(startTime) }
       });
     }

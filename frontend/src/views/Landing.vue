@@ -37,8 +37,8 @@
           <br>Learn from YouTube videos, practice pronunciation, and improve fluently.
         </p>
         <div class="hero-buttons">
-          <router-link to="/register" class="btn-hero-primary">Start Learning</router-link>
-          <router-link to="/shadowing?videoId=rtuKId76DZI" class="btn-hero-secondary">Watch Demo</router-link>
+          <router-link to="/dashboard/youtube" class="btn-hero-primary">Start Learning</router-link>
+          <router-link to="/transcribe?videoId=rtuKId76DZI" class="btn-hero-secondary">Watch Demo</router-link>
         </div>
         <div class="hero-stats">
           <div class="stat-item">
