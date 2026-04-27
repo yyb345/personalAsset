@@ -26,7 +26,8 @@ public class FrontendController {
         "/login",
         "/register",
         "/dashboard",
-        "/shadowing"
+        "/shadowing",
+        "/transcribe"
     })
     public ResponseEntity<Resource> index() {
         try {
