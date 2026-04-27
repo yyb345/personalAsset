@@ -65,6 +65,8 @@ public class SecurityConfig {
                                "/", "/index.html", "/script.js").permitAll()
                 // 前端路由（公开访问）
                 .requestMatchers("/login", "/register", "/dashboard", "/dashboard/**", "/shadowing").permitAll()
+                // SEO 页面（公开访问）
+                .requestMatchers("/video", "/video/**").permitAll()
                 // Chrome 插件 API（公开访问）
                 .requestMatchers("/api/youtube/**").permitAll()
                 // 字幕搜索 API（公开访问）
