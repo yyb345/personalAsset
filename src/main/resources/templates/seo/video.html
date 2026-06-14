@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${video.title} + ' - YouTube Transcript | xLearning'">Video Transcript</title>
-    <meta name="description" th:content="${video.description != null ? video.description : video.title}">
+    <meta name="description" th:content="${seoDescription}">
     <meta name="keywords" th:content="'YouTube transcript, ' + ${video.title} + ', English learning, subtitle'">
+    <meta name="robots" content="index, follow">
 
     <!-- Open Graph -->
-    <meta property="og:title" th:content="${video.title}">
-    <meta property="og:description" th:content="${video.description != null ? video.description : video.title}">
+    <meta property="og:title" th:content="${video.title} + ' - YouTube Transcript'">
+    <meta property="og:description" th:content="${seoDescription}">
     <meta property="og:image" th:content="${video.thumbnailUrl}">
-    <meta property="og:url" th:content="'https://www.xlearning.top/video/' + ${video.videoId}">
+    <meta property="og:url" th:content="${pageUrl}">
     <meta property="og:type" content="article">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" th:content="${video.title}">
-    <meta name="twitter:description" th:content="${video.description != null ? video.description : video.title}">
+    <meta name="twitter:title" th:content="${video.title} + ' - YouTube Transcript'">
+    <meta name="twitter:description" th:content="${seoDescription}">
     <meta name="twitter:image" th:content="${video.thumbnailUrl}">
 
     <!-- Canonical URL -->
-    <link rel="canonical" th:href="'https://www.xlearning.top/video/' + ${video.videoId}">
+    <link rel="canonical" th:href="${pageUrl}">
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,6 +49,12 @@
         footer { margin-top: 40px; padding: 20px 0; text-align: center; color: #666; font-size: 14px; }
         .back-link { display: inline-block; margin-bottom: 20px; color: #4f46e5; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
+        .breadcrumb { color: #666; font-size: 14px; margin-bottom: 16px; }
+        .breadcrumb a { color: #4f46e5; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .source-link { display: inline-block; margin-top: 12px; color: #4f46e5; text-decoration: none; font-size: 14px; }
+        .source-link:hover { text-decoration: underline; }
+        .intro { color: #555; margin-bottom: 20px; line-height: 1.7; }
     </style>
 </head>
 <body>
@@ -59,12 +66,17 @@
     </header>
 
     <main class="container">
-        <a href="/video" class="back-link">&larr; Back to Video List</a>
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/">Home</a> &rsaquo;
+            <a href="/video">Videos</a> &rsaquo;
+            <span th:text="${video.title}">Video Title</span>
+        </nav>
 
         <article class="video-card">
             <img th:src="${video.thumbnailUrl}" th:alt="${video.title}" class="thumbnail">
             <div class="video-info">
                 <h1 th:text="${video.title}">Video Title</h1>
+                <p class="intro" th:text="${seoDescription}">Transcript description</p>
                 <div class="meta">
                     <span th:if="${video.channel}">Channel: <strong th:text="${video.channel}">Channel Name</strong></span>
                     <span th:if="${video.duration}">Duration: <strong th:text="${#numbers.formatInteger(video.duration / 60, 1)} + ' min'">10 min</strong></span>
@@ -73,6 +85,10 @@
                 <div class="description" th:if="${video.description}" th:text="${video.description}">
                     Video description goes here...
                 </div>
+                <a th:href="${youtubeUrl}" class="source-link" rel="noopener noreferrer" target="_blank">
+                    Watch original video on YouTube &rarr;
+                </a>
+                <br>
                 <a th:href="'/transcribe?videoId=' + ${video.videoId}" class="cta-button">
                     Start Learning with Interactive Transcript
                 </a>
@@ -98,17 +114,6 @@
     </footer>
 
     <!-- Structured Data for SEO -->
-    <script type="application/ld+json" th:inline="javascript">
-    {
-        "@context": "https://schema.org",
-        "@type": "VideoObject",
-        "name": [[${video.title}]],
-        "description": [[${video.description}]],
-        "thumbnailUrl": [[${video.thumbnailUrl}]],
-        "duration": [[${video.duration != null ? 'PT' + video.duration + 'S' : null}]],
-        "uploadDate": [[${video.createdAt}]],
-        "embedUrl": [["https://www.youtube.com/embed/" + ${video.videoId}]]
-    }
-    </script>
+    <script type="application/ld+json" th:utext="${jsonLd}"></script>
 </body>
 </html>

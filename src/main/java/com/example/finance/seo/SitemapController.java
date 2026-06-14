@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -24,12 +26,8 @@ public class SitemapController {
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
 
-        // 静态页面
+        // 仅包含可被搜索引擎索引的公开 SEO 页面
         xml.append(buildUrl("https://www.xlearning.top/", "daily", "1.0"));
-        xml.append(buildUrl("https://www.xlearning.top/dashboard/youtube", "daily", "0.9"));
-        xml.append(buildUrl("https://www.xlearning.top/dashboard/xiaohongshu", "daily", "0.8"));
-        xml.append(buildUrl("https://www.xlearning.top/shadowing", "weekly", "0.8"));
-        xml.append(buildUrl("https://www.xlearning.top/transcribe", "weekly", "0.8"));
         xml.append(buildUrl("https://www.xlearning.top/video", "daily", "0.9"));
 
         // 动态生成视频页面
@@ -37,14 +35,11 @@ public class SitemapController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         for (YoutubeVideo video : videos) {
-            String lastmod = video.getCompletedAt() != null
-                ? video.getCompletedAt().format(formatter)
-                : video.getCreatedAt().format(formatter);
             xml.append(buildUrlWithLastmod(
                 "https://www.xlearning.top/video/" + video.getVideoId(),
-                lastmod,
+                formatLastmod(video, formatter),
                 "weekly",
-                "0.7"
+                "0.8"
             ));
         }
 
@@ -64,5 +59,15 @@ public class SitemapController {
             "  <url>\n    <loc>%s</loc>\n    <lastmod>%s</lastmod>\n    <changefreq>%s</changefreq>\n    <priority>%s</priority>\n  </url>\n",
             loc, lastmod, changefreq, priority
         );
+    }
+
+    private String formatLastmod(YoutubeVideo video, DateTimeFormatter formatter) {
+        LocalDateTime timestamp = video.getCompletedAt() != null
+            ? video.getCompletedAt()
+            : video.getCreatedAt();
+        if (timestamp != null) {
+            return timestamp.format(formatter);
+        }
+        return LocalDate.now().format(formatter);
     }
 }
