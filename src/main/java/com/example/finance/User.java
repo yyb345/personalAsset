@@ -23,7 +23,8 @@ public class User {
     private String fullName;
 
     // OAuth2 相关字段
-    @Column(nullable = false)
+    // SQLite 无法给已有表添加无 DEFAULT 的 NOT NULL 列，必须带默认值
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'local' not null")
     private String provider = "local"; // local, google, github 等
 
     private String providerId; // 第三方平台的用户ID
