@@ -1,0 +1,19 @@
+# Local configuration and credentials
+/application-local.properties
+.env
+.env.*
+!.env.example
+
+# Runtime data and build output
+/finance.db
+/finance.db-*
+/downloads/
+/uploads/
+/target/
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.npm-cache/
+
+# Editor and OS files
+.idea/
+.DS_Store
