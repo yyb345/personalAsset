@@ -50,3 +50,6 @@ test-*.sh
 *.tmp
 *.temp
 *~
+
+# Local OAuth credentials
+application-local.properties
