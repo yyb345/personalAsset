@@ -130,19 +130,6 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        // 清除 Spring Security 认证信息
-        SecurityContextHolder.clearContext();
-        
-        // 使会话失效
-        session.invalidate();
-        
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "登出成功");
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/check")
     public ResponseEntity<?> checkAuth(HttpSession session) {
         Map<String, Object> response = new HashMap<>();

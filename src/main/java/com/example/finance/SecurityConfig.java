@@ -100,7 +100,12 @@ public class SecurityConfig {
             .httpBasic(basic -> basic.disable())
             .logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
-                .logoutSuccessUrl("/login.html")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(200);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"message\":\"登出成功\"}");
+                })
                 .permitAll()
             )
             .exceptionHandling(exception -> exception
