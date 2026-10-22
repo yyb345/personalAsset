@@ -261,6 +261,12 @@ build() {
 start_app() {
     print_info "========== 启动应用容器 =========="
 
+    # 在停止旧容器前检查运行时凭据，避免配置缺失导致服务中断
+    if [ ! -r /home/data/secrets/finance.env ]; then
+        print_error "OAuth 配置文件不存在或不可读: /home/data/secrets/finance.env"
+        exit 1
+    fi
+
     if [ ! -d "$DATA_DIR" ]; then
         print_info "创建数据目录: $DATA_DIR"
         mkdir -p "$DATA_DIR"
@@ -284,6 +290,7 @@ start_app() {
     print_info "启动应用容器..."
     if docker run \
         --name "$DOCKER_NAME" \
+        --env-file /home/data/secrets/finance.env \
         --network "$NETWORK_NAME" \
         -v "$DATA_DIR:/data" \
         -e TZ=Asia/Shanghai \
