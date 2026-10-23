@@ -2626,3 +2626,20 @@
     height: 180px;
   }
 }
+
+/* 游客锁定卡片：inert 同时阻止鼠标、键盘和辅助技术访问。 */
+.youtube-import-container .is-locked {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.guest-video-gate {
+  margin-top: var(--space-6);
+  text-align: center;
+}
+
+.guest-video-gate p {
+  margin-bottom: var(--space-4);
+  color: var(--gray-600);
+}

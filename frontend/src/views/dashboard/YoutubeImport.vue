@@ -93,6 +93,9 @@
               v-for="result in searchResults"
               :key="result.videoId"
               class="search-result-card"
+              :class="{ 'is-locked': isVideoLocked(result.videoId) }"
+              :inert="isVideoLocked(result.videoId)"
+              :aria-hidden="isVideoLocked(result.videoId) ? 'true' : undefined"
             >
               <div class="result-thumbnail" @click="goToVideo(result.videoId)">
                 <img v-if="result.thumbnailUrl" :src="result.thumbnailUrl" alt="thumbnail" />
@@ -155,9 +158,11 @@
         </div>
         <div v-else class="video-list">
           <div
-            v-for="video in myVideos"
+            v-for="(video, index) in myVideos"
             :key="video.id"
-            :class="['video-card', { 'is-pinned': video.pinned }]"
+            :class="['video-card', { 'is-pinned': video.pinned, 'is-locked': !isAuthenticated && index >= guestVideoLimit }]"
+            :inert="!isAuthenticated && index >= guestVideoLimit"
+            :aria-hidden="!isAuthenticated && index >= guestVideoLimit ? 'true' : undefined"
             @mouseenter="onCardHover(video, $event)"
             @mouseleave="onCardLeave"
           >
@@ -235,8 +240,13 @@
           </div>
         </div>
 
+        <div v-if="hasLockedVideos" class="guest-video-gate">
+          <p>{{ $t('youtube.guestPreview', { count: guestVideoLimit }) }}</p>
+          <button class="page-btn" @click="goToLogin">{{ $t('youtube.viewMore') }}</button>
+        </div>
+
         <!-- 分页控件 -->
-        <div v-if="totalPages > 1" class="pagination">
+        <div v-if="isAuthenticated && totalPages > 1" class="pagination">
           <button
             class="page-btn"
             @click="previousPage"
@@ -609,9 +619,13 @@
 </template>
 
 <script>
+import { checkAuth } from '@/utils/auth';
 import axios from '../../utils/axios';
 import { Pencil, Download, Trash2, BookOpen, NotebookPen, Pin } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
+
+// 游客预览数量统一在此配置，列表和搜索共用同一访问范围。
+const GUEST_VIDEO_LIMIT = 6;
 
 export default {
   name: 'YoutubeImport',
@@ -625,7 +639,7 @@ export default {
   },
   setup() {
     const { t } = useI18n();
-    return { t };
+    return { t, guestVideoLimit: GUEST_VIDEO_LIMIT };
   },
   data() {
     return {
@@ -639,6 +653,8 @@ export default {
       progressPercent: 0,
       progressText: 'Preparing...',
       
+      isAuthenticated: false,
+      authReady: false,
       myVideos: [],
       selectedVideo: null,
       videoSentences: [],
@@ -665,7 +681,6 @@ export default {
       mediaRecorder: null,
       audioChunks: [],
       isRecording: false,
-      canRecord: false,
       userAudioUrl: null,
       
       // 任务和结果
@@ -706,6 +721,18 @@ export default {
     };
   },
   computed: {
+    // 只检测浏览器能力；麦克风授权由用户点击录音时触发。
+    canRecord() {
+      return typeof navigator !== 'undefined'
+        && typeof navigator.mediaDevices?.getUserMedia === 'function'
+        && typeof MediaRecorder !== 'undefined';
+    },
+    guestVideoIds() {
+      return new Set(this.myVideos.slice(0, GUEST_VIDEO_LIMIT).map(video => video.videoId));
+    },
+    hasLockedVideos() {
+      return !this.isAuthenticated && this.totalElements > GUEST_VIDEO_LIMIT;
+    },
     incorrectWords() {
       if (!this.taskResult || !this.taskResult.results) return [];
       return this.taskResult.results.filter(r => r.status === 'incorrect');
@@ -730,8 +757,7 @@ export default {
     // 检查 URL 参数是否包含 debug=true
     this.isDebugMode = this.$route.query.debug === 'true';
     this.checkSystemStatus();
-    this.loadMyVideos();
-    this.checkMicrophonePermission();
+    this.initializeVideoAccess();
     this.loadYoutubeAPI();
     this.loadDownloadTasks();
     this.connectSSE();
@@ -763,6 +789,17 @@ export default {
     }
   },
   methods: {
+    async initializeVideoAccess() {
+      this.isAuthenticated = await checkAuth();
+      this.authReady = true;
+      await this.loadMyVideos(0);
+    },
+    goToLogin() {
+      this.$router.push('/login');
+    },
+    isVideoLocked(videoId) {
+      return !this.isAuthenticated && !this.guestVideoIds.has(videoId);
+    },
     async checkSystemStatus() {
       try {
         const response = await axios.get('/api/youtube/status');
@@ -774,6 +811,9 @@ export default {
     },
     
     async loadMyVideos(page = this.currentPage) {
+      if (!this.authReady) return;
+      // 游客始终停留首页，不能通过分页获得下一组免费预览。
+      if (!this.isAuthenticated) page = 0;
       try {
         const response = await axios.get('/api/youtube/videos', {
           params: {
@@ -811,6 +851,7 @@ export default {
     },
 
     goToPage(page) {
+      if (!this.isAuthenticated) return this.goToLogin();
       if (page >= 0 && page < this.totalPages) {
         this.loadMyVideos(page);
       }
@@ -1026,17 +1067,6 @@ export default {
       this.taskResult = null;
       this.isRecording = false;
       this.isPlayingStandard = false;
-    },
-    
-    async checkMicrophonePermission() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.canRecord = true;
-        stream.getTracks().forEach(track => track.stop());
-      } catch (error) {
-        console.error('麦克风权限获取失败:', error);
-        this.canRecord = false;
-      }
     },
     
     loadYoutubeAPI() {
@@ -1538,6 +1568,7 @@ export default {
     // ========== 笔记悬浮预览 ==========
 
     onCardHover(video, event) {
+      if (this.isVideoLocked(video.videoId)) return;
       if (this.noteHoverTimer) clearTimeout(this.noteHoverTimer);
       const cardEl = event.currentTarget;
       this.noteHoverTimer = setTimeout(() => {
@@ -1671,6 +1702,7 @@ export default {
     },
 
     goToVideo(videoId) {
+      if (this.isVideoLocked(videoId)) return this.goToLogin();
       this.$router.push({
         path: '/transcribe',
         query: { videoId: videoId }
@@ -1678,6 +1710,7 @@ export default {
     },
 
     goToVideoAtTime(videoId, startTime) {
+      if (this.isVideoLocked(videoId)) return this.goToLogin();
       this.$router.push({
         path: '/transcribe',
         query: { videoId: videoId, t: Math.floor(startTime) }

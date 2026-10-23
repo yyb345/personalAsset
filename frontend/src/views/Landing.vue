@@ -1,372 +1,94 @@
 <template>
   <div class="landing-page">
-    <!-- Navigation -->
-    <nav class="navbar">
-      <div class="nav-container">
-        <div class="nav-logo">
-          <div class="logo-icon">
-            <svg viewBox="0 0 90 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="90" height="20" rx="2" fill="#FF0000"/>
-              <text x="45" y="14" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">EE</text>
-            </svg>
-          </div>
-          <span class="logo-text">X Learning</span>
-        </div>
-        <ul class="nav-menu" :class="{ active: mobileMenuOpen }">
-          <li><a href="#features" @click="scrollTo('features')">Features</a></li>
-          <li><a href="#testimonials" @click="scrollTo('testimonials')">Testimonials</a></li>
-          <li><a href="#pricing" @click="scrollTo('pricing')">Pricing</a></li>
-        </ul>
-        <div class="nav-buttons">
-          <router-link to="/login" class="btn-secondary">Sign In</router-link>
-          <router-link to="/dashboard/youtube" class="btn-primary">Get Started</router-link>
-        </div>
-        <button class="mobile-menu-btn" @click="mobileMenuOpen = !mobileMenuOpen">☰</button>
-      </div>
-    </nav>
+    <header class="site-header">
+      <nav class="shell nav-bar" aria-label="主导航">
+        <router-link to="/" class="brand" aria-label="X Learning 首页"><span class="brand-mark">X<span></span></span>X Learning<span class="brand-dot">.</span></router-link>
+        <div class="desktop-nav"><a href="#directions">学习方向</a><a href="#workspace">学习体验</a><a href="#process">如何开始</a></div>
+        <div class="nav-actions"><router-link to="/login" class="sign-in">登录</router-link><router-link to="/dashboard/youtube" class="button small">开始学习 <ArrowUpRight :size="15" /></router-link><button class="menu-toggle" :aria-expanded="menuOpen" aria-controls="mobile-nav" :aria-label="menuOpen ? '关闭菜单' : '打开菜单'" @click="menuOpen = !menuOpen"><X v-if="menuOpen" :size="22"/><Menu v-else :size="22"/></button></div>
+      </nav>
+      <nav v-if="menuOpen" id="mobile-nav" class="mobile-nav" aria-label="移动导航"><a v-for="item in navigation" :key="item.id" :href="`#${item.id}`" @click="menuOpen = false">{{ item.label }}</a><router-link to="/login">登录账户</router-link></nav>
+    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1 class="hero-title">
-          <span class="gradient-text">Master English</span>
-          <br>Through Video Learning
-        </h1>
-        <p class="hero-subtitle">
-          AI-powered English learning platform for all levels.
-          <br>Learn from YouTube videos, practice pronunciation, and improve fluently.
-        </p>
-        <div class="hero-buttons">
-          <router-link to="/dashboard/youtube" class="btn-hero-primary">Start Learning</router-link>
-          <router-link to="/transcribe?videoId=rtuKId76DZI" class="btn-hero-secondary">Watch Demo</router-link>
+    <main>
+      <section class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="status-dot"></span> A NEW WAY TO LEARN</p>
+          <h1>学语言，<br>也学<span class="accent">未来。</span></h1>
+          <p class="hero-description">从英语表达，到 AI 探索。<br>在真实视频里发现知识，把每一次好奇，变成自己的能力。</p>
+          <div class="hero-actions"><router-link to="/dashboard/youtube" class="button">开启学习之旅 <ArrowUpRight :size="18"/></router-link><a href="#directions" class="text-link">探索学习方向 <ArrowDown :size="16"/></a></div>
+          <div class="hero-notes"><span><Check :size="14"/> 视频驱动学习</span><span><Check :size="14"/> 英语 × 人工智能</span><span><Check :size="14"/> 支持游客预览</span></div>
         </div>
-        <div class="hero-stats">
-          <div class="stat-item">
-            <div class="stat-number">1000+</div>
-            <div class="stat-label">Active Learners</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">10K+</div>
-            <div class="stat-label">Video Lessons</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">99.9%</div>
-            <div class="stat-label">Satisfaction Rate</div>
-          </div>
+        <div class="knowledge-visual" aria-label="英语与 AI 连接的知识轨道图" role="img">
+          <div class="visual-grid"></div><div class="orbit orbit-outer"></div><div class="orbit orbit-middle"></div><div class="orbit orbit-inner"></div>
+          <div class="orbital-line line-one"></div><div class="orbital-line line-two"></div>
+          <div class="core"><span class="core-cross">X</span><span>LEARNING CORE</span></div>
+          <div class="orbit-node node-language"><Languages :size="23"/><div><span>ENGLISH</span><strong>连接更大的世界</strong></div></div>
+          <div class="orbit-node node-ai"><Cpu :size="23"/><div><span>ARTIFICIAL INTELLIGENCE</span><strong>探索下一种可能</strong></div></div>
+          <span class="orbit-point point-one"></span><span class="orbit-point point-two"></span><span class="visual-caption">CURIOSITY → KNOWLEDGE → POSSIBILITY</span><span class="coordinate">XL / KNOWLEDGE NETWORK</span>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Features Section -->
-    <section class="features" id="features">
-      <div class="container">
-        <div class="section-header">
-          <h2>Powerful Features at Your Fingertips</h2>
-          <p>AI-driven learning tools to accelerate your English mastery</p>
-        </div>
-        <div class="features-grid">
-          <div class="feature-card" v-for="feature in features" :key="feature.icon">
-            <div class="feature-icon">{{ feature.icon }}</div>
-            <h3>{{ feature.title }}</h3>
-            <p>{{ feature.description }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
+      <div class="topic-strip"><div class="shell"><span>保持好奇，持续进化</span><span>ENGLISH</span><i>✳</i><span>ARTIFICIAL INTELLIGENCE</span><i>✳</i><span>VIDEO LEARNING</span><i>✳</i><span>CONNECT THE DOTS</span></div></div>
 
-    <!-- Testimonials Section -->
-    <section class="testimonials" id="testimonials">
-      <div class="container">
-        <div class="section-header">
-          <h2>What Our Students Say</h2>
+      <section id="directions" class="section shell">
+        <div class="section-heading"><div><p class="eyebrow">01 / EXPLORE</p><h2>两个方向，无限可能。</h2></div><p>用语言拓宽视野，用技术打开想象。<br>从你最感兴趣的地方开始。</p></div>
+        <div class="tracks">
+          <article v-for="track in tracks" :key="track.id" class="track" :class="track.id">
+            <div class="track-top"><span class="track-number">{{ track.number }} / LEARNING PATH</span><component :is="track.icon" :size="28" :stroke-width="1.3"/></div>
+            <p class="track-label">{{ track.label }}</p><h3>{{ track.title }}</h3><p class="track-description">{{ track.description }}</p>
+            <div class="track-tags"><span v-for="tag in track.tags" :key="tag">{{ tag }}</span></div>
+            <router-link to="/dashboard/youtube" class="track-link">{{ track.action }} <ArrowUpRight :size="20"/></router-link>
+          </article>
         </div>
-        <div class="testimonials-grid">
-          <div class="testimonial-card" v-for="testimonial in testimonials" :key="testimonial.name">
-            <div class="testimonial-content">
-              <p>{{ testimonial.content }}</p>
-            </div>
-            <div class="testimonial-author">
-              <div class="author-avatar">{{ testimonial.avatar }}</div>
-              <div class="author-info">
-                <div class="author-name">{{ testimonial.name }}</div>
-                <div class="author-title">{{ testimonial.title }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+        <p class="library-note"><Layers :size="14"/> 两个方向共用视频学习库，你可以通过字幕搜索寻找感兴趣的内容。</p>
+      </section>
 
-    <!-- Pricing Section -->
-    <section class="pricing" id="pricing">
-      <div class="container">
-        <div class="section-header">
-          <h2>Choose Your Learning Plan</h2>
-          <p>All plans include core features, upgrade anytime</p>
-        </div>
-        <div class="pricing-grid">
-          <div class="pricing-card" v-for="plan in pricingPlans" :key="plan.name" :class="{ 'pricing-featured': plan.featured }">
-            <div v-if="plan.featured" class="featured-badge">Popular</div>
-            <div class="pricing-header">
-              <h3>{{ plan.name }}</h3>
-              <div class="price">
-                <template v-if="plan.price !== null">
-                  <span class="price-currency">$</span>
-                  <span class="price-amount">{{ plan.price }}</span>
-                  <span class="price-period">/month</span>
-                </template>
-                <span v-else class="price-text">Contact Us</span>
-              </div>
-            </div>
-            <ul class="pricing-features">
-              <li v-for="feature in plan.features" :key="feature">✓ {{ feature }}</li>
-            </ul>
-            <router-link v-if="plan.link" :to="plan.link" class="pricing-btn">{{ plan.buttonText }}</router-link>
-            <a v-else href="#contact" class="pricing-btn">{{ plan.buttonText }}</a>
+      <section id="workspace" class="workspace-section">
+        <div class="shell workspace-layout">
+          <div class="workspace-copy"><p class="eyebrow">02 / LEARN DEEPLY</p><h2>不止于看过。<br>让知识真正留下来。</h2><p>把视频变成可以反复探索的学习材料。跟着字幕理解内容，定位关键片段，再用笔记整理自己的思考。</p><ul><li><Captions :size="20"/><div><h3>看懂每一个关键点</h3><p>结合视频与字幕，按照自己的节奏理解内容。</p></div></li><li><Search :size="20"/><div><h3>让问题找到上下文</h3><p>搜索字幕，回到知识出现的那一刻。</p></div></li><li><NotebookPen :size="20"/><div><h3>把输入变成自己的知识</h3><p>在学习工作台记录重点，连接新的想法。</p></div></li></ul></div>
+          <div class="workspace-demo">
+            <div class="demo-toolbar"><div class="window-dots"><i></i><i></i><i></i></div><span>XL / LEARNING WORKSPACE</span><span class="demo-label">体验示意</span></div>
+            <div class="demo-tabs" role="group" aria-label="切换学习示意"><button v-for="sample in samples" :key="sample.id" :class="{active: activeSample === sample.id}" :aria-pressed="activeSample === sample.id" @click="activeSample = sample.id"><component :is="sample.icon" :size="15"/>{{ sample.label }}</button></div>
+            <div class="demo-video"><div class="demo-grid"></div><span class="video-tag">{{ currentSample.category }}</span><div class="demo-center"><component :is="currentSample.icon" :size="42" :stroke-width="1"/><h3>{{ currentSample.title }}</h3><p>{{ currentSample.subtitle }}</p></div><span class="demo-play"><Play :size="12" fill="currentColor"/> VIDEO + TRANSCRIPT</span></div>
+            <div class="transcript"><span class="time-code">{{ currentSample.time }}</span><p>{{ currentSample.transcript }}</p><span class="transcript-line"></span></div>
+            <div class="demo-note"><NotebookPen :size="16"/><div><span>我的学习笔记</span><p>{{ currentSample.note }}</p></div><span class="note-indicator"></span></div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- How It Works Section -->
-    <section class="how-it-works" id="how-it-works">
-      <div class="container">
-        <div class="section-header">
-          <h2>How It Works</h2>
-          <p>Start learning English in 3 simple steps</p>
-        </div>
-        <div class="steps-grid">
-          <div class="step-card" v-for="(step, index) in howItWorks" :key="index">
-            <div class="step-number">{{ index + 1 }}</div>
-            <div class="step-icon">{{ step.icon }}</div>
-            <h3>{{ step.title }}</h3>
-            <p>{{ step.description }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
+      <section id="process" class="section shell">
+        <div class="section-heading"><div><p class="eyebrow">03 / YOUR NEXT STEP</p><h2>从好奇，到掌握。</h2></div><router-link to="/dashboard/youtube" class="text-link">现在就开始 <ArrowUpRight :size="17"/></router-link></div>
+        <div class="steps"><article v-for="step in steps" :key="step.number"><span>{{ step.number }}</span><h3>{{ step.title }}</h3><p>{{ step.description }}</p></article></div>
+      </section>
 
-    <!-- FAQ Section -->
-    <section class="faq" id="faq">
-      <div class="container">
-        <div class="section-header">
-          <h2>Frequently Asked Questions</h2>
-          <p>Everything you need to know about X Learning</p>
-        </div>
-        <div class="faq-list">
-          <div class="faq-item" v-for="(item, index) in faqs" :key="index">
-            <button class="faq-question" @click="toggleFaq(index)" :aria-expanded="openFaq === index">
-              <span>{{ item.question }}</span>
-              <span class="faq-toggle">{{ openFaq === index ? '−' : '+' }}</span>
-            </button>
-            <div class="faq-answer" v-show="openFaq === index">
-              <p>{{ item.answer }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      <section class="closing shell"><div class="closing-orbit" aria-hidden="true"></div><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>下一次突破，<br>从这一次学习开始。</h2><p>学好英语，探索 AI，构建属于你的知识世界。</p><router-link to="/dashboard/youtube" class="button">开始探索 <ArrowUpRight :size="18"/></router-link><span class="preview-note">游客可预览前 6 个视频 · 登录后浏览全部</span></section>
+    </main>
 
-    <!-- CTA Section -->
-    <section class="cta">
-      <div class="container">
-        <div class="cta-content">
-          <h2>Ready to Transform Your English?</h2>
-          <p>Join thousands of learners improving their skills every day</p>
-          <div class="cta-buttons">
-            <router-link to="/register" class="btn-cta-primary">Start Free</router-link>
-            <router-link to="/login" class="btn-cta-secondary">Already have an account? Sign In</router-link>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-grid">
-          <div class="footer-section">
-            <div class="footer-logo">
-              <div class="logo-icon">
-                <svg viewBox="0 0 90 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="90" height="20" rx="2" fill="#FF0000"/>
-                  <text x="45" y="14" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">EE</text>
-                </svg>
-              </div>
-              <span class="logo-text">X Learning</span>
-            </div>
-            <p class="footer-description">AI-powered English learning platform for everyone</p>
-          </div>
-          <div class="footer-section">
-            <h4>Product</h4>
-            <ul>
-              <li><a href="#features">Features</a></li>
-              <li><a href="#solutions">Solutions</a></li>
-              <li><a href="#pricing">Pricing</a></li>
-              <li><a href="#">Updates</a></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h4>Resources</h4>
-            <ul>
-              <li><a href="#">Help Center</a></li>
-              <li><a href="#">Documentation</a></li>
-              <li><a href="#">Video Tutorials</a></li>
-              <li><a href="#">API Docs</a></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h4>Company</h4>
-            <ul>
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Contact</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms of Service</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>&copy; 2025 X Learning. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
+    <footer class="shell site-footer"><div><router-link to="/" class="brand"><span class="brand-mark">X<span></span></span>X Learning<span class="brand-dot">.</span></router-link><p>学语言，也学未来。</p></div><div class="footer-links"><a href="#directions">学习方向</a><router-link to="/dashboard/youtube">视频学习库</router-link><router-link to="/login">登录</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { ArrowUpRight, ArrowDown, Check, Languages, Cpu, Layers, Captions, Search, NotebookPen, Play, Menu, X } from 'lucide-vue-next'
 
-const mobileMenuOpen = ref(false)
-const openFaq = ref(null)
-
-const toggleFaq = (index) => {
-  openFaq.value = openFaq.value === index ? null : index
-}
-
-const howItWorks = [
-  {
-    icon: '🔗',
-    title: 'Paste a YouTube Link',
-    description: 'Copy any YouTube video URL and paste it into X Learning. We support videos in any language with English content.'
-  },
-  {
-    icon: '⚡',
-    title: 'AI Generates Subtitles',
-    description: 'Our AI instantly transcribes the video and creates interactive subtitles with translations and word definitions.'
-  },
-  {
-    icon: '🎯',
-    title: 'Practice & Improve',
-    description: 'Use shadowing mode to practice pronunciation, repeat sentences, and track your progress over time.'
-  }
+const menuOpen = ref(false)
+const navigation = [{ id: 'directions', label: '学习方向' }, { id: 'workspace', label: '学习体验' }, { id: 'process', label: '如何开始' }]
+const tracks = [
+  { id: 'english', number: '01', icon: Languages, label: 'EXPRESS YOURSELF', title: '用英语，连接世界。', description: '从真实语境出发，听懂表达，练习跟读。在感兴趣的视频里，积累词汇与语感，让语言成为探索世界的工具。', tags: ['听力理解', '口语跟读', '真实语境'], action: '进入视频库，练习英语' },
+  { id: 'ai', number: '02', icon: Cpu, label: 'UNDERSTAND WHAT’S NEXT', title: '学 AI，打开未来。', description: '带着问题探索人工智能。通过视频、字幕和笔记，拆解新概念，理解新思路，把零散的信息整理为自己的知识。', tags: ['人工智能', '概念理解', '学习笔记'], action: '进入视频库，探索 AI' }
 ]
-
-const faqs = [
-  {
-    question: 'What is X Learning?',
-    answer: 'X Learning is an AI-powered English learning platform that helps you learn from YouTube videos. You can import any video, get AI-generated subtitles, practice pronunciation with shadowing, and track your progress.'
-  },
-  {
-    question: 'Is X Learning free to use?',
-    answer: 'Yes! X Learning offers a free Basic plan that includes 5 videos per month, basic pronunciation feedback, and standard subtitles. For unlimited access and advanced features, you can upgrade to our Pro plan.'
-  },
-  {
-    question: 'How does the shadowing feature work?',
-    answer: 'Shadowing is a language learning technique where you listen to a sentence and immediately repeat it. X Learning plays each sentence, records your voice, and uses AI to analyze your pronunciation, giving you instant feedback on accuracy and fluency.'
-  },
-  {
-    question: 'Can I use X Learning on my phone?',
-    answer: 'Absolutely! X Learning is fully responsive and works on desktop, tablet, and mobile devices. You can learn anywhere, anytime, on any device with an internet connection.'
-  },
-  {
-    question: 'What types of YouTube videos work best?',
-    answer: 'Any YouTube video with clear English speech works great. Popular choices include TED Talks, interviews, podcasts, movie clips, and educational content. Videos with one speaker and minimal background noise give the best results.'
-  }
+const samples = [
+  { id: 'english', icon: Languages, label: '英语学习', category: 'ENGLISH / LISTEN & UNDERSTAND', title: 'Ideas worth sharing.', subtitle: '在真实表达中，发现语言的力量', time: '00:24', transcript: 'Every great idea begins with a little curiosity.', note: 'curiosity：好奇心。记录表达，再试着用自己的话复述。' },
+  { id: 'ai', icon: Cpu, label: 'AI 探索', category: 'AI / EXPLORE & CONNECT', title: 'How does AI learn?', subtitle: '从一个问题出发，理解人工智能', time: '01:08', transcript: 'Neural networks learn patterns from examples.', note: '神经网络从样本中学习模式。继续思考：数据如何影响结果？' }
 ]
-
-const features = [
-  {
-    icon: '🎥',
-    title: 'YouTube Video Learning',
-    description: 'Learn from authentic YouTube content. Import any video and generate interactive learning materials instantly.'
-  },
-  {
-    icon: '🎙️',
-    title: 'AI Pronunciation Practice',
-    description: 'AI-powered speech recognition to practice and perfect your pronunciation with instant feedback.'
-  },
-  {
-    icon: '📝',
-    title: 'Smart Subtitles',
-    description: 'Interactive subtitles with translations, definitions, and context to help you understand every word.'
-  },
-  {
-    icon: '🔒',
-    title: 'Secure & Private',
-    description: 'Enterprise-grade security with multiple authentication layers. Your learning data is safe with us.'
-  },
-  {
-    icon: '📱',
-    title: 'Cross-Platform',
-    description: 'Perfect support for desktop and mobile devices. Learn anywhere, anytime, on any device.'
-  }
+const activeSample = ref('english')
+const currentSample = computed(() => samples.find(sample => sample.id === activeSample.value))
+const steps = [
+  { number: '01', title: '找到你的兴趣', description: '进入视频库，选择内容，或通过字幕搜索找到想了解的话题。' },
+  { number: '02', title: '按照自己的节奏探索', description: '结合视频和字幕学习，回看关键片段，让难点变得清晰。' },
+  { number: '03', title: '沉淀每一次收获', description: '练习表达，记录笔记，把看到的内容变成自己的理解。' }
 ]
-
-const testimonials = [
-  {
-    content: 'X Learning completely transformed my learning approach. The YouTube integration is brilliant – I can learn from content I actually enjoy watching. My speaking confidence has doubled in just 3 months!',
-    avatar: '👨‍💼',
-    name: 'David Chen',
-    title: 'Software Engineer'
-  },
-  {
-    content: 'As a beginner, this platform made learning English so much easier. The AI pronunciation feedback is incredibly helpful. I can now have basic conversations with confidence!',
-    avatar: '👩‍💻',
-    name: 'Maria Garcia',
-    title: 'Marketing Professional'
-  },
-  {
-    content: 'Our whole family uses this platform for learning. The interface is clean and intuitive, and the video library keeps growing. It\'s the best investment we\'ve made in education.',
-    avatar: '👨‍👩‍👧',
-    name: 'The Johnson Family',
-    title: 'Family Plan Users'
-  }
-]
-
-const pricingPlans = [
-  {
-    name: 'Basic',
-    price: 0,
-    features: ['5 videos per month', 'Basic pronunciation feedback', 'Standard subtitles', 'Mobile access', 'Community support'],
-    buttonText: 'Start Free',
-    link: '/register'
-  },
-  {
-    name: 'Pro',
-    price: 19,
-    featured: true,
-    features: ['Unlimited videos', 'Advanced AI feedback', 'Smart subtitles with translations', 'Offline mode', 'Progress tracking', 'Priority support'],
-    buttonText: 'Upgrade Now',
-    link: '/register'
-  },
-  {
-    name: 'Enterprise',
-    price: null,
-    features: ['All Pro features', 'Team management', 'Custom content', 'Dedicated account manager', 'API access', 'Private deployment'],
-    buttonText: 'Contact Sales',
-    link: null
-  }
-]
-
-const scrollTo = (id) => {
-  const element = document.getElementById(id)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
-  }
-  mobileMenuOpen.value = false
-}
 </script>
 
-<style scoped src="@/assets/styles/landing.css"></style>
-
-
+<style src="@/assets/styles/landing.css"></style>
