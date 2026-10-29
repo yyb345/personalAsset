@@ -1,0 +1,13 @@
+/* Shared visual language for public pages and the learning library. */
+:root {
+  --app-background: #f8fafc;
+  --app-surface: #ffffff;
+  --app-text: #0f172a;
+  --app-muted: #64748b;
+  --app-border: #e5e7eb;
+  --app-accent: #4f46e5;
+  --app-accent-hover: #4338ca;
+  --app-accent-soft: #eef2ff;
+  --app-radius: 12px;
+  --app-shadow: 0 4px 20px rgba(15, 23, 42, .04);
+}

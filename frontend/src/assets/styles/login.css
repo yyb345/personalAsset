@@ -1,0 +1,49 @@
+/* Login-only rules keep the separate registration page unaffected. */
+.auth-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 64px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--app-background);
+  color: var(--app-text);
+}
+.auth-page .login-container {
+  width: min(100%, 420px);
+  padding: 40px 32px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow);
+}
+.auth-page .login-brand { display: flex; justify-content: center; margin-bottom: 36px; }
+.auth-page .login-header { text-align: center; margin-bottom: 28px; }
+.auth-page .login-header h1 { font-size: 26px; font-weight: 600; margin-bottom: 10px; }
+.auth-page .login-header p { font-size: 14px; line-height: 1.7; color: var(--app-muted); }
+.auth-page .oauth-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color .2s, background .2s;
+}
+.auth-page .oauth-btn:hover { border-color: var(--app-accent); background: var(--app-accent-soft); }
+.auth-page .google-icon { flex-shrink: 0; }
+.auth-page .back-home { margin-top: 24px; font-size: 13px; }
+.auth-page .back-home a { color: var(--app-muted); text-decoration: none; }
+.auth-page .back-home a:hover { color: var(--app-accent); }
+.auth-page a:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 4px; }
+.auth-page .alert-error { padding: 12px; margin-bottom: 20px; border: 1px solid #fecaca; border-radius: 8px; color: #b91c1c; background: #fef2f2; font-size: 13px; }
+@media (max-width: 480px) {
+  .auth-page .login-container { padding: 32px 24px; }
+}

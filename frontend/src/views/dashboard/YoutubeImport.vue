@@ -48,8 +48,8 @@
         </div>
       </div>
 
-      <section class="learning-paths" :aria-label="$t('youtube.library.pathsTitle')">
-        <h2>{{ $t('youtube.library.pathsTitle') }}</h2>
+      <details class="learning-paths">
+        <summary>{{ $t('youtube.library.pathsTitle') }}</summary>
         <p class="library-help">{{ $t('youtube.library.pathsHint') }}</p>
         <div class="learning-path-grid">
           <button v-for="path in learningPaths" :key="path.id" class="learning-path-card"
@@ -60,16 +60,17 @@
             <small>{{ $t('youtube.library.pathCount', { count: pathCount(path) }) }}</small>
           </button>
         </div>
-      </section>
+      </details>
 
+      <!-- 我的视频列表 -->
+      <div class="my-videos-section">
+        <h2>{{ $t('youtube.myLibrary') }} <span v-if="totalElements > 0" class="total-count">({{ totalElements }} {{ $t('youtube.videoCount', { count: '' }).replace('{count}', '').trim() }})</span></h2>
       <!-- 字幕搜索区域 -->
       <div class="subtitle-search-section">
-        <div class="search-header">
-          <h2>{{ $t('youtube.search.title') }}</h2>
-        </div>
         <div class="search-input-wrapper">
           <span class="search-icon">🔍</span>
           <input
+            :aria-label="$t('youtube.search.title')"
             v-model="searchKeyword"
             type="text"
             :placeholder="$t('youtube.search.placeholder')"
@@ -164,9 +165,7 @@
         </div>
       </div>
 
-      <!-- 我的视频列表 -->
-      <div class="my-videos-section">
-        <h2>{{ $t('youtube.myLibrary') }} <span v-if="totalElements > 0" class="total-count">({{ totalElements }} {{ $t('youtube.videoCount', { count: '' }).replace('{count}', '').trim() }})</span></h2>
+
         <div class="library-filters">
           <div class="category-tabs" role="group" :aria-label="$t('youtube.library.category')">
             <button v-for="category in categories" :key="category" :class="{ active: filters.category === category }"

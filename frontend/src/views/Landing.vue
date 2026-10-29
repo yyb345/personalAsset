@@ -2,7 +2,7 @@
   <div class="landing-page">
     <header class="site-header">
       <nav class="shell nav-bar" aria-label="主导航">
-        <router-link to="/" class="brand" aria-label="X Learning 首页"><span class="brand-mark">X<span></span></span>X Learning<span class="brand-dot">.</span></router-link>
+        <BrandLogo />
         <div class="desktop-nav"><a href="#directions">学习方向</a><a href="#workspace">学习体验</a><a href="#process">如何开始</a></div>
         <div class="nav-actions"><router-link to="/login" class="sign-in">登录</router-link><router-link to="/dashboard/youtube" class="button small">开始学习 <ArrowUpRight :size="15" /></router-link><button class="menu-toggle" :aria-expanded="menuOpen" aria-controls="mobile-nav" :aria-label="menuOpen ? '关闭菜单' : '打开菜单'" @click="menuOpen = !menuOpen"><X v-if="menuOpen" :size="22"/><Menu v-else :size="22"/></button></div>
       </nav>
@@ -18,17 +18,16 @@
           <div class="hero-actions"><router-link to="/dashboard/youtube" class="button">开启学习之旅 <ArrowUpRight :size="18"/></router-link><a href="#directions" class="text-link">探索学习方向 <ArrowDown :size="16"/></a></div>
           <div class="hero-notes"><span><Check :size="14"/> 视频驱动学习</span><span><Check :size="14"/> 英语 × 人工智能</span><span><Check :size="14"/> 支持游客预览</span></div>
         </div>
-        <div class="knowledge-visual" aria-label="英语与 AI 连接的知识轨道图" role="img">
-          <div class="visual-grid"></div><div class="orbit orbit-outer"></div><div class="orbit orbit-middle"></div><div class="orbit orbit-inner"></div>
-          <div class="orbital-line line-one"></div><div class="orbital-line line-two"></div>
-          <div class="core"><span class="core-cross">X</span><span>LEARNING CORE</span></div>
-          <div class="orbit-node node-language"><Languages :size="23"/><div><span>ENGLISH</span><strong>连接更大的世界</strong></div></div>
-          <div class="orbit-node node-ai"><Cpu :size="23"/><div><span>ARTIFICIAL INTELLIGENCE</span><strong>探索下一种可能</strong></div></div>
-          <span class="orbit-point point-one"></span><span class="orbit-point point-two"></span><span class="visual-caption">CURIOSITY → KNOWLEDGE → POSSIBILITY</span><span class="coordinate">XL / KNOWLEDGE NETWORK</span>
-        </div>
+        <aside class="hero-library" aria-label="学习路线预览">
+          <div class="library-preview-heading"><span class="preview-icon"><NotebookPen :size="20" /></span><div><strong>给好奇心，一个清晰的方向</strong><p>从感兴趣的专题开始，按照自己的节奏学习</p></div></div>
+          <router-link v-for="(item, index) in previewTopics" :key="item.title" to="/dashboard/youtube" class="preview-topic">
+            <span class="topic-index">0{{ index + 1 }}</span><div><strong>{{ item.title }}</strong><p>{{ item.description }}</p></div><ArrowUpRight :size="17" />
+          </router-link>
+          <div class="preview-footer"><Check :size="15" /> 视频与字幕 <span>·</span> 跟读练习 <span>·</span> 学习笔记</div>
+        </aside>
       </section>
 
-      <div class="topic-strip"><div class="shell"><span>保持好奇，持续进化</span><span>ENGLISH</span><i>✳</i><span>ARTIFICIAL INTELLIGENCE</span><i>✳</i><span>VIDEO LEARNING</span><i>✳</i><span>CONNECT THE DOTS</span></div></div>
+
 
       <section id="directions" class="section shell">
         <div class="section-heading"><div><p class="eyebrow">01 / EXPLORE</p><h2>一个学习过程，两种收获。</h2></div><p>围绕 AI 内容建立知识框架，<br>在真实语境中积累英语表达。</p></div>
@@ -61,18 +60,24 @@
         <div class="steps"><article v-for="step in steps" :key="step.number"><span>{{ step.number }}</span><h3>{{ step.title }}</h3><p>{{ step.description }}</p></article></div>
       </section>
 
-      <section class="closing shell"><div class="closing-orbit" aria-hidden="true"></div><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>下一次突破，<br>从这一次学习开始。</h2><p>通过视频学 AI，在学习中练英语。</p><router-link to="/dashboard/youtube" class="button">开始探索 <ArrowUpRight :size="18"/></router-link><span class="preview-note">游客可预览前 6 个视频 · 登录后浏览全部</span></section>
+      <section class="closing shell"><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>下一次突破，<br>从这一次学习开始。</h2><p>通过视频学 AI，在学习中练英语。</p><router-link to="/dashboard/youtube" class="button">开始探索 <ArrowUpRight :size="18"/></router-link><span class="preview-note">游客可预览前 6 个视频 · 登录后浏览全部</span></section>
     </main>
 
-    <footer class="shell site-footer"><div><router-link to="/" class="brand"><span class="brand-mark">X<span></span></span>X Learning<span class="brand-dot">.</span></router-link><p>学 AI，也练英语。</p></div><div class="footer-links"><a href="#directions">学习方向</a><router-link to="/dashboard/youtube">视频学习库</router-link><router-link to="/login">登录</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
+    <footer class="shell site-footer"><div><BrandLogo /><p>学 AI，也练英语。</p></div><div class="footer-links"><a href="#directions">学习方向</a><router-link to="/dashboard/youtube">视频学习库</router-link><router-link to="/login">登录</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
+import BrandLogo from '@/components/BrandLogo.vue'
 import { ArrowUpRight, ArrowDown, Check, Languages, Cpu, Layers, Captions, Search, NotebookPen, Play, Menu, X } from 'lucide-vue-next'
 
 const menuOpen = ref(false)
+const previewTopics = [
+  { title: 'AI 基础与大模型', description: '建立概念框架，理解模型与技术表达' },
+  { title: '智能体与应用实践', description: '探索 Agent、工作流和实际应用' },
+  { title: '英语听力与职场表达', description: '在真实视频中积累词汇，练习复述' }
+]
 const navigation = [{ id: 'directions', label: '学习方向' }, { id: 'workspace', label: '学习体验' }, { id: 'process', label: '如何开始' }]
 const tracks = [
   { id: 'english', number: '01', icon: Languages, label: 'EXPRESS YOURSELF', title: '用英语，连接世界。', description: '从真实语境出发，听懂表达，练习跟读。在感兴趣的视频里，积累词汇与语感，让语言成为探索世界的工具。', tags: ['听力理解', '口语跟读', '真实语境'], action: '进入视频库，练习英语' },

@@ -19,6 +19,7 @@
     ></div>
 
     <aside class="sidebar" :class="{ active: sidebarOpen }">
+      <div class="sidebar-brand"><BrandLogo /></div>
       <!-- 用户信息区域 - 小红书风格 -->
       <div class="user-profile-card">
         <div class="profile-header">
@@ -109,6 +110,7 @@
 </template>
 
 <script setup>
+import BrandLogo from '@/components/BrandLogo.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -310,3 +312,7 @@ const loadVideoLibraryCount = async () => {
 <style scoped src="@/assets/styles/dashboard.css"></style>
 
 
+
+<style scoped>
+.sidebar-brand { padding: 24px 20px 0; }
+</style>

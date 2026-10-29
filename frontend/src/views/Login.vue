@@ -1,16 +1,7 @@
 <template>
   <div class="auth-page">
-    <div class="background-orbs">
-      <div class="gradient-orb orb-1"></div>
-      <div class="gradient-orb orb-2"></div>
-      <div class="gradient-orb orb-3"></div>
-    </div>
-
     <div class="login-container">
-      <router-link to="/" class="logo-link">
-        <span class="logo-icon">📚</span>
-        <span class="logo-text">X Learning</span>
-      </router-link>
+      <div class="login-brand"><BrandLogo /></div>
       <div class="login-header">
         <h1>{{ $t('auth.welcomeBack') }}</h1>
         <p>{{ $t('auth.signInContinue') }}</p>
@@ -43,6 +34,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import BrandLogo from '@/components/BrandLogo.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { checkAuth } from '@/utils/auth'
@@ -74,6 +66,6 @@ onMounted(async () => {
 
 </script>
 
-<style scoped src="@/assets/styles/auth.css"></style>
+<style src="@/assets/styles/login.css"></style>
 
 
