@@ -16,43 +16,8 @@
         <p>{{ $t('auth.signInContinue') }}</p>
       </div>
 
-      <div v-if="alertMessage" :class="['alert', `alert-${alertType}`]">
+      <div v-if="alertMessage" class="alert alert-error" role="alert">
         {{ alertMessage }}
-      </div>
-
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label for="username">{{ $t('auth.username') }}</label>
-          <input
-            type="text"
-            id="username"
-            v-model="form.username"
-            required
-            autocomplete="username"
-            :placeholder="$t('auth.enterUsername')"
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="password">{{ $t('auth.password') }}</label>
-          <input
-            type="password"
-            id="password"
-            v-model="form.password"
-            required
-            autocomplete="current-password"
-            :placeholder="$t('auth.enterPassword')"
-          >
-        </div>
-
-        <button type="submit" class="btn-login" :disabled="loading">
-          {{ loading ? $t('auth.signingIn') : $t('auth.signIn') }}
-        </button>
-      </form>
-
-      <!-- OAuth2 分隔线 -->
-      <div class="oauth-divider">
-        <span>{{ $t('auth.orContinueWith') }}</span>
       </div>
 
       <!-- OAuth2 登录按钮 -->
@@ -68,9 +33,6 @@
         </a>
       </div>
 
-      <div class="login-footer">
-        {{ $t('auth.noAccount') }} <router-link to="/register">{{ $t('auth.signUp') }}</router-link>
-      </div>
     </div>
 
     <div class="back-home">
@@ -83,18 +45,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { login, checkAuth } from '@/utils/auth'
+import { checkAuth } from '@/utils/auth'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
-const form = ref({
-  username: '',
-  password: ''
-})
-const loading = ref(false)
 const alertMessage = ref('')
-const alertType = ref('error')
 
 // OAuth2 Google 登录 URL（直接指向后端）
 const googleLoginUrl = computed(() => {
@@ -106,40 +62,16 @@ const googleLoginUrl = computed(() => {
 onMounted(async () => {
   // 检查 URL 中是否有 OAuth2 错误参数
   if (route.query.error === 'oauth2') {
-    showAlert(t('auth.oauth2Failed'))
+    alertMessage.value = t('auth.oauth2Failed')
   }
 
   // 检查是否已登录
   const isAuthenticated = await checkAuth()
   if (isAuthenticated) {
-    router.push('/dashboard')
+    router.replace('/dashboard')
   }
 })
 
-const showAlert = (message, type = 'error') => {
-  alertMessage.value = message
-  alertType.value = type
-  if (type !== 'success') {
-    setTimeout(() => {
-      alertMessage.value = ''
-    }, 5000)
-  }
-}
-
-const handleLogin = async () => {
-  loading.value = true
-  try {
-    await login(form.value.username, form.value.password)
-    showAlert(t('auth.loginSuccess'), 'success')
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 1000)
-  } catch (error) {
-    showAlert(error.response?.data?.message || t('auth.loginFailed'))
-  } finally {
-    loading.value = false
-  }
-}
 </script>
 
 <style scoped src="@/assets/styles/auth.css"></style>

@@ -61,7 +61,7 @@ export default {
   youtube: {
     guestPreview: 'Guests can preview the first {count} videos. Sign in to view all videos.',
     viewMore: 'View more',
-    title: 'AI-powered YouTube Shadowing',
+    title: 'Curated YouTube AI Videos',
     subtitle: 'Turn any YouTube video into intelligent English shadowing practice',
     pasteHint: 'Paste a YouTube link. We\'ll generate shadowing practice instantly.',
     generatePractice: 'Generate Practice',
@@ -208,7 +208,7 @@ export default {
     },
 
     search: {
-      title: 'Search Subtitles',
+      title: 'Search Videos',
       placeholder: 'Search keywords in video subtitles...',
       search: 'Search',
       searching: 'Searching...',

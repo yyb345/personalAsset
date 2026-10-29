@@ -61,7 +61,7 @@ export default {
   youtube: {
     guestPreview: '游客可预览前 {count} 个视频，登录后查看全部视频。',
     viewMore: '查看更多',
-    title: 'AI 驱动的 YouTube 跟读练习',
+    title: 'YouTube精品AI视频',
     subtitle: '将任何 YouTube 视频转化为智能英语跟读练习',
     pasteHint: '粘贴 YouTube 链接，我们将立即生成跟读练习',
     generatePractice: '生成练习',
@@ -208,7 +208,7 @@ export default {
     },
 
     search: {
-      title: '搜索字幕',
+      title: '搜索视频',
       placeholder: '在视频字幕中搜索关键词...',
       search: '搜索',
       searching: '搜索中...',
