@@ -48,7 +48,7 @@ export default {
   dashboard: {
     studyDays: 'Study Days',
     library: 'Library',
-    youtubeVideos: 'YouTube Videos',
+    youtubeVideos: 'AI & English Learning',
     xiaohongshuVideos: 'Xiaohongshu Videos',
     profile: {
       bio: 'Love learning, improve every day ✨',
@@ -59,10 +59,76 @@ export default {
   },
 
   youtube: {
+    library: {
+      "pathsTitle": "Curated topics · Learn in sequence",
+      "pathsHint": "Hand-picked from the production library in a suggested order. Only ready videos are recommended.",
+      "pathCount": "{count} videos · Filter topic",
+      "category": "Category",
+      "difficulty": "Content difficulty",
+      "duration": "Duration",
+      "reset": "View all / Reset",
+      "loading": "Loading video library…",
+      "loadFailed": "Unable to load the video library. Please retry.",
+      "retry": "Retry",
+      "noMatches": "No videos match these filters yet. Reset filters or explore another topic.",
+      "metadataHint": "Existing videos are classified from production titles; new videos use title-based rules. Unconfirmed difficulty stays unlabelled. Goals are based on titles.",
+      "learnGoal": "Learning goal:",
+      "suggestedGoal": "Suggested goal:",
+      "categories": {
+            "all": "All",
+            "basics": "AI fundamentals",
+            "models": "Language models",
+            "agents": "AI agents",
+            "applications": "Applications",
+            "english": "English practice",
+            "other": "Uncategorised",
+            "business": "Business & startups",
+            "technology": "Programming & computing",
+            "japanese": "Japanese practice"
+      },
+      "levels": {
+            "all": "All levels",
+            "easy": "Beginner",
+            "medium": "Intermediate",
+            "hard": "Advanced",
+            "unknown": "Unlabelled"
+      },
+      "durations": {
+            "all": "Any duration",
+            "short": "Up to 10 minutes",
+            "medium": "10–20 minutes",
+            "long": "Over 20 minutes"
+      },
+      "paths": {
+            "foundations": {
+                  "title": "From AI fundamentals to models",
+                  "description": "Build a conceptual foundation, then explore language models and technical English."
+            },
+            "building": {
+                  "title": "From agents to applications",
+                  "description": "Explore agents before workflows and applications. Capture implementation ideas in notes."
+            },
+            "english": {
+                  "title": "Build listening and everyday English",
+                  "description": "Practise listening, shadowing and retelling with everyday videos before technical content."
+            }
+      },
+      "objectives": {
+            "basics": "Map key concepts, collect English terms and explain them in your own words.",
+            "models": "Organise model concepts and use transcripts to understand technical expressions.",
+            "agents": "Identify the main parts of an agent and note questions and implementation ideas.",
+            "applications": "Record the steps and consider how to apply them in your own work.",
+            "english": "Collect everyday expressions, shadow key sentences and retell the ideas.",
+            "other": "Note three key ideas and collect vocabulary and questions from the transcript.",
+            "business": "Map business ideas and cases, and note assumptions to test.",
+            "technology": "Record key computing concepts and questions using the transcript.",
+            "japanese": "Collect Japanese vocabulary and everyday expressions, then practise retelling."
+      }
+},
     guestPreview: 'Guests can preview the first {count} videos. Sign in to view all videos.',
     viewMore: 'View more',
     title: 'Curated YouTube AI Videos',
-    subtitle: 'Turn any YouTube video into intelligent English shadowing practice',
+    subtitle: 'Learn AI through quality videos. Build your English with transcripts, shadowing and study notes.',
     pasteHint: 'Paste a YouTube link. We\'ll generate shadowing practice instantly.',
     generatePractice: 'Generate Practice',
     analyzing: 'Analyzing video',
@@ -72,7 +138,7 @@ export default {
     systemNotReady: 'System not ready: yt-dlp not installed',
     installHint: 'Please install yt-dlp on the server',
 
-    myLibrary: 'My Library',
+    myLibrary: 'Learning Library',
     videoCount: '{count} videos',
     noVideos: 'No videos yet',
 

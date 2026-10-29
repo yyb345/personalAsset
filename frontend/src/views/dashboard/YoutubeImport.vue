@@ -48,6 +48,20 @@
         </div>
       </div>
 
+      <section class="learning-paths" :aria-label="$t('youtube.library.pathsTitle')">
+        <h2>{{ $t('youtube.library.pathsTitle') }}</h2>
+        <p class="library-help">{{ $t('youtube.library.pathsHint') }}</p>
+        <div class="learning-path-grid">
+          <button v-for="path in learningPaths" :key="path.id" class="learning-path-card"
+            :class="{ active: filters.path === path.id }" :aria-pressed="filters.path === path.id"
+            @click="selectPath(path.id)">
+            <strong>{{ $t('youtube.library.paths.' + path.id + '.title') }}</strong>
+            <span>{{ $t('youtube.library.paths.' + path.id + '.description') }}</span>
+            <small>{{ $t('youtube.library.pathCount', { count: pathCount(path) }) }}</small>
+          </button>
+        </div>
+      </section>
+
       <!-- 字幕搜索区域 -->
       <div class="subtitle-search-section">
         <div class="search-header">
@@ -153,16 +167,38 @@
       <!-- 我的视频列表 -->
       <div class="my-videos-section">
         <h2>{{ $t('youtube.myLibrary') }} <span v-if="totalElements > 0" class="total-count">({{ totalElements }} {{ $t('youtube.videoCount', { count: '' }).replace('{count}', '').trim() }})</span></h2>
-        <div v-if="myVideos.length === 0" class="empty-state">
-          <p>{{ $t('youtube.noVideos') }}</p>
+        <div class="library-filters">
+          <div class="category-tabs" role="group" :aria-label="$t('youtube.library.category')">
+            <button v-for="category in categories" :key="category" :class="{ active: filters.category === category }"
+              :aria-pressed="filters.category === category" @click="filters.category = category; filters.path = ''">
+              {{ $t('youtube.library.categories.' + category) }}
+            </button>
+          </div>
+          <div class="library-filter-options">
+            <label>{{ $t('youtube.library.difficulty') }}
+              <select v-model="filters.difficulty"><option v-for="level in ['all', 'easy', 'medium', 'hard', 'unknown']" :key="level" :value="level">{{ $t('youtube.library.levels.' + level) }}</option></select>
+            </label>
+            <label>{{ $t('youtube.library.duration') }}
+              <select v-model="filters.duration"><option v-for="length in ['all', 'short', 'medium', 'long']" :key="length" :value="length">{{ $t('youtube.library.durations.' + length) }}</option></select>
+            </label>
+            <button class="page-btn" @click="resetFilters">{{ $t('youtube.library.reset') }}</button>
+          </div>
+          <p class="library-help">{{ $t('youtube.library.metadataHint') }}</p>
+        </div>
+        <div v-if="catalogLoading" class="empty-state" role="status">{{ $t('youtube.library.loading') }}</div>
+        <div v-else-if="catalogError" class="empty-state" role="alert">
+          <p>{{ $t('youtube.library.loadFailed') }}</p><button class="page-btn" @click="loadMyVideos(currentPage)">{{ $t('youtube.library.retry') }}</button>
+        </div>
+        <div v-else-if="myVideos.length === 0" class="empty-state">
+          <p>{{ $t('youtube.library.noMatches') }}</p><button class="page-btn" @click="resetFilters">{{ $t('youtube.library.reset') }}</button>
         </div>
         <div v-else class="video-list">
           <div
             v-for="(video, index) in myVideos"
             :key="video.id"
-            :class="['video-card', { 'is-pinned': video.pinned, 'is-locked': !isAuthenticated && index >= guestVideoLimit }]"
-            :inert="!isAuthenticated && index >= guestVideoLimit"
-            :aria-hidden="!isAuthenticated && index >= guestVideoLimit ? 'true' : undefined"
+            :class="['video-card', { 'is-pinned': video.pinned, 'is-locked': isVideoLocked(video.videoId) }]"
+            :inert="isVideoLocked(video.videoId)"
+            :aria-hidden="isVideoLocked(video.videoId) ? 'true' : undefined"
             @mouseenter="onCardHover(video, $event)"
             @mouseleave="onCardLeave"
           >
@@ -172,6 +208,7 @@
             </div>
             <div class="video-info" @click="viewVideoDetails(video)">
               <h3 class="video-title">
+                <span v-if="filters.path" class="pin-badge">{{ currentPage * pageSize + index + 1 }}.</span>
                 <span v-if="video.pinned" class="pin-badge">📌</span>
                 {{ video.title || 'Loading...' }}
               </h3>
@@ -179,6 +216,11 @@
                 <span class="channel">{{ video.channel }}</span>
                 <span class="duration">{{ formatDuration(video.duration) }}</span>
               </div>
+              <div class="video-learning-tags">
+                <span>{{ $t('youtube.library.categories.' + video.category) }}</span>
+                <span>{{ $t('youtube.library.levels.' + video.difficulty) }}</span>
+              </div>
+              <p class="video-learning-objective"><strong>{{ $t(video.objective ? 'youtube.library.learnGoal' : 'youtube.library.suggestedGoal') }}</strong> {{ videoObjective(video) }}</p>
               <div class="video-status-row">
                 <div class="video-status">
                   <span :class="['status-badge', video.status]">
@@ -246,7 +288,7 @@
         </div>
 
         <!-- 分页控件 -->
-        <div v-if="isAuthenticated && totalPages > 1" class="pagination">
+        <div v-if="totalPages > 1" class="pagination">
           <button
             class="page-btn"
             @click="previousPage"
@@ -619,6 +661,7 @@
 </template>
 
 <script>
+import { categories, learningPaths, enrichVideo, filterVideos } from '@/features/video-library/catalog';
 import { checkAuth } from '@/utils/auth';
 import axios from '../../utils/axios';
 import { Pencil, Download, Trash2, BookOpen, NotebookPen, Pin } from 'lucide-vue-next';
@@ -639,7 +682,7 @@ export default {
   },
   setup() {
     const { t } = useI18n();
-    return { t, guestVideoLimit: GUEST_VIDEO_LIMIT };
+    return { t, guestVideoLimit: GUEST_VIDEO_LIMIT, categories, learningPaths };
   },
   data() {
     return {
@@ -655,17 +698,16 @@ export default {
       
       isAuthenticated: false,
       authReady: false,
-      myVideos: [],
+      catalog: [],
+      catalogLoading: true,
+      catalogError: false,
+      filters: { category: 'all', difficulty: 'all', duration: 'all', path: '' },
       selectedVideo: null,
       videoSentences: [],
 
       // 分页相关
       currentPage: 0,
-      totalPages: 0,
       pageSize: 9,
-      totalElements: 0,
-      hasNext: false,
-      hasPrevious: false,
       
       pollInterval: null,
       videoListPollInterval: null, // 新增：视频列表轮询定时器
@@ -721,6 +763,18 @@ export default {
     };
   },
   computed: {
+    filteredVideos() {
+      return filterVideos(this.catalog, this.filters);
+    },
+    myVideos() {
+      const start = this.currentPage * this.pageSize;
+      return this.filteredVideos.slice(start, start + this.pageSize);
+    },
+    totalElements() { return this.filteredVideos.length; },
+    totalPages() { return Math.ceil(this.totalElements / this.pageSize); },
+    hasNext() { return this.currentPage + 1 < this.totalPages; },
+    hasPrevious() { return this.currentPage > 0; },
+
     // 只检测浏览器能力；麦克风授权由用户点击录音时触发。
     canRecord() {
       return typeof navigator !== 'undefined'
@@ -728,10 +782,10 @@ export default {
         && typeof MediaRecorder !== 'undefined';
     },
     guestVideoIds() {
-      return new Set(this.myVideos.slice(0, GUEST_VIDEO_LIMIT).map(video => video.videoId));
+      return new Set(this.catalog.filter(video => video.previewAllowed).map(video => video.videoId));
     },
     hasLockedVideos() {
-      return !this.isAuthenticated && this.totalElements > GUEST_VIDEO_LIMIT;
+      return !this.isAuthenticated && this.filteredVideos.some(video => !video.previewAllowed);
     },
     incorrectWords() {
       if (!this.taskResult || !this.taskResult.results) return [];
@@ -752,6 +806,9 @@ export default {
       }
       return pages;
     }
+  },
+  watch: {
+    filters: { deep: true, handler() { this.currentPage = 0; } }
   },
   mounted() {
     // 检查 URL 参数是否包含 debug=true
@@ -812,28 +869,35 @@ export default {
     
     async loadMyVideos(page = this.currentPage) {
       if (!this.authReady) return;
-      // 游客始终停留首页，不能通过分页获得下一组免费预览。
-      if (!this.isAuthenticated) page = 0;
       try {
-        const response = await axios.get('/api/youtube/videos', {
-          params: {
-            page: page,
-            size: this.pageSize
-          }
-        });
-        const data = response.data;
-        // 兼容两种返回格式：分页格式 { content, totalElements, ... } 或 直接数组
-        const list = Array.isArray(data.content) ? data.content : (Array.isArray(data) ? data : []);
-        this.myVideos = list.map((v) => this.normalizeVideoItem(v));
-        this.currentPage = typeof data.currentPage === 'number' ? data.currentPage : (data.number ?? 0);
-        this.totalPages = typeof data.totalPages === 'number' ? data.totalPages : (list.length > 0 ? 1 : 0);
-        this.totalElements = typeof data.totalElements === 'number' ? data.totalElements : list.length;
-        this.hasNext = Boolean(data.hasNext);
-        this.hasPrevious = Boolean(data.hasPrevious);
+        const response = await axios.get('/api/youtube/catalog');
+        const list = Array.isArray(response.data) ? response.data : [];
+        this.catalog = list.map((video, index) => enrichVideo({
+          ...this.normalizeVideoItem(video),
+          difficultyLevel: video.difficultyLevel,
+          previewAllowed: index < GUEST_VIDEO_LIMIT
+        }));
+        this.currentPage = Math.max(0, Math.min(page, this.totalPages - 1));
+        this.catalogError = false;
       } catch (error) {
         console.error('加载视频列表失败:', error);
-        this.myVideos = [];
+        this.catalogError = true;
+      } finally {
+        this.catalogLoading = false;
       }
+    },
+    resetFilters() {
+      this.filters = { category: 'all', difficulty: 'all', duration: 'all', path: '' };
+    },
+    selectPath(path) {
+      this.filters = { category: 'all', difficulty: 'all', duration: 'all', path: this.filters.path === path ? '' : path };
+    },
+    pathCount(path) {
+      return filterVideos(this.catalog, { category: 'all', difficulty: 'all', duration: 'all', path: path.id }).length;
+    },
+    videoObjective(video) {
+      return video.objective?.[this.$i18n.locale] || video.objective?.['zh-CN']
+        || this.t('youtube.library.objectives.' + video.category);
     },
     normalizeVideoItem(v) {
       if (!v || typeof v !== 'object') return {};
@@ -851,7 +915,6 @@ export default {
     },
 
     goToPage(page) {
-      if (!this.isAuthenticated) return this.goToLogin();
       if (page >= 0 && page < this.totalPages) {
         this.loadMyVideos(page);
       }
@@ -1311,7 +1374,7 @@ export default {
         await axios.delete(`/api/youtube/videos/${videoId}`);
 
         // 从列表中移除
-        this.myVideos = this.myVideos.filter(v => v.id !== videoId);
+        this.catalog = this.catalog.filter(v => v.id !== videoId);
 
         // 如果当前正在查看这个视频的详情，返回列表
         if (this.selectedVideo && this.selectedVideo.id === videoId) {

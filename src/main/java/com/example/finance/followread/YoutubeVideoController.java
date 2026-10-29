@@ -152,6 +152,12 @@ public class YoutubeVideoController {
     /**
      * 获取所有视频（供所有用户学习，支持分页）
      */
+    @GetMapping("/catalog")
+    public ResponseEntity<?> getCatalog() {
+        // Reuse the library order so guest preview and pinning remain consistent.
+        return ResponseEntity.ok(youtubeVideoService.getAllVideosPaged(0, Integer.MAX_VALUE).getContent());
+    }
+
     @GetMapping("/videos")
     public ResponseEntity<?> getAllVideos(
             @RequestParam(defaultValue = "0") int page,

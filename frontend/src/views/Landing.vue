@@ -13,8 +13,8 @@
       <section class="hero shell">
         <div class="hero-copy">
           <p class="eyebrow"><span class="status-dot"></span> A NEW WAY TO LEARN</p>
-          <h1>学语言，<br>也学<span class="accent">未来。</span></h1>
-          <p class="hero-description">从英语表达，到 AI 探索。<br>在真实视频里发现知识，把每一次好奇，变成自己的能力。</p>
+          <h1>学 AI，<br>也练<span class="accent">英语。</span></h1>
+          <p class="hero-description">通过优质视频理解人工智能。<br>结合英文字幕、跟读与笔记，学知识，也提升英语能力。</p>
           <div class="hero-actions"><router-link to="/dashboard/youtube" class="button">开启学习之旅 <ArrowUpRight :size="18"/></router-link><a href="#directions" class="text-link">探索学习方向 <ArrowDown :size="16"/></a></div>
           <div class="hero-notes"><span><Check :size="14"/> 视频驱动学习</span><span><Check :size="14"/> 英语 × 人工智能</span><span><Check :size="14"/> 支持游客预览</span></div>
         </div>
@@ -31,7 +31,7 @@
       <div class="topic-strip"><div class="shell"><span>保持好奇，持续进化</span><span>ENGLISH</span><i>✳</i><span>ARTIFICIAL INTELLIGENCE</span><i>✳</i><span>VIDEO LEARNING</span><i>✳</i><span>CONNECT THE DOTS</span></div></div>
 
       <section id="directions" class="section shell">
-        <div class="section-heading"><div><p class="eyebrow">01 / EXPLORE</p><h2>两个方向，无限可能。</h2></div><p>用语言拓宽视野，用技术打开想象。<br>从你最感兴趣的地方开始。</p></div>
+        <div class="section-heading"><div><p class="eyebrow">01 / EXPLORE</p><h2>一个学习过程，两种收获。</h2></div><p>围绕 AI 内容建立知识框架，<br>在真实语境中积累英语表达。</p></div>
         <div class="tracks">
           <article v-for="track in tracks" :key="track.id" class="track" :class="track.id">
             <div class="track-top"><span class="track-number">{{ track.number }} / LEARNING PATH</span><component :is="track.icon" :size="28" :stroke-width="1.3"/></div>
@@ -40,7 +40,7 @@
             <router-link to="/dashboard/youtube" class="track-link">{{ track.action }} <ArrowUpRight :size="20"/></router-link>
           </article>
         </div>
-        <p class="library-note"><Layers :size="14"/> 两个方向共用视频学习库，你可以通过字幕搜索寻找感兴趣的内容。</p>
+        <p class="library-note"><Layers :size="14"/> 从 AI 基础、大模型到智能体与应用，按专题学习；也可先从英语练习开始。</p>
       </section>
 
       <section id="workspace" class="workspace-section">
@@ -61,10 +61,10 @@
         <div class="steps"><article v-for="step in steps" :key="step.number"><span>{{ step.number }}</span><h3>{{ step.title }}</h3><p>{{ step.description }}</p></article></div>
       </section>
 
-      <section class="closing shell"><div class="closing-orbit" aria-hidden="true"></div><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>下一次突破，<br>从这一次学习开始。</h2><p>学好英语，探索 AI，构建属于你的知识世界。</p><router-link to="/dashboard/youtube" class="button">开始探索 <ArrowUpRight :size="18"/></router-link><span class="preview-note">游客可预览前 6 个视频 · 登录后浏览全部</span></section>
+      <section class="closing shell"><div class="closing-orbit" aria-hidden="true"></div><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>下一次突破，<br>从这一次学习开始。</h2><p>通过视频学 AI，在学习中练英语。</p><router-link to="/dashboard/youtube" class="button">开始探索 <ArrowUpRight :size="18"/></router-link><span class="preview-note">游客可预览前 6 个视频 · 登录后浏览全部</span></section>
     </main>
 
-    <footer class="shell site-footer"><div><router-link to="/" class="brand"><span class="brand-mark">X<span></span></span>X Learning<span class="brand-dot">.</span></router-link><p>学语言，也学未来。</p></div><div class="footer-links"><a href="#directions">学习方向</a><router-link to="/dashboard/youtube">视频学习库</router-link><router-link to="/login">登录</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
+    <footer class="shell site-footer"><div><router-link to="/" class="brand"><span class="brand-mark">X<span></span></span>X Learning<span class="brand-dot">.</span></router-link><p>学 AI，也练英语。</p></div><div class="footer-links"><a href="#directions">学习方向</a><router-link to="/dashboard/youtube">视频学习库</router-link><router-link to="/login">登录</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
   </div>
 </template>
 

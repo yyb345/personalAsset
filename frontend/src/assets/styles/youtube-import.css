@@ -2643,3 +2643,57 @@
   margin-bottom: var(--space-4);
   color: var(--gray-600);
 }
+
+/* Discovery controls are scoped to the library, independent of video actions. */
+.youtube-import-container .learning-paths {
+  margin-bottom: 28px;
+}
+.youtube-import-container .learning-paths h2 {
+  font-size: 20px;
+}
+.youtube-import-container .library-help {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 10px 0 16px;
+}
+.youtube-import-container .learning-path-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.youtube-import-container .learning-path-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+}
+.youtube-import-container .learning-path-card strong { font-size: 16px; }
+.youtube-import-container .learning-path-card span { font-size: 13px; color: #64748b; line-height: 1.8; }
+.youtube-import-container .learning-path-card small { color: #2563eb; margin-top: auto; }
+.youtube-import-container .learning-path-card.active { border-color: #2563eb; background: #eff6ff; }
+.youtube-import-container .category-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.youtube-import-container .category-tabs button {
+  padding: 8px 14px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 20px;
+  color: #475569;
+}
+.youtube-import-container .category-tabs button.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+.youtube-import-container .library-filter-options { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 18px; }
+.youtube-import-container .library-filter-options label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
+.youtube-import-container .library-filter-options select { border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; background: white; }
+.youtube-import-container .video-learning-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.youtube-import-container .video-learning-tags span { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: #eff6ff; color: #1d4ed8; }
+.youtube-import-container .video-learning-objective { font-size: 12px; color: #64748b; line-height: 1.7; margin-block: 10px; }
+.youtube-import-container .learning-path-card:focus-visible,
+.youtube-import-container .category-tabs button:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+@media (max-width: 900px) {
+  .youtube-import-container .learning-path-grid { grid-template-columns: 1fr; }
+}

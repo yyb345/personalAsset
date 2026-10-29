@@ -48,7 +48,7 @@ export default {
   dashboard: {
     studyDays: '学习天数',
     library: '收藏',
-    youtubeVideos: 'YouTube 视频',
+    youtubeVideos: 'AI 与英语学习',
     xiaohongshuVideos: '小红书视频',
     profile: {
       bio: '热爱学习，每天进步 ✨',
@@ -59,10 +59,76 @@ export default {
   },
 
   youtube: {
+    library: {
+      "pathsTitle": "精选专题 · 按路线学习",
+      "pathsHint": "根据线上真实视频精选编排，按顺序学习；仅推荐已就绪的视频，序号代表建议观看顺序。",
+      "pathCount": "{count} 个视频 · 点击筛选",
+      "category": "学习分类",
+      "difficulty": "内容难度",
+      "duration": "视频时长",
+      "reset": "查看全部 / 重置",
+      "loading": "正在加载视频库…",
+      "loadFailed": "视频库加载失败，请稍后重试。",
+      "retry": "重试",
+      "noMatches": "暂时没有符合条件的视频。可以重置筛选，或先学习其他专题。",
+      "metadataHint": "已按线上真实标题人工整理分类；新增视频按标题自动归类。难度未经确认时保留“待标注”，学习目标依据标题制定。",
+      "learnGoal": "学习目标：",
+      "suggestedGoal": "学习建议：",
+      "categories": {
+            "all": "全部",
+            "basics": "AI 基础",
+            "models": "大模型",
+            "agents": "Agent 智能体",
+            "applications": "应用实战",
+            "english": "英语练习",
+            "other": "待分类",
+            "business": "创业与商业",
+            "technology": "编程与计算机",
+            "japanese": "日语练习"
+      },
+      "levels": {
+            "all": "全部难度",
+            "easy": "入门",
+            "medium": "进阶",
+            "hard": "深入",
+            "unknown": "待标注"
+      },
+      "durations": {
+            "all": "全部时长",
+            "short": "10 分钟以内",
+            "medium": "10–20 分钟",
+            "long": "20 分钟以上"
+      },
+      "paths": {
+            "foundations": {
+                  "title": "从 AI 基础到大模型",
+                  "description": "先建立概念框架，再理解大模型。配合英文字幕积累技术表达。"
+            },
+            "building": {
+                  "title": "从智能体到应用实践",
+                  "description": "先了解 Agent，再探索工作流和应用。用笔记梳理自己的实现思路。"
+            },
+            "english": {
+                  "title": "先练听力与日常表达",
+                  "description": "从真实生活视频练习听力、跟读与复述，为阅读英语技术内容打基础。"
+            }
+      },
+      "objectives": {
+            "basics": "梳理核心概念，记录英文术语，并用自己的话解释。",
+            "models": "整理模型的关键概念，结合字幕理解技术表达。",
+            "agents": "梳理智能体的关键环节，记录问题和实现思路。",
+            "applications": "记录应用步骤，思考可以迁移到自己工作中的方法。",
+            "english": "积累日常表达，跟读关键句，并尝试复述。",
+            "other": "记录三个关键点，结合字幕整理词汇与问题。",
+            "business": "梳理商业观点与案例，记录自己认同或想验证的判断。",
+            "technology": "记录关键技术概念与问题，结合字幕整理知识框架。",
+            "japanese": "结合字幕积累日语词汇和生活表达，尝试复述。"
+      }
+},
     guestPreview: '游客可预览前 {count} 个视频，登录后查看全部视频。',
     viewMore: '查看更多',
     title: 'YouTube精品AI视频',
-    subtitle: '将任何 YouTube 视频转化为智能英语跟读练习',
+    subtitle: '通过优质视频学习 AI，结合英文字幕、跟读与笔记，同时提升英语能力。',
     pasteHint: '粘贴 YouTube 链接，我们将立即生成跟读练习',
     generatePractice: '生成练习',
     analyzing: '分析视频中',
@@ -72,7 +138,7 @@ export default {
     systemNotReady: '系统未就绪：yt-dlp 未安装',
     installHint: '请在服务器上安装 yt-dlp',
 
-    myLibrary: '我的视频库',
+    myLibrary: '学习视频库',
     videoCount: '{count} 个视频',
     noVideos: '暂无视频',
 
