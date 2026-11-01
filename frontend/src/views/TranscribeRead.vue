@@ -22,6 +22,7 @@
         <div class="player-wrapper">
           <div id="yt-player" class="yt-player-container"></div>
         </div>
+        <p v-if="playerError" role="status">{{ playerError }} <button class="export-btn" @click="preparePlayer">Retry player</button></p>
         <div class="video-info">
           <h2 class="video-title">{{ videoData.videoTitle }}</h2>
           <p class="video-channel">{{ videoData.channel }}</p>
@@ -122,8 +123,7 @@
 
 <script>
 import axios from '../utils/axios'
-import { jsPDF } from 'jspdf'
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx'
+import { loadYouTubePlayer } from '../utils/youtubePlayer'
 import { saveAs } from 'file-saver'
 
 export default {
@@ -137,6 +137,8 @@ export default {
       error: null,
       player: null,
       playerReady: false,
+      playerError: '',
+      disposed: false,
       currentTime: 0,
       currentSentenceId: null,
       timeUpdateInterval: null,
@@ -187,8 +189,9 @@ export default {
       return
     }
 
-    await this.loadYouTubeAPI()
+    this.preparePlayer()
     await this.loadVideoData()
+    if (this.disposed) return
 
     // Load saved highlights
     this.loadHighlights()
@@ -198,6 +201,7 @@ export default {
     document.addEventListener('click', this.handleDocumentClick)
   },
   beforeUnmount() {
+    this.disposed = true;
     if (this.timeUpdateInterval) {
       clearInterval(this.timeUpdateInterval)
     }
@@ -230,6 +234,7 @@ export default {
         if (statusRes.data.status === 'completed') {
           this.loadingMessage = 'Loading transcript...'
           const res = await axios.get(`/api/youtube/sentences/${this.videoId}`)
+          if (this.disposed) return
           this.videoData = res.data
           this.loading = false
           await this.$nextTick()
@@ -251,27 +256,20 @@ export default {
       }
     },
 
-    loadYouTubeAPI() {
-      return new Promise((resolve) => {
-        if (window.YT && window.YT.Player) {
-          resolve()
-          return
-        }
-        const tag = document.createElement('script')
-        tag.src = 'https://www.youtube.com/iframe_api'
-        const first = document.getElementsByTagName('script')[0]
-        first.parentNode.insertBefore(tag, first)
-
-        const prevCallback = window.onYouTubeIframeAPIReady
-        window.onYouTubeIframeAPIReady = () => {
-          if (prevCallback) prevCallback()
-          resolve()
-        }
-      })
+    async preparePlayer() {
+      this.playerError = ''
+      try {
+        await loadYouTubePlayer()
+        if (this.disposed) return
+        await this.$nextTick()
+        this.initPlayer()
+      } catch (error) {
+        if (!this.disposed) this.playerError = 'Video player unavailable. You can still read the transcript.'
+      }
     },
 
     initPlayer() {
-      if (!window.YT || !window.YT.Player) return
+      if (this.disposed || this.player || this.loading || !this.videoData || !window.YT?.Player) return
 
       this.player = new window.YT.Player('yt-player', {
         videoId: this.videoId,
@@ -543,6 +541,7 @@ export default {
     },
 
     async exportPDF(title, filename) {
+      const { jsPDF } = await import('jspdf')
       const doc = new jsPDF()
       const pageWidth = doc.internal.pageSize.getWidth()
       const margin = 20
@@ -584,6 +583,7 @@ export default {
     },
 
     async exportWord(title, filename) {
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await import('docx')
       const paragraphs = this.getTranscriptWithTimestamps()
 
       const children = [
