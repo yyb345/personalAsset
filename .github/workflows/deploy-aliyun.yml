@@ -72,6 +72,9 @@ jobs:
           # 拉取最新镜像
           docker pull ${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:latest
           
+          # Keep runtime secrets outside the repository and image
+          install -d -m 700 /etc/finance/secrets
+
           # 停止并删除旧容器
           docker stop finance-app || true
           docker rm finance-app || true
@@ -82,6 +85,7 @@ jobs:
             --restart unless-stopped \
             -p 8080:8080 \
             -v ~/finance-app/data:/data \
+            -v /etc/finance/secrets:/run/secrets:ro \
             -e TZ=Asia/Shanghai \
             ${{ secrets.ALIYUN_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/finance-app:latest
           

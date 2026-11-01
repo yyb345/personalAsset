@@ -272,6 +272,9 @@ start_app() {
         mkdir -p "$DATA_DIR"
     fi
 
+    # Runtime-only secrets stay outside the repository and image.
+    install -d -m 700 /etc/finance/secrets || return 1
+
     # 强制停止并删除旧容器（兼容 Podman）
     print_info "清理旧的应用容器..."
     docker stop "$DOCKER_NAME" 2>/dev/null || true
@@ -293,6 +296,7 @@ start_app() {
         --env-file /home/data/secrets/finance.env \
         --network "$NETWORK_NAME" \
         -v "$DATA_DIR:/data" \
+        -v /etc/finance/secrets:/run/secrets:ro \
         -e TZ=Asia/Shanghai \
         -e SERVER_PORT=$APP_PORT \
         -e SPRING_DATASOURCE_URL=jdbc:sqlite:/data/finance.db \
@@ -311,6 +315,9 @@ start_app() {
 # ==================== 启动 Nginx 容器 ====================
 start_nginx() {
     print_info "========== 启动 Nginx 容器 =========="
+
+    # Runtime-only secrets stay outside the repository and image.
+    install -d -m 700 /etc/finance/secrets || return 1
 
     # 强制停止并删除旧容器（兼容 Podman）
     print_info "清理旧的 Nginx 容器..."

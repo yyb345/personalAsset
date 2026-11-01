@@ -67,6 +67,12 @@ public class YoutubeVideo {
     @Column(name = "pinned_at")
     private LocalDateTime pinnedAt;
 
+    @Column(name = "ai_summary", columnDefinition = "TEXT")
+    private String aiSummary;
+
+    public String getAiSummary() { return aiSummary; }
+    public void setAiSummary(String aiSummary) { this.aiSummary = aiSummary; }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

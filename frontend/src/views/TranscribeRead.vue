@@ -38,24 +38,36 @@
         <div class="transcript-header">
           <div class="header-top">
             <h1 class="transcript-title">Transcript</h1>
-            <div class="export-dropdown" ref="exportDropdown">
-              <button class="export-btn" @click="toggleExportMenu">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Export
+            <div class="header-actions">
+              <button class="export-btn" :disabled="summaryLoading" :aria-busy="summaryLoading" @click="generateSummary">
+                {{ summaryLoading ? 'Generating…' : 'AI Summary' }}
               </button>
-              <div v-if="showExportMenu" class="export-menu">
-                <button @click="exportAs('pdf')">PDF</button>
-                <button @click="exportAs('word')">Word</button>
-                <button @click="exportAs('markdown')">Markdown</button>
+              <div class="export-dropdown" ref="exportDropdown">
+                <button class="export-btn" @click="toggleExportMenu">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Export
+                </button>
+                <div v-if="showExportMenu" class="export-menu">
+                  <button @click="exportAs('pdf')">PDF</button>
+                  <button @click="exportAs('word')">Word</button>
+                  <button @click="exportAs('markdown')">Markdown</button>
+                </div>
               </div>
             </div>
           </div>
           <p class="transcript-subtitle">{{ videoData.videoTitle }}</p>
         </div>
+
+        <section v-if="summaryVisible" class="summary-panel" aria-label="AI Summary" aria-live="polite">
+          <div class="summary-heading"><h2>AI Summary</h2><button class="export-btn" @click="summaryVisible = false" aria-label="Close summary">×</button></div>
+          <p v-if="summaryLoading" role="status">正在阅读全部字幕并生成摘要，请稍候…</p>
+          <p v-else-if="summaryError" role="alert">{{ summaryError }} <button class="export-btn" @click="generateSummary">重试</button></p>
+          <div v-else class="summary-text">{{ summary }}</div>
+        </section>
 
         <div class="transcript-content" ref="transcriptContent" @click="handleTranscriptClick">
           <div
@@ -134,6 +146,10 @@ export default {
       toolbarPosition: { top: 0, left: 0 },
       pendingSelection: null,
       // Export feature
+      summary: '',
+      summaryVisible: false,
+      summaryLoading: false,
+      summaryError: '',
       showExportMenu: false
     }
   },
@@ -192,6 +208,20 @@ export default {
     document.removeEventListener('click', this.handleDocumentClick)
   },
   methods: {
+    async generateSummary() {
+      if (this.summaryLoading) return
+      this.summaryVisible = true
+      this.summaryError = ''
+      this.summaryLoading = true
+      try {
+        const { data } = await axios.post(`/api/youtube/summary/${encodeURIComponent(this.videoId)}`, null, { timeout: 0 })
+        this.summary = data.summary
+      } catch (err) {
+        this.summaryError = err.response?.data?.error || '摘要生成失败，请稍后重试。'
+      } finally {
+        this.summaryLoading = false
+      }
+    },
     async loadVideoData() {
       try {
         this.loadingMessage = 'Checking video status...'
@@ -778,6 +808,14 @@ export default {
   margin: 0;
   color: #1a1a1a;
 }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.export-btn:disabled { opacity: .6; cursor: wait; }
+.summary-panel { margin: 16px 24px; padding: 18px; background: #f5f7ff; border: 1px solid #dce2f5; border-radius: 12px; max-height: 40vh; overflow-y: auto; flex-shrink: 0; }
+.summary-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.summary-heading h2 { margin: 0 0 12px; font-size: 18px; }
+.summary-text { white-space: pre-wrap; line-height: 1.8; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .header-top { flex-wrap: wrap; gap: 12px; } }
 
 /* Export Dropdown */
 .export-dropdown {
