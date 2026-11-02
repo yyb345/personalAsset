@@ -4,6 +4,7 @@ import { checkAuth } from '@/utils/auth'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    { path: '/dashboard/billing', name: 'Billing', component: () => import('@/views/dashboard/Billing.vue'), meta: { requiresAuth: false } },
     {
       path: '/',
       name: 'Landing',

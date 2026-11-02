@@ -72,6 +72,7 @@
 
       <nav class="menu">
         <ul>
+          <li><router-link to="/dashboard/billing" class="menu-item" @click="closeMobileSidebar"><span class="menu-text">会员 · 付款</span></router-link></li>
           <li>
             <router-link
               to="/dashboard/youtube"

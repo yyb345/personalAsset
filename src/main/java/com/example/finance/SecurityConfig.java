@@ -73,6 +73,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/subtitle-search/**").permitAll()
                 // OAuth2 相关端点（公开访问）
                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                 .requestMatchers("/api/billing/webhook", "/api/billing/config").permitAll()
+                .requestMatchers("/api/billing/**").authenticated()
                 // 需要认证的API
                 .requestMatchers("/api/stocks/**").authenticated()
                 .anyRequest().permitAll()
