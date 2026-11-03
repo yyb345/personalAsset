@@ -61,6 +61,13 @@
             </div>
           </div>
           <p class="transcript-subtitle">{{ videoData.videoTitle }}</p>
+          <div class="glossary-controls">
+            <label><input type="checkbox" v-model="glossaryEnabled"> AI 术语解释</label>
+            <span v-if="glossaryLoading" role="status">正在识别术语…</span>
+            <span v-else-if="glossaryError" role="status">术语解释暂不可用 <button class="glossary-retry" @click="loadGlossary">重试</button></span>
+            <span v-else>悬停或聚焦蓝色术语，查看中英文解释</span>
+            <span class="glossary-attribution">词库来源：<a href="https://developers.google.com/machine-learning/glossary" target="_blank" rel="noopener noreferrer">Google ML Glossary</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>（含整理与翻译）</span>
+          </div>
         </div>
 
         <section v-if="summaryVisible" class="summary-panel" aria-label="AI Summary" aria-live="polite">
@@ -83,9 +90,8 @@
                 v-for="sentence in paragraph.sentences"
                 :key="sentence.id"
                 :class="['sentence', { 'current': currentSentenceId === sentence.id }]"
-                @click.stop="seekToSentence(sentence)"
-                v-html="renderHighlightedText(sentence)"
-              ></span>
+                @click.stop="handleSentenceClick($event, sentence)"
+              ><GlossaryText :text="sentence.text + ' '" :spans="glossaryEnabled ? (glossarySpans[sentence.id] || []) : []" :highlights="highlights.filter(h => h.sentenceId === sentence.id)" /></span>
             </p>
           </div>
         </div>
@@ -125,9 +131,11 @@
 import axios from '../utils/axios'
 import { loadYouTubePlayer } from '../utils/youtubePlayer'
 import { saveAs } from 'file-saver'
+import GlossaryText from '../components/GlossaryText.vue'
 
 export default {
   name: 'TranscribeRead',
+  components: { GlossaryText },
   data() {
     return {
       videoId: null,
@@ -142,6 +150,11 @@ export default {
       currentTime: 0,
       currentSentenceId: null,
       timeUpdateInterval: null,
+      glossaryEnabled: true,
+      glossarySpans: {},
+      glossaryLoading: false,
+      glossaryError: false,
+      glossaryRequest: null,
       // Highlight feature
       highlights: [],
       showHighlightToolbar: false,
@@ -202,6 +215,7 @@ export default {
   },
   beforeUnmount() {
     this.disposed = true;
+    this.glossaryRequest?.abort()
     if (this.timeUpdateInterval) {
       clearInterval(this.timeUpdateInterval)
     }
@@ -212,6 +226,39 @@ export default {
     document.removeEventListener('click', this.handleDocumentClick)
   },
   methods: {
+    async loadGlossary() {
+      this.glossaryRequest?.abort()
+      const request = new AbortController()
+      this.glossaryRequest = request
+      this.glossarySpans = {}
+      this.glossaryLoading = true
+      this.glossaryError = false
+      const sentences = this.videoData?.sentences || []
+      try {
+        // Display completed batches immediately while keeping long transcript payloads bounded.
+        for (let offset = 0; offset < sentences.length; offset += 80) {
+          const batch = sentences.slice(offset, offset + 80)
+          const { data } = await axios.post('/api/glossary/highlight', {
+            texts: batch.map(sentence => sentence.text), language: 'zh'
+          }, { signal: request.signal, timeout: 30000 })
+          if (this.disposed || request.signal.aborted) return
+          if (!Array.isArray(data.results) || data.results.length !== batch.length) throw new Error('Invalid glossary response')
+          batch.forEach((sentence, index) => {
+            const result = data.results[index]
+            if (result.text !== sentence.text || !Array.isArray(result.spans)) throw new Error('Invalid glossary offsets')
+            this.glossarySpans[sentence.id] = result.spans
+          })
+        }
+      } catch (error) {
+        if (!request.signal.aborted && !this.disposed) this.glossaryError = true
+      } finally {
+        if (this.glossaryRequest === request && !this.disposed) this.glossaryLoading = false
+      }
+    },
+    handleSentenceClick(event, sentence) {
+      if (event.target.closest('.highlight')) this.handleTranscriptClick(event)
+      else this.seekToSentence(sentence)
+    },
     async generateSummary() {
       if (this.summaryLoading) return
       this.summaryVisible = true
@@ -239,6 +286,7 @@ export default {
           this.loading = false
           await this.$nextTick()
           this.initPlayer()
+          this.loadGlossary()
         } else if (statusRes.data.status === 'parsing') {
           this.error = 'Video is still being parsed. Please try again later.'
           this.loading = false
@@ -465,38 +513,6 @@ export default {
     saveHighlights() {
       const key = `highlights_${this.videoId}`
       localStorage.setItem(key, JSON.stringify(this.highlights))
-    },
-
-    renderHighlightedText(sentence) {
-      let text = sentence.text + ' '
-      const sentenceHighlights = this.highlights.filter(h => h.sentenceId === sentence.id)
-
-      if (sentenceHighlights.length === 0) {
-        return this.escapeHtml(text)
-      }
-
-      // Sort by text length (longer first) to handle overlapping
-      sentenceHighlights.sort((a, b) => b.text.length - a.text.length)
-
-      // Create a map of positions to highlight
-      let result = text
-      for (const hl of sentenceHighlights) {
-        const escapedText = this.escapeHtml(hl.text)
-        const regex = new RegExp(this.escapeRegex(hl.text), 'gi')
-        result = result.replace(regex, `<mark class="highlight highlight-${hl.color}" data-id="${hl.id}">${escapedText}</mark>`)
-      }
-
-      return result
-    },
-
-    escapeHtml(text) {
-      const div = document.createElement('div')
-      div.textContent = text
-      return div.innerHTML
-    },
-
-    escapeRegex(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     },
 
     // Export methods
@@ -816,6 +832,13 @@ export default {
 .summary-heading h2 { margin: 0 0 12px; font-size: 18px; }
 .summary-text { white-space: pre-wrap; line-height: 1.8; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .header-top { flex-wrap: wrap; gap: 12px; } }
+
+.glossary-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 12px; color: #64748b; font-size: 12px; line-height: 1.5; }
+.glossary-controls label { display: inline-flex; gap: 6px; align-items: center; color: #2563a7; cursor: pointer; }
+.glossary-controls input { accent-color: #2563a7; }
+.glossary-attribution { flex-basis: 100%; font-size: 11px; }
+.glossary-attribution a { color: #64748b; text-underline-offset: 2px; }
+.glossary-retry { border: 0; background: transparent; color: #2563a7; text-decoration: underline; cursor: pointer; }
 
 /* Export Dropdown */
 .export-dropdown {
