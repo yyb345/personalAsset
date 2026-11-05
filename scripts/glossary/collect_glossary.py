@@ -3,6 +3,7 @@
 import argparse, hashlib, json, re, urllib.request
 from pathlib import Path
 from bs4 import BeautifulSoup
+from merge_advanced import merge_terms
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCES = [('education', 'https://developers.google.com/machine-learning/glossary'), ('cloud', 'https://cloud.google.com/vertex-ai/docs/glossary')]
@@ -101,6 +102,7 @@ def main():
     plural_aliases = {'token': ['tokens'], 'large language model': ['large language models', 'LLMs']}
     for record in records:
         record['aliases'] = list(dict.fromkeys(record['aliases'] + plural_aliases.get(record['termEn'].lower(), [])))
+    records = merge_terms(records)
     assert len(records) >= 500, f'Only {len(records)} concepts; source markup may have changed'
     assert len({r['id'] for r in records}) == len(records)
     output = ROOT/'src/main/resources/glossary/terms.json'

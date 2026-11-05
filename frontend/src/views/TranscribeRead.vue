@@ -66,7 +66,7 @@
             <span v-if="glossaryLoading" role="status">正在识别术语…</span>
             <span v-else-if="glossaryError" role="status">术语解释暂不可用 <button class="glossary-retry" @click="loadGlossary">重试</button></span>
             <span v-else>悬停或聚焦蓝色术语，查看中英文解释</span>
-            <span class="glossary-attribution">词库来源：<a href="https://developers.google.com/machine-learning/glossary" target="_blank" rel="noopener noreferrer">Google ML Glossary</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>（含整理与翻译）</span>
+            <span class="glossary-attribution">基础词库：<a href="https://developers.google.com/machine-learning/glossary" target="_blank" rel="noopener noreferrer">Google ML Glossary</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>）；进阶词条依据官方文档与原始论文整理，含翻译。</span>
           </div>
         </div>
 

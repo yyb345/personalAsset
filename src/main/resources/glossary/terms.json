@@ -1,5 +1,23 @@
 [
   {
+    "id": "ai-advanced-normalfloat4",
+    "termEn": "4-bit NormalFloat",
+    "termZh": "四比特正态浮点",
+    "aliases": [
+      "4-bit NormalFloat",
+      "四比特正态浮点",
+      "NF4",
+      "NormalFloat4",
+      "四位正态浮点"
+    ],
+    "definitionEn": "A four-bit quantization format designed for approximately normally distributed model weights.",
+    "definitionZh": "针对近似正态分布的模型权重设计的四比特量化格式，是QLoRA使用的技术之一。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://arxiv.org/abs/2305.14314"
+    ]
+  },
+  {
     "id": "ai-education-ab-testing",
     "termEn": "A/B testing",
     "termZh": "A/B 测试",
@@ -13,6 +31,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#ab-testing",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#ab-testing"
+    ]
+  },
+  {
+    "id": "ai-advanced-a2a-artifact",
+    "termEn": "A2A artifact",
+    "termZh": "A2A任务产物",
+    "aliases": [
+      "A2A artifact",
+      "A2A任务产物",
+      "A2A artifacts",
+      "A2A任务工件"
+    ],
+    "definitionEn": "A structured output produced by an A2A task, such as a document or generated data.",
+    "definitionZh": "A2A任务产生的结构化输出，例如文档或生成数据，与执行过程中的普通消息相区别。",
+    "category": "Agents",
+    "sources": [
+      "https://a2a-protocol.org/latest/topics/key-concepts/"
     ]
   },
   {
@@ -110,6 +145,23 @@
     ]
   },
   {
+    "id": "ai-advanced-activated-parameters",
+    "termEn": "activated parameters",
+    "termZh": "激活参数量",
+    "aliases": [
+      "activated parameters",
+      "激活参数量",
+      "active parameters",
+      "每词元激活参数量"
+    ],
+    "definitionEn": "The subset of model parameters used for a token's computation, often smaller than total parameters in MoE models.",
+    "definitionZh": "处理某个词元时实际参与计算的参数量，在混合专家模型中通常小于模型总参数量。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2412.19437"
+    ]
+  },
+  {
     "id": "ai-education-activation-function",
     "termEn": "activation function",
     "termZh": "激活函数",
@@ -123,6 +175,22 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#activation-function",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#activation-function"
+    ]
+  },
+  {
+    "id": "ai-advanced-activation-aware-weight-quantization",
+    "termEn": "activation-aware weight quantization",
+    "termZh": "激活感知权重量化",
+    "aliases": [
+      "activation-aware weight quantization",
+      "激活感知权重量化",
+      "AWQ"
+    ],
+    "definitionEn": "Uses activation information to identify important weight channels and improve low-bit weight quantization.",
+    "definitionZh": "利用激活信息识别重要权重通道，改善低比特权重量化的质量。",
+    "category": "Quantization",
+    "sources": [
+      "https://arxiv.org/abs/2306.00978"
     ]
   },
   {
@@ -157,19 +225,125 @@
     ]
   },
   {
-    "id": "ai-education-agent",
-    "termEn": "agent",
-    "termZh": "代理",
+    "id": "ai-advanced-adaptive-test-time-compute",
+    "termEn": "adaptive test-time compute",
+    "termZh": "自适应测试时计算",
     "aliases": [
-      "agent",
-      "代理"
+      "adaptive test-time compute",
+      "自适应测试时计算",
+      "adaptive inference compute",
+      "自适应推理计算"
     ],
-    "definitionEn": "Software that can reason about user inputs in order to plan and execute actions on behalf of the user. In reinforcement learning , an agent is the entity that uses a policy to maximize the expected return gained from transitioning between states of the environment .",
-    "definitionZh": "能够对用户输入进行推理，以便代表用户规划和执行操作的软件。 在 强化学习 中，智能体是使用 政策 来最大限度提高从 环境 的 状态 转换中获得的预期 回报 的实体。",
-    "category": "Generative AI",
+    "definitionEn": "Allocates inference computation according to problem difficulty or feedback instead of using a fixed budget everywhere.",
+    "definitionZh": "根据问题难度或反馈分配推理计算，而不是对所有问题使用同样预算。",
+    "category": "Reasoning",
     "sources": [
-      "https://developers.google.com/machine-learning/glossary#agent",
-      "https://developers.google.com/machine-learning/glossary?hl=zh-cn#agent"
+      "https://arxiv.org/abs/2408.03314"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-card",
+    "termEn": "Agent Card",
+    "termZh": "智能体能力卡",
+    "aliases": [
+      "Agent Card",
+      "智能体能力卡",
+      "Agent Cards",
+      "智能体卡片"
+    ],
+    "definitionEn": "An A2A metadata document describing an agent's identity, capabilities, endpoints and access requirements.",
+    "definitionZh": "描述智能体身份、能力、服务地址及访问要求的A2A元数据文档，便于发现与对接。",
+    "category": "Agents",
+    "sources": [
+      "https://a2a-protocol.org/latest/topics/key-concepts/"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-checkpoint",
+    "termEn": "agent checkpoint",
+    "termZh": "智能体执行检查点",
+    "aliases": [
+      "agent checkpoint",
+      "智能体执行检查点",
+      "agent checkpointing",
+      "智能体状态检查点"
+    ],
+    "definitionEn": "A saved execution state used to resume an agent task, distinct from a model-weight checkpoint.",
+    "definitionZh": "保存任务执行状态以便恢复智能体工作的位置，与保存模型权重的训练检查点不同。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/effective-harnesses-for-long-running-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-delegation",
+    "termEn": "agent delegation",
+    "termZh": "智能体任务委派",
+    "aliases": [
+      "agent delegation",
+      "智能体任务委派",
+      "task delegation",
+      "任务委派"
+    ],
+    "definitionEn": "Assigns a scoped task and expected result to another agent rather than only calling a fixed function.",
+    "definitionZh": "将有边界的任务与预期结果交给另一智能体，而不只是执行一个固定函数。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/multi-agent-research-system"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-handoff",
+    "termEn": "agent handoff",
+    "termZh": "智能体交接",
+    "aliases": [
+      "agent handoff",
+      "智能体交接",
+      "agent handoffs",
+      "handoff between agents",
+      "智能体任务交接"
+    ],
+    "definitionEn": "Transfers responsibility and relevant context from one agent to another.",
+    "definitionZh": "把任务责任与必要上下文从一个智能体转交给另一个，需要明确接手范围与已有进展。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/multi-agent-research-system"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-harness",
+    "termEn": "agent harness",
+    "termZh": "智能体运行框架",
+    "aliases": [
+      "agent harness",
+      "智能体运行框架",
+      "agent scaffold",
+      "agent scaffolding",
+      "智能体支撑框架",
+      "agent harnesses"
+    ],
+    "definitionEn": "The surrounding software that manages an agent's tools, execution state and interaction with its environment.",
+    "definitionZh": "围绕模型管理工具、执行状态和环境交互的软件框架；模型与运行框架共同决定系统表现。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/effective-harnesses-for-long-running-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-memory",
+    "termEn": "agent memory",
+    "termZh": "智能体记忆",
+    "aliases": [
+      "agent memory",
+      "智能体记忆",
+      "agent memories",
+      "智能体长期记忆"
+    ],
+    "definitionEn": "Stores selected task information for retrieval across steps or sessions.",
+    "definitionZh": "保存选定的任务信息，以便智能体在后续步骤或不同会话中检索使用。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/effective-context-engineering-for-ai-agents"
     ]
   },
   {
@@ -186,6 +360,78 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#agent-orchestration",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#agent-orchestration"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-routing",
+    "termEn": "agent routing",
+    "termZh": "智能体路由",
+    "aliases": [
+      "agent routing",
+      "智能体路由",
+      "task routing",
+      "任务路由"
+    ],
+    "definitionEn": "Selects an appropriate specialized agent or workflow for an incoming request.",
+    "definitionZh": "根据请求内容选择合适的专门智能体或工作流，并不要求所有请求都进入同一路径。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/building-effective-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-skills",
+    "termEn": "Agent Skills",
+    "termZh": "智能体技能包",
+    "aliases": [
+      "Agent Skills",
+      "智能体技能包",
+      "agent skill",
+      "agent skills",
+      "智能体技能"
+    ],
+    "definitionEn": "Reusable packages of task instructions and optional resources that give agents specialized procedures or expertise.",
+    "definitionZh": "由任务指令与可选资源组成的可复用能力包，为智能体提供特定流程或专业知识。",
+    "category": "Agents",
+    "sources": [
+      "https://agentskills.io/home"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent-trajectory",
+    "termEn": "agent trajectory",
+    "termZh": "智能体执行轨迹",
+    "aliases": [
+      "agent trajectory",
+      "智能体执行轨迹",
+      "agent trace",
+      "agent transcript",
+      "智能体轨迹"
+    ],
+    "definitionEn": "A record of an agent trial, including tool calls, outputs and intermediate interactions.",
+    "definitionZh": "一次智能体任务尝试的过程记录，包括工具调用、输出和中间交互，不等同于任务最终结果。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/demystifying-evals-for-ai-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-agent2agent",
+    "termEn": "Agent2Agent protocol",
+    "termZh": "智能体互联协议",
+    "aliases": [
+      "Agent2Agent protocol",
+      "智能体互联协议",
+      "A2A",
+      "A2A protocol",
+      "Agent-to-Agent protocol",
+      "智能体间协议"
+    ],
+    "definitionEn": "A protocol for communication and task collaboration between independently implemented agent systems.",
+    "definitionZh": "用于不同实现的智能体系统之间通信与任务协作的协议，与模型调用工具的协议职责不同。",
+    "category": "Agents",
+    "sources": [
+      "https://a2a-protocol.org/latest/topics/key-concepts/"
     ]
   },
   {
@@ -234,6 +480,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#agentic-workflow",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#agentic-workflow"
+    ]
+  },
+  {
+    "id": "ai-advanced-ai-alignment",
+    "termEn": "AI alignment",
+    "termZh": "AI对齐",
+    "aliases": [
+      "AI alignment",
+      "AI对齐",
+      "model alignment",
+      "模型对齐",
+      "人工智能对齐"
+    ],
+    "definitionEn": "Making model behavior better match intended human goals, preferences and constraints.",
+    "definitionZh": "使模型行为更符合预期的人类目标、偏好与约束；它不意味着模型已经完全可靠或安全。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2212.08073"
     ]
   },
   {
@@ -402,6 +666,23 @@
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#artificial-intelligence",
       "https://cloud.google.com/vertex-ai/docs/glossary#artificial_intelligence",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#artificial_intelligence"
+    ]
+  },
+  {
+    "id": "ai-advanced-assistant-only-loss",
+    "termEn": "assistant-only loss",
+    "termZh": "仅助手输出损失",
+    "aliases": [
+      "assistant-only loss",
+      "仅助手输出损失",
+      "completion-only loss",
+      "仅回答损失"
+    ],
+    "definitionEn": "Computes training loss only on assistant or completion tokens rather than all prompt tokens.",
+    "definitionZh": "仅对助手回答或补全部分计算训练损失，不把全部提示词元都作为监督目标。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/sft_trainer"
     ]
   },
   {
@@ -681,6 +962,23 @@
     ]
   },
   {
+    "id": "ai-advanced-auxiliary-loss-free-balancing",
+    "termEn": "auxiliary-loss-free load balancing",
+    "termZh": "无辅助损失负载均衡",
+    "aliases": [
+      "auxiliary-loss-free load balancing",
+      "无辅助损失负载均衡",
+      "auxiliary loss free load balancing",
+      "无辅助损失专家负载均衡"
+    ],
+    "definitionEn": "Balances expert use through routing adjustments rather than relying mainly on an auxiliary balancing loss.",
+    "definitionZh": "通过调整专家路由等方式平衡使用率，避免主要依赖辅助均衡损失影响训练目标。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2412.19437"
+    ]
+  },
+  {
     "id": "ai-education-average-precision-at-k",
     "termEn": "average precision at k",
     "termZh": "前 k 名的平均精确率",
@@ -888,6 +1186,23 @@
     ]
   },
   {
+    "id": "ai-advanced-beam-search",
+    "termEn": "beam search",
+    "termZh": "束搜索",
+    "aliases": [
+      "beam search",
+      "束搜索",
+      "beam decoding",
+      "波束搜索"
+    ],
+    "definitionEn": "Maintains several high-scoring partial sequences while expanding possible next tokens.",
+    "definitionZh": "扩展下一词元时保留多条高分部分序列的解码方法，目标分数不一定等于回答质量。",
+    "category": "Reasoning",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/generation_strategies"
+    ]
+  },
+  {
     "id": "ai-education-bellman-equation",
     "termEn": "Bellman equation",
     "termZh": "贝尔曼方程",
@@ -918,6 +1233,25 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#bert-bidirectional-encoder-representations-from-transformers",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#bert-bidirectional-encoder-representations-from-transformers"
+    ]
+  },
+  {
+    "id": "ai-advanced-best-of-n",
+    "termEn": "best-of-N sampling",
+    "termZh": "N选优采样",
+    "aliases": [
+      "best-of-N sampling",
+      "N选优采样",
+      "best-of-n",
+      "best of N",
+      "best-of-N selection",
+      "多样本择优"
+    ],
+    "definitionEn": "Generates several candidate responses and selects the one favored by an evaluator.",
+    "definitionZh": "生成多个候选回答，再根据评价模型或规则选择评分最高的一个，效果取决于评价质量。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2305.20050"
     ]
   },
   {
@@ -1282,6 +1616,57 @@
     ]
   },
   {
+    "id": "ai-advanced-budget-forcing",
+    "termEn": "budget forcing",
+    "termZh": "预算强制",
+    "aliases": [
+      "budget forcing",
+      "预算强制",
+      "推理预算强制"
+    ],
+    "definitionEn": "Controls reasoning length by enforcing a stopping point or prompting continued reasoning.",
+    "definitionZh": "通过规定停止位置或要求继续推理来控制推理长度，以研究或调节测试时计算预算。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2501.19393"
+    ]
+  },
+  {
+    "id": "ai-advanced-byte-level-bpe",
+    "termEn": "byte-level BPE",
+    "termZh": "字节级BPE",
+    "aliases": [
+      "byte-level BPE",
+      "字节级BPE",
+      "byte level BPE",
+      "字节级字节对编码"
+    ],
+    "definitionEn": "Starts BPE from byte values, enabling arbitrary text to be represented without a character-level unknown-token vocabulary gap.",
+    "definitionZh": "以字节值作为BPE初始单位，减少字符词表无法表示文本所带来的未知词元问题。",
+    "category": "Foundation models",
+    "sources": [
+      "https://huggingface.co/docs/transformers/tokenizer_summary"
+    ]
+  },
+  {
+    "id": "ai-advanced-byte-pair-encoding",
+    "termEn": "byte-pair encoding",
+    "termZh": "字节对编码",
+    "aliases": [
+      "byte-pair encoding",
+      "字节对编码",
+      "BPE",
+      "byte pair encoding",
+      "字节对分词"
+    ],
+    "definitionEn": "A subword tokenization method that iteratively merges frequent adjacent symbols; implementations may begin with characters or bytes.",
+    "definitionZh": "反复合并高频相邻符号的子词分词方法，具体实现可从字符或字节开始。",
+    "category": "Foundation models",
+    "sources": [
+      "https://huggingface.co/docs/tokenizers/main/en/components"
+    ]
+  },
+  {
     "id": "ai-education-calibration-layer",
     "termEn": "calibration layer",
     "termZh": "校准层",
@@ -1346,6 +1731,45 @@
     ]
   },
   {
+    "id": "ai-advanced-causal-attention-mask",
+    "termEn": "causal attention mask",
+    "termZh": "因果注意力掩码",
+    "aliases": [
+      "causal attention mask",
+      "因果注意力掩码",
+      "causal mask",
+      "因果掩码"
+    ],
+    "definitionEn": "Prevents a token from attending to future positions during autoregressive language modeling.",
+    "definitionZh": "阻止词元在自回归语言建模时关注未来位置，避免利用尚未生成的信息。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1706.03762"
+    ]
+  },
+  {
+    "id": "ai-education-unidirectional-language-model",
+    "termEn": "causal language modeling",
+    "termZh": "因果语言建模",
+    "aliases": [
+      "causal language modeling",
+      "因果语言建模",
+      "causal language model",
+      "CLM",
+      "因果语言模型",
+      "unidirectional language model",
+      "单向语言模型"
+    ],
+    "definitionEn": "Predicts the next token from preceding tokens rather than using future context.",
+    "definitionZh": "根据此前词元预测下一个词元的语言建模方式，不使用未来文本作为该位置的条件。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2407.21783",
+      "https://developers.google.com/machine-learning/glossary#unidirectional-language-model",
+      "https://developers.google.com/machine-learning/glossary?hl=zh-cn#unidirectional-language-model"
+    ]
+  },
+  {
     "id": "ai-education-centroid",
     "termEn": "centroid",
     "termZh": "形心",
@@ -1378,17 +1802,40 @@
     ]
   },
   {
+    "id": "ai-advanced-coconut",
+    "termEn": "Chain of Continuous Thought",
+    "termZh": "连续思维链",
+    "aliases": [
+      "Chain of Continuous Thought",
+      "连续思维链",
+      "Coconut",
+      "continuous thought chain",
+      "连续思考链"
+    ],
+    "definitionEn": "A research method that feeds hidden representations back as inputs to perform continuous latent reasoning.",
+    "definitionZh": "将隐藏表示重新作为模型输入，以在连续潜在空间中执行推理的研究方法。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2412.06769"
+    ]
+  },
+  {
     "id": "ai-education-chain-of-thought-prompting",
     "termEn": "chain-of-thought prompting",
     "termZh": "思维链提示",
     "aliases": [
       "chain-of-thought prompting",
-      "思维链提示"
+      "思维链提示",
+      "chain of thought",
+      "chain-of-thought",
+      "CoT",
+      "思维链"
     ],
-    "definitionEn": "A prompt engineering technique that encourages a large language model (LLM) to explain its reasoning, step by step. For example, consider the following prompt, paying particular attention to the second sentence: How many g forces would a driver experience in a car that goes from 0 to 60 miles per hour in 7 seconds? In the answer, show all relevant calculations. The LLM's response would likely: Show a sequence of physics formulas, plugging in the values 0, 60, and 7 in appropriate places. Explain why it chose those formulas and what the various variables mean.",
-    "definitionZh": "一种 提示工程 技术，可鼓励 大语言模型 (LLM) 逐步说明其推理过程。例如，请考虑以下提示，并特别注意第二句话： 如果一辆汽车从 0 加速到 60 英里/小时需要 7 秒，那么驾驶员会感受到多少 g 的重力？在回答中，显示所有相关计算。 LLM 的 回答 可能会： 显示一系列物理公式，并在适当的位置代入值 0、60 和 7。 说明系统为何选择这些公式，以及各种变量的含义。",
-    "category": "Generative AI",
+    "definitionEn": "Prompts a model to generate intermediate reasoning steps before an answer; visible steps need not faithfully reveal internal computation.",
+    "definitionZh": "引导模型在答案前生成中间推理步骤；可见步骤不一定忠实反映模型内部计算。",
+    "category": "Reasoning",
     "sources": [
+      "https://arxiv.org/abs/2201.11903",
       "https://developers.google.com/machine-learning/glossary#chain-of-thought-prompting",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#chain-of-thought-prompting"
     ]
@@ -1428,6 +1875,23 @@
     ]
   },
   {
+    "id": "ai-advanced-chat-template",
+    "termEn": "chat template",
+    "termZh": "对话模板",
+    "aliases": [
+      "chat template",
+      "对话模板",
+      "chat templates",
+      "聊天模板"
+    ],
+    "definitionEn": "Serializes roles and message content into the token format expected by a conversational language model.",
+    "definitionZh": "把角色与消息内容转换成对话模型期望的词元格式，错误模板可能损害模型表现。",
+    "category": "Foundation models",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/chat_templating"
+    ]
+  },
+  {
     "id": "ai-education-checkpoint",
     "termEn": "checkpoint",
     "termZh": "检查点",
@@ -1441,6 +1905,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#checkpoint",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#checkpoint"
+    ]
+  },
+  {
+    "id": "ai-advanced-chinchilla-scaling",
+    "termEn": "Chinchilla scaling",
+    "termZh": "Chinchilla缩放规律",
+    "aliases": [
+      "Chinchilla scaling",
+      "Chinchilla缩放规律",
+      "Chinchilla scaling law",
+      "Chinchilla计算最优缩放"
+    ],
+    "definitionEn": "An empirical compute-optimal scaling result emphasizing that model size and training tokens should grow together.",
+    "definitionZh": "强调模型规模与训练词元量需协调增长的一组计算最优经验结果，而非固定适用于所有场景的配方。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2203.15556"
     ]
   },
   {
@@ -1459,6 +1940,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#choice-of-plausible-alternatives-copa",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#choice-of-plausible-alternatives-copa"
+    ]
+  },
+  {
+    "id": "ai-advanced-chunked-prefill",
+    "termEn": "chunked prefill",
+    "termZh": "分块预填充",
+    "aliases": [
+      "chunked prefill",
+      "分块预填充",
+      "chunked prefilling",
+      "分块提示处理"
+    ],
+    "definitionEn": "Splits long prompt processing into chunks that can be scheduled alongside decoding work.",
+    "definitionZh": "将长提示的处理拆成小块，便于与其他请求的解码工作共同调度。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/configuration/optimization/"
     ]
   },
   {
@@ -1603,6 +2101,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#classifier",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#classifier"
+    ]
+  },
+  {
+    "id": "ai-advanced-clip-model",
+    "termEn": "CLIP model",
+    "termZh": "图文对比预训练模型",
+    "aliases": [
+      "CLIP model",
+      "图文对比预训练模型",
+      "CLIP",
+      "Contrastive Language-Image Pre-training"
+    ],
+    "definitionEn": "A model family aligning image and text encoders through contrastive training on image-caption pairs.",
+    "definitionZh": "通过图像文本对的对比训练对齐图像编码器和文本编码器的一类模型。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2103.00020"
     ]
   },
   {
@@ -1807,6 +2322,23 @@
     ]
   },
   {
+    "id": "ai-advanced-cold-start-data",
+    "termEn": "cold-start data",
+    "termZh": "冷启动数据",
+    "aliases": [
+      "cold-start data",
+      "冷启动数据",
+      "cold start data",
+      "冷启动训练数据"
+    ],
+    "definitionEn": "An initial curated dataset used to establish useful model behavior before later reinforcement-learning stages.",
+    "definitionZh": "在后续强化学习之前，用于建立基本回答格式或推理行为的初始整理数据集。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2501.12948"
+    ]
+  },
+  {
     "id": "ai-education-collaborative-filtering",
     "termEn": "collaborative filtering",
     "termZh": "协同过滤",
@@ -1901,6 +2433,41 @@
     "sources": [
       "https://cloud.google.com/vertex-ai/docs/glossary#compute_engine_instance",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#compute_engine_instance"
+    ]
+  },
+  {
+    "id": "ai-advanced-compute-optimal-training",
+    "termEn": "compute-optimal training",
+    "termZh": "计算最优训练",
+    "aliases": [
+      "compute-optimal training",
+      "计算最优训练",
+      "compute optimal pretraining",
+      "计算最优预训练"
+    ],
+    "definitionEn": "Balances parameter count and training tokens to minimize loss under a fixed training-compute budget.",
+    "definitionZh": "在固定训练计算预算下协调参数量与训练词元量，以获得较低损失；实际部署还可能考虑推理成本。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2203.15556"
+    ]
+  },
+  {
+    "id": "ai-advanced-computer-use-agent",
+    "termEn": "computer-use agent",
+    "termZh": "计算机操作智能体",
+    "aliases": [
+      "computer-use agent",
+      "计算机操作智能体",
+      "computer use agent",
+      "GUI agent",
+      "图形界面智能体"
+    ],
+    "definitionEn": "An agent that observes and operates graphical interfaces to complete computer tasks.",
+    "definitionZh": "通过观察与操作图形界面来完成计算机任务的智能体，不限于调用结构化API。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2404.07972"
     ]
   },
   {
@@ -1999,6 +2566,23 @@
     ]
   },
   {
+    "id": "ai-advanced-constitutional-ai",
+    "termEn": "Constitutional AI",
+    "termZh": "宪法式AI",
+    "aliases": [
+      "Constitutional AI",
+      "宪法式AI",
+      "宪法式人工智能",
+      "宪法AI"
+    ],
+    "definitionEn": "Trains assistants using explicit principles to guide self-critique, revisions and AI-generated preference feedback.",
+    "definitionZh": "用明确的原则指导模型自我批评、修改回答与生成偏好反馈，从而改善助手行为。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2212.08073"
+    ]
+  },
+  {
     "id": "ai-cloud-consumer_vpc",
     "termEn": "consumer VPC",
     "termZh": "使用方 VPC",
@@ -2079,6 +2663,55 @@
     ]
   },
   {
+    "id": "ai-advanced-context-compaction",
+    "termEn": "context compaction",
+    "termZh": "上下文压缩",
+    "aliases": [
+      "context compaction",
+      "上下文压缩",
+      "context compacting",
+      "上下文精简"
+    ],
+    "definitionEn": "Summarizes or restructures accumulated context while preserving information needed for future steps.",
+    "definitionZh": "对累积上下文进行摘要或重组，同时尽量保留后续步骤所需的信息。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/effective-context-engineering-for-ai-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-context-engineering",
+    "termEn": "context engineering",
+    "termZh": "上下文工程",
+    "aliases": [
+      "context engineering",
+      "上下文工程",
+      "上下文设计"
+    ],
+    "definitionEn": "Designs and maintains the information supplied to a model across a task.",
+    "definitionZh": "设计并维护模型执行任务时接收到的信息，包括指令、工具结果、记忆和历史内容。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/effective-context-engineering-for-ai-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-context-rot",
+    "termEn": "context rot",
+    "termZh": "上下文腐化",
+    "aliases": [
+      "context rot",
+      "上下文腐化",
+      "上下文退化"
+    ],
+    "definitionEn": "A descriptive term for degraded use of relevant information as context grows; behavior varies by model and task.",
+    "definitionZh": "描述上下文变长时模型利用相关信息能力下降的现象；具体表现取决于模型和任务。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/effective-context-engineering-for-ai-agents"
+    ]
+  },
+  {
     "id": "ai-education-context-window",
     "termEn": "context window",
     "termZh": "上下文窗口",
@@ -2092,6 +2725,22 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#context-window",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#context-window"
+    ]
+  },
+  {
+    "id": "ai-advanced-contextual-retrieval",
+    "termEn": "contextual retrieval",
+    "termZh": "上下文化检索",
+    "aliases": [
+      "contextual retrieval",
+      "上下文化检索",
+      "上下文增强检索"
+    ],
+    "definitionEn": "Adds document-specific context to chunks before indexing to make retrieval more informative.",
+    "definitionZh": "在文本块被索引前加入文档相关背景，帮助检索系统更好理解局部片段。",
+    "category": "Retrieval",
+    "sources": [
+      "https://www.anthropic.com/research/contextual-retrieval"
     ]
   },
   {
@@ -2111,6 +2760,41 @@
     ]
   },
   {
+    "id": "ai-advanced-continued-pretraining",
+    "termEn": "continued pretraining",
+    "termZh": "持续预训练",
+    "aliases": [
+      "continued pretraining",
+      "持续预训练",
+      "continued pre-training",
+      "continual pretraining",
+      "继续预训练"
+    ],
+    "definitionEn": "Further self-supervised training of an existing pretrained model on additional text.",
+    "definitionZh": "在已有预训练模型上，用新增文本继续进行自监督训练，以吸收新领域或任务的数据分布。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2004.10964"
+    ]
+  },
+  {
+    "id": "ai-advanced-continuous-batching",
+    "termEn": "continuous batching",
+    "termZh": "连续批处理",
+    "aliases": [
+      "continuous batching",
+      "连续批处理",
+      "iteration-level batching",
+      "连续批次调度"
+    ],
+    "definitionEn": "Reschedules requests at generation steps so new requests enter as finished ones leave.",
+    "definitionZh": "在生成步骤之间重新调度批次，让新请求及时填入已完成请求留下的位置，提高设备利用率。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/continuous_batching"
+    ]
+  },
+  {
     "id": "ai-education-continuous-feature",
     "termEn": "continuous feature",
     "termZh": "连续特征",
@@ -2124,6 +2808,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#continuous-feature",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#continuous-feature"
+    ]
+  },
+  {
+    "id": "ai-advanced-control-token",
+    "termEn": "control token",
+    "termZh": "控制词元",
+    "aliases": [
+      "control token",
+      "控制词元",
+      "control tokens",
+      "对话控制词元"
+    ],
+    "definitionEn": "A special token marking boundaries or roles in a model's serialized conversation format.",
+    "definitionZh": "在模型对话序列中标记角色、边界等结构的特殊词元，通常不属于用户文本本身。",
+    "category": "Foundation models",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/chat_templating"
     ]
   },
   {
@@ -2319,6 +3020,22 @@
     ]
   },
   {
+    "id": "ai-advanced-counterfactual-reasoning",
+    "termEn": "counterfactual reasoning",
+    "termZh": "反事实推理",
+    "aliases": [
+      "counterfactual reasoning",
+      "反事实推理",
+      "反事实条件推理"
+    ],
+    "definitionEn": "Reasons about altered assumptions rather than only recalling familiar facts or standard problem settings.",
+    "definitionZh": "在改变后的假设下进行推理，而不只是复述熟悉事实或原有题目设置。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2307.02477"
+    ]
+  },
+  {
     "id": "ai-education-crash-blossom",
     "termEn": "crash blossom",
     "termZh": "歧义",
@@ -2332,6 +3049,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#crash-blossom",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#crash-blossom"
+    ]
+  },
+  {
+    "id": "ai-advanced-cross-attention",
+    "termEn": "cross-attention",
+    "termZh": "交叉注意力",
+    "aliases": [
+      "cross-attention",
+      "交叉注意力",
+      "cross attention",
+      "交叉注意力机制"
+    ],
+    "definitionEn": "Attention whose queries and key-value representations come from different sequences or representation streams.",
+    "definitionZh": "查询与键值来自不同序列或表示流的注意力，例如解码器读取编码器输出。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1706.03762"
     ]
   },
   {
@@ -2642,6 +3376,23 @@
     ]
   },
   {
+    "id": "ai-advanced-decode-phase",
+    "termEn": "decode phase",
+    "termZh": "解码阶段",
+    "aliases": [
+      "decode phase",
+      "解码阶段",
+      "decoding phase",
+      "自回归解码阶段"
+    ],
+    "definitionEn": "Generates new tokens autoregressively using the prompt and previously generated tokens.",
+    "definitionZh": "基于提示及已生成词元，按自回归方式逐步生成新词元的阶段。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/continuous_batching"
+    ]
+  },
+  {
     "id": "ai-education-decoder",
     "termEn": "decoder",
     "termZh": "解码器",
@@ -2655,6 +3406,25 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#decoder",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#decoder"
+    ]
+  },
+  {
+    "id": "ai-advanced-decoder-only",
+    "termEn": "decoder-only model",
+    "termZh": "纯解码器模型",
+    "aliases": [
+      "decoder-only model",
+      "纯解码器模型",
+      "decoder only model",
+      "仅解码器模型",
+      "decoder-only models",
+      "decoder only models"
+    ],
+    "definitionEn": "A model using decoder-style blocks to generate text, commonly with causal self-attention.",
+    "definitionZh": "使用解码器式模块生成文本的模型，通常采用因果自注意力来逐步生成词元。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2407.21783"
     ]
   },
   {
@@ -2758,6 +3528,41 @@
     ]
   },
   {
+    "id": "ai-advanced-dense-model",
+    "termEn": "dense model",
+    "termZh": "稠密模型",
+    "aliases": [
+      "dense model",
+      "稠密模型",
+      "dense language model",
+      "稠密语言模型",
+      "dense models"
+    ],
+    "definitionEn": "A model that generally uses all relevant layer parameters for each token, unlike sparsely activated experts.",
+    "definitionZh": "每个词元通常使用相关层全部参数进行计算的模型，与只激活部分专家的结构相区别。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2101.03961"
+    ]
+  },
+  {
+    "id": "ai-advanced-dense-retrieval",
+    "termEn": "dense retrieval",
+    "termZh": "稠密检索",
+    "aliases": [
+      "dense retrieval",
+      "稠密检索",
+      "dense vector retrieval",
+      "密集检索"
+    ],
+    "definitionEn": "Retrieves content by similarity between dense vector representations.",
+    "definitionZh": "通过稠密向量表示之间的相似度检索内容，能够发现不同措辞表达的相关信息。",
+    "category": "Retrieval",
+    "sources": [
+      "https://www.anthropic.com/research/contextual-retrieval"
+    ]
+  },
+  {
     "id": "ai-education-depth",
     "termEn": "depth",
     "termZh": "深度",
@@ -2855,6 +3660,23 @@
     ]
   },
   {
+    "id": "ai-advanced-diffusion-language-model",
+    "termEn": "diffusion language model",
+    "termZh": "扩散语言模型",
+    "aliases": [
+      "diffusion language model",
+      "扩散语言模型",
+      "diffusion language models",
+      "文本扩散模型"
+    ],
+    "definitionEn": "Generates text through iterative denoising or unmasking rather than strictly left-to-right next-token generation.",
+    "definitionZh": "通过逐步去噪或恢复被遮盖词元生成文本，不一定严格按从左到右逐词元生成。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2502.09992"
+    ]
+  },
+  {
     "id": "ai-education-dimension-reduction",
     "termEn": "dimension reduction",
     "termZh": "降维",
@@ -2884,6 +3706,22 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#dimensions",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#dimensions"
+    ]
+  },
+  {
+    "id": "ai-advanced-direct-preference-optimization",
+    "termEn": "direct preference optimization",
+    "termZh": "直接偏好优化",
+    "aliases": [
+      "direct preference optimization",
+      "直接偏好优化",
+      "DPO"
+    ],
+    "definitionEn": "Optimizes preferred versus rejected responses directly, avoiding a separately trained reward model and an online reinforcement-learning loop.",
+    "definitionZh": "直接根据偏好与非偏好回答的比较来优化语言模型，无需单独训练奖励模型或执行在线强化学习循环。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2305.18290"
     ]
   },
   {
@@ -2999,6 +3837,41 @@
     ]
   },
   {
+    "id": "ai-advanced-domain-adaptive-pretraining",
+    "termEn": "domain-adaptive pretraining",
+    "termZh": "领域自适应预训练",
+    "aliases": [
+      "domain-adaptive pretraining",
+      "领域自适应预训练",
+      "domain adaptive pretraining",
+      "DAPT",
+      "领域继续预训练"
+    ],
+    "definitionEn": "Continued pretraining on unlabeled text from a target domain before downstream task adaptation.",
+    "definitionZh": "使用目标领域的未标注文本继续预训练，让模型适应该领域，再进行下游任务训练。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2004.10964"
+    ]
+  },
+  {
+    "id": "ai-advanced-double-quantization",
+    "termEn": "double quantization",
+    "termZh": "双重量化",
+    "aliases": [
+      "double quantization",
+      "双重量化",
+      "nested quantization",
+      "嵌套量化"
+    ],
+    "definitionEn": "Quantizes quantization constants as well as model weights to reduce storage overhead.",
+    "definitionZh": "除了量化模型权重，还对量化所需的常数再次量化，以减少额外存储。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://arxiv.org/abs/2305.14314"
+    ]
+  },
+  {
     "id": "ai-education-downsampling",
     "termEn": "downsampling",
     "termZh": "降采样",
@@ -3012,6 +3885,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#downsampling",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#downsampling"
+    ]
+  },
+  {
+    "id": "ai-advanced-draft-model",
+    "termEn": "draft model",
+    "termZh": "草稿模型",
+    "aliases": [
+      "draft model",
+      "草稿模型",
+      "assistant model",
+      "草稿小模型"
+    ],
+    "definitionEn": "A cheaper model proposing candidate tokens for verification by a target model.",
+    "definitionZh": "在推测解码中以较低成本提出候选词元、供目标模型验证的模型。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/assisted_decoding"
     ]
   },
   {
@@ -3046,6 +3936,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#dynamic",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#dynamic"
+    ]
+  },
+  {
+    "id": "ai-advanced-dynamic-kv-cache",
+    "termEn": "dynamic KV cache",
+    "termZh": "动态键值缓存",
+    "aliases": [
+      "dynamic KV cache",
+      "动态键值缓存",
+      "dynamic cache",
+      "动态KV缓存"
+    ],
+    "definitionEn": "Grows attention-key and value storage as generated sequence length increases.",
+    "definitionZh": "随着生成序列增长而扩展的键值缓存，使用灵活，但动态形状可能限制部分编译优化。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/kv_cache"
     ]
   },
   {
@@ -3296,6 +4203,42 @@
     ]
   },
   {
+    "id": "ai-advanced-encoder-decoder-architecture",
+    "termEn": "encoder-decoder architecture",
+    "termZh": "编码器解码器架构",
+    "aliases": [
+      "encoder-decoder architecture",
+      "编码器解码器架构",
+      "encoder decoder architecture",
+      "编码器-解码器架构"
+    ],
+    "definitionEn": "An encoder represents the input while a decoder generates output conditioned on that representation.",
+    "definitionZh": "编码器先表示输入，解码器再结合该表示生成输出，常用于输入输出分离的序列任务。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1706.03762"
+    ]
+  },
+  {
+    "id": "ai-advanced-encoder-only",
+    "termEn": "encoder-only model",
+    "termZh": "纯编码器模型",
+    "aliases": [
+      "encoder-only model",
+      "纯编码器模型",
+      "encoder only model",
+      "仅编码器模型",
+      "encoder-only models",
+      "encoder only models"
+    ],
+    "definitionEn": "A model built from bidirectional encoder blocks, commonly used for representation and classification tasks.",
+    "definitionZh": "主要由双向编码器模块构成的模型，常用于文本表示、分类等理解任务。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1810.04805"
+    ]
+  },
+  {
     "id": "ai-cloud-endpoint",
     "termEn": "endpoint",
     "termZh": "endpoint",
@@ -3536,6 +4479,23 @@
     ]
   },
   {
+    "id": "ai-advanced-evaluation-harness",
+    "termEn": "evaluation harness",
+    "termZh": "评测运行框架",
+    "aliases": [
+      "evaluation harness",
+      "评测运行框架",
+      "eval harness",
+      "评测框架"
+    ],
+    "definitionEn": "Infrastructure that runs tasks, records trials, invokes graders and aggregates evaluation results.",
+    "definitionZh": "负责运行任务、记录尝试、调用评分器并汇总评测结果的基础设施。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/demystifying-evals-for-ai-agents"
+    ]
+  },
+  {
     "id": "ai-education-evaluator-agent",
     "termEn": "evaluator agent",
     "termZh": "评估器代理",
@@ -3549,6 +4509,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#evaluator-agent",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#evaluator-agent"
+    ]
+  },
+  {
+    "id": "ai-advanced-evaluator-optimizer",
+    "termEn": "evaluator-optimizer workflow",
+    "termZh": "评价与优化工作流",
+    "aliases": [
+      "evaluator-optimizer workflow",
+      "评价与优化工作流",
+      "evaluator-optimizer",
+      "evaluator optimizer",
+      "评估优化循环"
+    ],
+    "definitionEn": "One model evaluates another's output, guiding iterative revisions.",
+    "definitionZh": "一个模型评价另一个模型的输出，并用反馈指导反复修改。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/building-effective-agents"
     ]
   },
   {
@@ -3663,6 +4641,74 @@
     "sources": [
       "https://cloud.google.com/vertex-ai/docs/glossary#experimentrun",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#experimentrun"
+    ]
+  },
+  {
+    "id": "ai-advanced-expert-capacity",
+    "termEn": "expert capacity",
+    "termZh": "专家容量",
+    "aliases": [
+      "expert capacity",
+      "专家容量",
+      "MoE expert capacity",
+      "专家容量限制"
+    ],
+    "definitionEn": "A limit on how many tokens an expert processes in a batch, affecting load and overflow handling.",
+    "definitionZh": "一个专家在某批次中可处理的词元数量上限，会影响负载分配与超额词元的处理。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2101.03961"
+    ]
+  },
+  {
+    "id": "ai-advanced-expert-parallelism",
+    "termEn": "expert parallelism",
+    "termZh": "专家并行",
+    "aliases": [
+      "expert parallelism",
+      "专家并行",
+      "expert parallel",
+      "专家并行推理"
+    ],
+    "definitionEn": "Distributes mixture-of-experts modules across devices and routes token representations to selected experts.",
+    "definitionZh": "将混合专家模块分布到不同设备，并把词元表示路由到被选中的专家。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/serving/parallelism_scaling/"
+    ]
+  },
+  {
+    "id": "ai-advanced-expert-routing",
+    "termEn": "expert routing",
+    "termZh": "专家路由",
+    "aliases": [
+      "expert routing",
+      "专家路由",
+      "MoE routing",
+      "专家选择路由"
+    ],
+    "definitionEn": "A learned routing mechanism selects which expert modules process each token in a mixture-of-experts layer.",
+    "definitionZh": "混合专家层中的路由机制为各词元选择执行计算的专家模块。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2101.03961"
+    ]
+  },
+  {
+    "id": "ai-advanced-expert-specialization",
+    "termEn": "expert specialization",
+    "termZh": "专家专门化",
+    "aliases": [
+      "expert specialization",
+      "专家专门化",
+      "MoE specialization",
+      "专家专业化"
+    ],
+    "definitionEn": "Different experts develop distinct processing roles instead of duplicating the same capabilities.",
+    "definitionZh": "不同专家形成有差异的处理角色或能力，而不是全部重复学习相同内容。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2401.06066"
     ]
   },
   {
@@ -4204,6 +5250,24 @@
     ]
   },
   {
+    "id": "ai-advanced-few-shot-cot",
+    "termEn": "few-shot chain-of-thought",
+    "termZh": "少样本思维链",
+    "aliases": [
+      "few-shot chain-of-thought",
+      "少样本思维链",
+      "few-shot CoT",
+      "few shot chain of thought",
+      "少样本思维链提示"
+    ],
+    "definitionEn": "Supplies a small number of worked reasoning examples before asking the model to solve a new problem.",
+    "definitionZh": "在新问题之前提供少量带推理步骤的示范，以引导模型采用类似的解题方式。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2201.11903"
+    ]
+  },
+  {
     "id": "ai-education-few-shot-learning",
     "termEn": "few-shot learning",
     "termZh": "少量样本学习",
@@ -4303,6 +5367,24 @@
     ]
   },
   {
+    "id": "ai-advanced-flash-attention",
+    "termEn": "FlashAttention",
+    "termZh": "高效精确注意力",
+    "aliases": [
+      "FlashAttention",
+      "高效精确注意力",
+      "flash attention",
+      "Flash Attention",
+      "闪电注意力"
+    ],
+    "definitionEn": "An exact attention implementation using tiling to reduce GPU memory transfers, without removing attention interactions.",
+    "definitionZh": "通过分块减少GPU显存读写的精确注意力实现，不是通过删去注意力连接来做近似。",
+    "category": "Inference",
+    "sources": [
+      "https://arxiv.org/abs/2205.14135"
+    ]
+  },
+  {
     "id": "ai-education-flax",
     "termEn": "Flax",
     "termZh": "Flax",
@@ -4388,6 +5470,23 @@
     ]
   },
   {
+    "id": "ai-advanced-fp8-training",
+    "termEn": "FP8 training",
+    "termZh": "八位浮点训练",
+    "aliases": [
+      "FP8 training",
+      "八位浮点训练",
+      "FP8 mixed-precision training",
+      "FP8训练"
+    ],
+    "definitionEn": "Uses eight-bit floating-point computation for selected training operations while retaining higher precision where needed.",
+    "definitionZh": "在部分训练运算中使用八位浮点数，并在必要位置保留较高精度，以改善计算与内存效率。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2412.19437"
+    ]
+  },
+  {
     "id": "ai-education-fraction-of-successes",
     "termEn": "fraction of successes",
     "termZh": "成功次数所占的比例",
@@ -4401,6 +5500,25 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#fraction-of-successes",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#fraction-of-successes"
+    ]
+  },
+  {
+    "id": "ai-advanced-full-finetuning",
+    "termEn": "full-parameter fine-tuning",
+    "termZh": "全参数微调",
+    "aliases": [
+      "full-parameter fine-tuning",
+      "全参数微调",
+      "full fine-tuning",
+      "full parameter fine tuning",
+      "full finetuning",
+      "全量微调"
+    ],
+    "definitionEn": "Updates all model parameters instead of restricting updates to a small trainable subset.",
+    "definitionZh": "训练时更新模型全部参数，与仅训练适配器等少量参数的方法相区别。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/sft_trainer"
     ]
   },
   {
@@ -4746,6 +5864,22 @@
     ]
   },
   {
+    "id": "ai-advanced-gptq",
+    "termEn": "GPTQ",
+    "termZh": "GPTQ量化",
+    "aliases": [
+      "GPTQ",
+      "GPTQ量化",
+      "GPTQ quantization"
+    ],
+    "definitionEn": "A post-training weight-quantization method using approximate second-order information to reduce quantization error.",
+    "definitionZh": "使用近似二阶信息减少量化误差的训练后权重量化方法，常用于压缩生成式语言模型。",
+    "category": "Quantization",
+    "sources": [
+      "https://arxiv.org/abs/2210.17323"
+    ]
+  },
+  {
     "id": "ai-education-gradient",
     "termEn": "gradient",
     "termZh": "渐变色",
@@ -4876,6 +6010,23 @@
     ]
   },
   {
+    "id": "ai-advanced-greedy-decoding",
+    "termEn": "greedy decoding",
+    "termZh": "贪婪解码",
+    "aliases": [
+      "greedy decoding",
+      "贪婪解码",
+      "greedy search",
+      "贪心解码"
+    ],
+    "definitionEn": "Selects the highest-probability next token at each step, without guaranteeing the most probable complete sequence.",
+    "definitionZh": "每一步选择概率最高的下一个词元，但不保证得到整体概率最高的完整序列。",
+    "category": "Reasoning",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/generation_strategies"
+    ]
+  },
+  {
     "id": "ai-education-greedy-policy",
     "termEn": "greedy policy",
     "termZh": "贪婪策略",
@@ -4957,6 +6108,40 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#group-attribution-bias",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#group-attribution-bias"
+    ]
+  },
+  {
+    "id": "ai-advanced-group-relative-policy-optimization",
+    "termEn": "group relative policy optimization",
+    "termZh": "组相对策略优化",
+    "aliases": [
+      "group relative policy optimization",
+      "组相对策略优化",
+      "GRPO",
+      "组相对策略优化算法"
+    ],
+    "definitionEn": "Uses rewards from a group of sampled responses to estimate relative advantages, without a separate value-model baseline.",
+    "definitionZh": "对同一问题采样一组回答，用组内奖励比较估计相对优势，通常不需要单独的价值模型作为基线。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/grpo_trainer"
+    ]
+  },
+  {
+    "id": "ai-advanced-grouped-query-attention",
+    "termEn": "grouped-query attention",
+    "termZh": "分组查询注意力",
+    "aliases": [
+      "grouped-query attention",
+      "分组查询注意力",
+      "GQA",
+      "grouped query attention"
+    ],
+    "definitionEn": "Shares key-value heads within groups of query heads, between multi-head and multi-query attention.",
+    "definitionZh": "将查询头分组，每组共享键值头，在多头注意力与多查询注意力之间取得折中。",
+    "category": "Architecture",
+    "sources": [
+      "https://arxiv.org/abs/2305.13245"
     ]
   },
   {
@@ -5171,20 +6356,42 @@
   },
   {
     "id": "ai-education-human-in-the-loop-hitl",
-    "termEn": "human in the loop",
-    "termZh": "人机协同 (HITL)",
+    "termEn": "human-in-the-loop",
+    "termZh": "人在回路",
     "aliases": [
-      "human in the loop (HITL)",
+      "human-in-the-loop",
+      "人在回路",
+      "human in the loop",
+      "HITL",
+      "人工介入",
       "人机协同 (HITL)",
-      "人机协同",
-      "HITL"
+      "human in the loop (HITL)",
+      "人机协同"
     ],
-    "definitionEn": "A loosely-defined idiom that could mean either of the following: A policy of viewing generative AI output critically or skeptically. A strategy or system for ensuring that people help shape, evaluate, and refine a model's behavior. Keeping a human in the loop enables an AI to benefit from both machine intelligence and human intelligence. For example, a system in which an AI generates code which software engineers then review is a human-in-the-loop system.",
-    "definitionZh": "一种定义宽泛的表达方式，可能表示以下任一含义： 以批判性或怀疑性态度看待 生成式 AI 输出的政策。 一种策略或系统，用于确保人们帮助塑造、评估和改进模型的行为。人机协同可使 AI 同时受益于机器智能和人类智能。例如，在 AI 生成代码后由软件工程师审核的系统就是一个人机协同系统。",
-    "category": "Generative AI",
+    "definitionEn": "Humans review or intervene at selected stages of an otherwise automated process.",
+    "definitionZh": "在自动化流程的特定节点由人进行审查或干预，而不是让系统始终独立执行。",
+    "category": "Agents",
     "sources": [
+      "https://www.anthropic.com/research/building-effective-agents",
       "https://developers.google.com/machine-learning/glossary#human-in-the-loop-hitl",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#human-in-the-loop-hitl"
+    ]
+  },
+  {
+    "id": "ai-advanced-hybrid-retrieval",
+    "termEn": "hybrid retrieval",
+    "termZh": "混合检索",
+    "aliases": [
+      "hybrid retrieval",
+      "混合检索",
+      "hybrid search",
+      "混合搜索"
+    ],
+    "definitionEn": "Combines lexical matching with semantic retrieval to improve coverage.",
+    "definitionZh": "结合词法匹配与语义检索，利用不同检索方法互补的召回能力。",
+    "category": "Retrieval",
+    "sources": [
+      "https://www.anthropic.com/research/contextual-retrieval"
     ]
   },
   {
@@ -5236,6 +6443,23 @@
     ]
   },
   {
+    "id": "ai-advanced-hypothetical-document-embeddings",
+    "termEn": "hypothetical document embeddings",
+    "termZh": "假设文档嵌入",
+    "aliases": [
+      "hypothetical document embeddings",
+      "假设文档嵌入",
+      "HyDE",
+      "假想文档嵌入"
+    ],
+    "definitionEn": "Generates a hypothetical answer document and embeds it to retrieve real supporting documents.",
+    "definitionZh": "先生成假设性的回答文档，再对其编码并检索真实资料；生成内容本身不是事实证据。",
+    "category": "Retrieval",
+    "sources": [
+      "https://arxiv.org/abs/2212.10496"
+    ]
+  },
+  {
     "id": "ai-cloud-iam_permissions",
     "termEn": "Identity and Access Management permissions",
     "termZh": "Identity and Access Management 权限 (IAM)",
@@ -5254,6 +6478,23 @@
     ]
   },
   {
+    "id": "ai-advanced-image-patch-token",
+    "termEn": "image patch token",
+    "termZh": "图像块词元",
+    "aliases": [
+      "image patch token",
+      "图像块词元",
+      "patch tokens",
+      "图像图块词元"
+    ],
+    "definitionEn": "A token representation derived from an image patch for input to a visual Transformer.",
+    "definitionZh": "从图像局部块得到、供视觉Transformer处理的词元表示，不等同于一个自然语言单词。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2010.11929"
+    ]
+  },
+  {
     "id": "ai-education-image-recognition",
     "termEn": "image recognition",
     "termZh": "图像识别",
@@ -5267,6 +6508,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#image-recognition",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#image-recognition"
+    ]
+  },
+  {
+    "id": "ai-advanced-image-text-contrastive-learning",
+    "termEn": "image-text contrastive learning",
+    "termZh": "图文对比学习",
+    "aliases": [
+      "image-text contrastive learning",
+      "图文对比学习",
+      "image text contrastive learning",
+      "图像文本对比学习"
+    ],
+    "definitionEn": "Learns representations by bringing matched image-text pairs closer and separating mismatched pairs.",
+    "definitionZh": "让配对图像与文本的表示更接近，并区分不匹配样本的表示学习方法。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2103.00020"
     ]
   },
   {
@@ -5531,6 +6789,24 @@
     ]
   },
   {
+    "id": "ai-advanced-instruction-tuned-model",
+    "termEn": "instruction-tuned model",
+    "termZh": "指令微调模型",
+    "aliases": [
+      "instruction-tuned model",
+      "指令微调模型",
+      "instruct model",
+      "instruction tuned model",
+      "指令模型"
+    ],
+    "definitionEn": "A model further trained on instruction-response examples or related alignment data to follow requests.",
+    "definitionZh": "在预训练之后利用指令回答示范或相关对齐数据进一步训练，以更好遵循用户请求的模型。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2407.21783"
+    ]
+  },
+  {
     "id": "ai-education-inter-rater-agreement",
     "termEn": "inter-rater agreement",
     "termZh": "评分者间一致性信度",
@@ -5544,6 +6820,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#inter-rater-agreement",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#inter-rater-agreement"
+    ]
+  },
+  {
+    "id": "ai-advanced-inter-token-latency",
+    "termEn": "inter-token latency",
+    "termZh": "词元间延迟",
+    "aliases": [
+      "inter-token latency",
+      "词元间延迟",
+      "ITL",
+      "token间延迟"
+    ],
+    "definitionEn": "Time between successive output tokens during streamed generation.",
+    "definitionZh": "流式生成中，相邻输出词元之间的时间间隔，反映持续输出的速度。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/configuration/optimization/"
     ]
   },
   {
@@ -5706,6 +6999,22 @@
     ]
   },
   {
+    "id": "ai-advanced-kahneman-tversky-optimization",
+    "termEn": "Kahneman-Tversky optimization",
+    "termZh": "卡尼曼-特沃斯基优化",
+    "aliases": [
+      "Kahneman-Tversky optimization",
+      "卡尼曼-特沃斯基优化",
+      "KTO"
+    ],
+    "definitionEn": "Aligns models using desirable or undesirable output labels rather than requiring paired preference comparisons.",
+    "definitionZh": "使用回答是否合意的二元标签来对齐模型，无需为每个提示准备成对的优劣回答。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2402.01306"
+    ]
+  },
+  {
     "id": "ai-education-keras",
     "termEn": "Keras",
     "termZh": "Keras",
@@ -5739,6 +7048,25 @@
     ]
   },
   {
+    "id": "ai-advanced-kv-cache",
+    "termEn": "key-value cache",
+    "termZh": "键值缓存",
+    "aliases": [
+      "key-value cache",
+      "键值缓存",
+      "KV cache",
+      "KV-cache",
+      "KV缓存",
+      "KV 缓存"
+    ],
+    "definitionEn": "Stores attention keys and values from previous tokens to avoid recomputation during autoregressive generation.",
+    "definitionZh": "缓存已处理词元的注意力键和值，使自回归生成后续词元时避免重复计算。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/kv_cache"
+    ]
+  },
+  {
     "id": "ai-education-keypoints",
     "termEn": "keypoints",
     "termZh": "关键点",
@@ -5753,6 +7081,59 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#keypoints",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#keypoints"
+    ]
+  },
+  {
+    "id": "ai-advanced-kl-regularization",
+    "termEn": "KL regularization",
+    "termZh": "KL正则化",
+    "aliases": [
+      "KL regularization",
+      "KL正则化",
+      "KL penalty",
+      "KL divergence penalty",
+      "KL 正则化",
+      "KL惩罚"
+    ],
+    "definitionEn": "Penalizes divergence between learned and reference policies to constrain changes during optimization.",
+    "definitionZh": "通过惩罚当前策略与参考策略之间的KL散度，限制优化过程中的行为偏移。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/grpo_trainer"
+    ]
+  },
+  {
+    "id": "ai-advanced-cache-offloading",
+    "termEn": "KV cache offloading",
+    "termZh": "键值缓存卸载",
+    "aliases": [
+      "KV cache offloading",
+      "键值缓存卸载",
+      "cache offloading",
+      "KV缓存卸载"
+    ],
+    "definitionEn": "Moves some attention cache states to CPU memory to lower GPU memory demand.",
+    "definitionZh": "将部分注意力缓存状态放到CPU内存，在需要时传回GPU，用传输开销换取较低显存占用。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/kv_cache"
+    ]
+  },
+  {
+    "id": "ai-advanced-kv-cache-quantization",
+    "termEn": "KV cache quantization",
+    "termZh": "键值缓存量化",
+    "aliases": [
+      "KV cache quantization",
+      "键值缓存量化",
+      "KV-cache quantization",
+      "KV缓存量化"
+    ],
+    "definitionEn": "Stores attention cache values at lower numerical precision to save memory, with possible quality or latency tradeoffs.",
+    "definitionZh": "用较低数值精度存储键值缓存以节省显存，可能带来质量或延迟方面的权衡。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/kv_cache"
     ]
   },
   {
@@ -5903,6 +7284,23 @@
     ]
   },
   {
+    "id": "ai-advanced-language-agent-tree-search",
+    "termEn": "Language Agent Tree Search",
+    "termZh": "语言智能体树搜索",
+    "aliases": [
+      "Language Agent Tree Search",
+      "语言智能体树搜索",
+      "LATS",
+      "语言智能体搜索树"
+    ],
+    "definitionEn": "A research framework combining language-model reasoning, actions and environment feedback with tree search.",
+    "definitionZh": "将语言模型推理、动作、环境反馈与树搜索结合的研究框架。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2310.04406"
+    ]
+  },
+  {
     "id": "ai-education-language-model",
     "termEn": "language model",
     "termZh": "语言模型",
@@ -5951,6 +7349,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#latency",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#latency"
+    ]
+  },
+  {
+    "id": "ai-advanced-latent-reasoning",
+    "termEn": "latent reasoning",
+    "termZh": "潜在空间推理",
+    "aliases": [
+      "latent reasoning",
+      "潜在空间推理",
+      "latent space reasoning",
+      "连续潜空间推理",
+      "潜空间推理"
+    ],
+    "definitionEn": "Carries intermediate computation in latent representations instead of expressing every step as text.",
+    "definitionZh": "在潜在表示中承载中间推理计算，不要求把每一步都转换成自然语言词元。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2412.06769"
     ]
   },
   {
@@ -6130,6 +7546,31 @@
     ]
   },
   {
+    "id": "ai-education-agent",
+    "termEn": "LLM agent",
+    "termZh": "语言模型智能体",
+    "aliases": [
+      "LLM agent",
+      "语言模型智能体",
+      "AI agent",
+      "AI agents",
+      "LLM agents",
+      "智能体",
+      "AI智能体",
+      "agent",
+      "agents",
+      "代理"
+    ],
+    "definitionEn": "A model-driven system that selects actions and tools using feedback while pursuing a task.",
+    "definitionZh": "由语言模型根据任务与反馈选择行动和工具的系统，不等同于固定步骤的自动化脚本。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/building-effective-agents",
+      "https://developers.google.com/machine-learning/glossary#agent",
+      "https://developers.google.com/machine-learning/glossary?hl=zh-cn#agent"
+    ]
+  },
+  {
     "id": "ai-education-llm-evaluations-evals",
     "termEn": "LLM evaluations",
     "termZh": "LLM 评估",
@@ -6144,6 +7585,59 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#llm-evaluations-evals",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#llm-evaluations-evals"
+    ]
+  },
+  {
+    "id": "ai-advanced-overthinking",
+    "termEn": "LLM overthinking",
+    "termZh": "大模型过度思考",
+    "aliases": [
+      "LLM overthinking",
+      "大模型过度思考",
+      "overthinking",
+      "推理冗余",
+      "过度推理"
+    ],
+    "definitionEn": "Spending unnecessary reasoning steps that increase cost without reliably improving answers, and can sometimes degrade them.",
+    "definitionZh": "使用过多推理步骤却没有稳定改善答案的现象，既增加成本，也可能破坏已有正确解答。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2412.21187"
+    ]
+  },
+  {
+    "id": "ai-advanced-llm-as-judge",
+    "termEn": "LLM-as-a-judge",
+    "termZh": "大模型裁判",
+    "aliases": [
+      "LLM-as-a-judge",
+      "大模型裁判",
+      "LLM as a judge",
+      "LLM judge",
+      "大模型评审"
+    ],
+    "definitionEn": "Uses a language model to evaluate outputs; judgments can exhibit ordering, verbosity and other biases.",
+    "definitionZh": "使用语言模型评价输出质量；评价可能受到回答顺序、长度等偏差影响。",
+    "category": "Evaluation",
+    "sources": [
+      "https://arxiv.org/abs/2306.05685"
+    ]
+  },
+  {
+    "id": "ai-advanced-llmcompiler",
+    "termEn": "LLMCompiler",
+    "termZh": "大模型调用编译器",
+    "aliases": [
+      "LLMCompiler",
+      "大模型调用编译器",
+      "LLM Compiler",
+      "大模型工具调用编译框架"
+    ],
+    "definitionEn": "A research framework that plans tool dependencies and schedules function calls, including parallel execution.",
+    "definitionZh": "将工具依赖关系规划成执行图并调度函数调用的研究框架，可并行执行独立调用。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2312.04511"
     ]
   },
   {
@@ -6260,6 +7754,41 @@
     ]
   },
   {
+    "id": "ai-advanced-long-horizon-agent",
+    "termEn": "long-horizon agent",
+    "termZh": "长程任务智能体",
+    "aliases": [
+      "long-horizon agent",
+      "长程任务智能体",
+      "long-running agent",
+      "long horizon tasks",
+      "长时运行智能体"
+    ],
+    "definitionEn": "An agent performing tasks that require sustained work across many steps or execution sessions.",
+    "definitionZh": "需要跨很多步骤或多个执行会话持续完成任务的智能体，通常依赖明确的进度与状态管理。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/effective-harnesses-for-long-running-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-lora-adapter",
+    "termEn": "LoRA adapter",
+    "termZh": "LoRA适配器",
+    "aliases": [
+      "LoRA adapter",
+      "LoRA适配器",
+      "low-rank adapter",
+      "低秩适配器"
+    ],
+    "definitionEn": "The trainable low-rank modules added to a frozen base model during LoRA tuning.",
+    "definitionZh": "在LoRA微调中附加到冻结基础模型上的可训练低秩模块，可单独保存和加载。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora"
+    ]
+  },
+  {
     "id": "ai-education-loss",
     "termEn": "loss",
     "termZh": "损失",
@@ -6359,18 +7888,23 @@
   },
   {
     "id": "ai-education-low-rank-adaptability-lora",
-    "termEn": "Low-Rank Adaptability",
-    "termZh": "低秩自适应 (LoRA)",
+    "termEn": "low-rank adaptation",
+    "termZh": "低秩适配",
     "aliases": [
-      "Low-Rank Adaptability (LoRA)",
-      "低秩自适应 (LoRA)",
+      "low-rank adaptation",
+      "低秩适配",
+      "LoRA",
+      "low rank adaptation",
       "低秩自适应",
-      "LoRA"
+      "Low-Rank Adaptability",
+      "低秩自适应 (LoRA)",
+      "Low-Rank Adaptability (LoRA)"
     ],
-    "definitionEn": "A parameter-efficient technique for fine tuning that \"freezes\" the model's pre-trained weights (such that they can no longer be modified) and then inserts a small set of trainable weights into the model. This set of trainable weights (also known as \"update matrixes\") is considerably smaller than the base model and is therefore much faster to train. LoRA provides the following benefits: Improves the quality of a model's predictions for the domain where the fine tuning is applied. Fine-tunes faster than techniques that require fine-tuning all of a model's parameters. Reduces the computational cost of inference by enabling concurrent serving of multiple specialized models sharing the same base model.",
-    "definitionZh": "一种 参数高效 的 微调 技术，用于“冻结”模型的预训练权重（使其无法再被修改），然后在模型中插入一小部分可训练的权重。这组可训练的权重（也称为“更新矩阵”）比基础模型小得多，因此训练速度也快得多。 LoRA 具有以下优势： 提高模型在应用微调的网域中的预测质量。 与需要微调模型 所有 参数的技术相比，微调速度更快。 通过支持同时部署多个共享同一基础模型的专用模型，降低 推理 的计算成本。",
-    "category": "Generative AI",
+    "definitionEn": "Keeps base weights frozen and learns low-rank matrix updates for selected layers.",
+    "definitionZh": "冻结基础模型权重，用低秩矩阵学习选定层的权重增量，从而降低微调开销。",
+    "category": "Fine-tuning",
     "sources": [
+      "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora",
       "https://developers.google.com/machine-learning/glossary#low-rank-adaptability-lora",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#low-rank-adaptability-lora"
     ]
@@ -6438,6 +7972,42 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#majority-class",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#majority-class"
+    ]
+  },
+  {
+    "id": "ai-advanced-majority-voting",
+    "termEn": "majority voting",
+    "termZh": "多数投票",
+    "aliases": [
+      "majority voting",
+      "多数投票",
+      "majority vote",
+      "多数表决"
+    ],
+    "definitionEn": "Chooses the answer appearing most often among multiple sampled solutions.",
+    "definitionZh": "从多个采样解答中选择出现次数最多的答案；多个解答仍可能共同犯错。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2203.11171"
+    ]
+  },
+  {
+    "id": "ai-advanced-mamba",
+    "termEn": "Mamba architecture",
+    "termZh": "Mamba架构",
+    "aliases": [
+      "Mamba architecture",
+      "Mamba架构",
+      "Mamba model",
+      "Mamba模型",
+      "Mamba architectures",
+      "Mamba"
+    ],
+    "definitionEn": "A sequence-model architecture built around selective state-space mechanisms rather than standard full self-attention.",
+    "definitionZh": "围绕选择性状态空间机制构建的序列模型架构，不以标准全自注意力作为核心。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2312.00752"
     ]
   },
   {
@@ -6575,12 +8145,16 @@
     "termZh": "掩码语言模型",
     "aliases": [
       "masked language model",
-      "掩码语言模型"
+      "掩码语言模型",
+      "masked language modeling",
+      "MLM",
+      "掩码语言建模"
     ],
-    "definitionEn": "A language model that predicts the probability of candidate tokens to fill in blanks in a sequence. For example, a masked language model can calculate probabilities for candidate word(s) to replace the underline in the following sentence: The ____ in the hat came back. The literature typically uses the string \"MASK\" instead of an underline. For example: The \"MASK\" in the hat came back. Most modern masked language models are bidirectional .",
-    "definitionZh": "一种 语言模型 ，用于预测候选令牌填入序列中空白处的概率。例如，遮盖语言模型可以计算候选字词的概率，以替换以下句子中的下划线： 帽子里的____回来了。 文献通常使用字符串“MASK”而不是下划线。 例如： 帽子上的“MASK”又回来了。 大多数现代掩码语言模型都是 双向 的。",
-    "category": "Machine learning",
+    "definitionEn": "Learns to predict hidden tokens using the visible surrounding context.",
+    "definitionZh": "通过可见的周围上下文预测被隐藏的词元，是一类常见的预训练模型与训练目标。",
+    "category": "Foundation models",
     "sources": [
+      "https://arxiv.org/abs/1810.04805",
       "https://developers.google.com/machine-learning/glossary#masked-language-model",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#masked-language-model"
     ]
@@ -6647,6 +8221,87 @@
     "sources": [
       "https://cloud.google.com/vertex-ai/docs/glossary#maximum_transmission_unit",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#maximum_transmission_unit"
+    ]
+  },
+  {
+    "id": "ai-advanced-mcp-client",
+    "termEn": "MCP client",
+    "termZh": "MCP客户端",
+    "aliases": [
+      "MCP client",
+      "MCP客户端",
+      "MCP clients"
+    ],
+    "definitionEn": "A component within a host application that maintains a connection to an MCP server.",
+    "definitionZh": "位于宿主应用中、负责维持与某个MCP服务端连接的组件。",
+    "category": "Agents",
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture"
+    ]
+  },
+  {
+    "id": "ai-advanced-mcp-prompt",
+    "termEn": "MCP prompt",
+    "termZh": "MCP提示模板",
+    "aliases": [
+      "MCP prompt",
+      "MCP提示模板",
+      "MCP prompts"
+    ],
+    "definitionEn": "A reusable prompt template exposed by an MCP server, optionally accepting arguments.",
+    "definitionZh": "MCP服务端提供的可复用提示模板，可接受参数并生成结构化提示内容。",
+    "category": "Agents",
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-06-18/server/prompts"
+    ]
+  },
+  {
+    "id": "ai-advanced-mcp-resource",
+    "termEn": "MCP resource",
+    "termZh": "MCP资源",
+    "aliases": [
+      "MCP resource",
+      "MCP资源",
+      "MCP resources"
+    ],
+    "definitionEn": "URI-addressed contextual data exposed by an MCP server for a client application to read.",
+    "definitionZh": "由MCP服务端通过URI提供的上下文数据，供客户端应用读取，不等同于执行工具动作。",
+    "category": "Agents",
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-06-18/server/resources"
+    ]
+  },
+  {
+    "id": "ai-advanced-mcp-server",
+    "termEn": "MCP server",
+    "termZh": "MCP服务端",
+    "aliases": [
+      "MCP server",
+      "MCP服务端",
+      "MCP servers",
+      "MCP服务器"
+    ],
+    "definitionEn": "A service exposing tools, resources or prompts through the Model Context Protocol.",
+    "definitionZh": "通过模型上下文协议提供工具、资源或提示等能力的服务端。",
+    "category": "Agents",
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture"
+    ]
+  },
+  {
+    "id": "ai-advanced-mcp-tool",
+    "termEn": "MCP tool",
+    "termZh": "MCP工具",
+    "aliases": [
+      "MCP tool",
+      "MCP工具",
+      "MCP tools"
+    ],
+    "definitionEn": "A callable capability advertised by an MCP server with a name, description and input schema.",
+    "definitionZh": "MCP服务端公布的可调用能力，通常具有名称、说明和输入模式，与只读上下文资源不同。",
+    "category": "Agents",
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-06-18/server/tools"
     ]
   },
   {
@@ -6972,6 +8627,22 @@
     ]
   },
   {
+    "id": "ai-advanced-model-context-protocol",
+    "termEn": "Model Context Protocol",
+    "termZh": "模型上下文协议",
+    "aliases": [
+      "Model Context Protocol",
+      "模型上下文协议",
+      "MCP"
+    ],
+    "definitionEn": "A protocol connecting AI applications to external tools and contextual resources through client-server interfaces.",
+    "definitionZh": "通过客户端与服务端接口，将AI应用连接到外部工具和上下文资源的协议。",
+    "category": "Agents",
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture"
+    ]
+  },
+  {
     "id": "ai-cloud-model_distillation",
     "termEn": "model distillation (knowledge distillation, teacher-student models)",
     "termZh": "模型蒸馏（知识蒸馏、教师-学生模型）",
@@ -7101,6 +8772,24 @@
     ]
   },
   {
+    "id": "ai-advanced-monte-carlo-tree-search",
+    "termEn": "Monte Carlo tree search",
+    "termZh": "蒙特卡洛树搜索",
+    "aliases": [
+      "Monte Carlo tree search",
+      "蒙特卡洛树搜索",
+      "MCTS",
+      "Monte-Carlo tree search",
+      "蒙特卡罗树搜索"
+    ],
+    "definitionEn": "A search method allocating exploration among action branches using sampled outcomes and updated value estimates.",
+    "definitionZh": "根据采样结果与更新的价值估计在行动分支之间分配探索的搜索方法。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2310.04406"
+    ]
+  },
+  {
     "id": "ai-education-mostly-basic-python-problems-mbpp",
     "termEn": "Mostly Basic Python Problems",
     "termZh": "Mostly Basic Python Problems (MBPP)",
@@ -7131,6 +8820,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#multi-agent-collaboration",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#multi-agent-collaboration"
+    ]
+  },
+  {
+    "id": "ai-advanced-multi-agent-system",
+    "termEn": "multi-agent system",
+    "termZh": "多智能体系统",
+    "aliases": [
+      "multi-agent system",
+      "多智能体系统",
+      "multi-agent systems",
+      "multi agent system",
+      "多代理系统"
+    ],
+    "definitionEn": "A system in which multiple agents coordinate to solve tasks, with additional communication and consistency costs.",
+    "definitionZh": "多个智能体协调完成任务的系统，可能增加并行能力，也带来通信和结果一致性成本。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/multi-agent-research-system"
     ]
   },
   {
@@ -7166,6 +8873,24 @@
     ]
   },
   {
+    "id": "ai-advanced-multi-head-latent-attention",
+    "termEn": "multi-head latent attention",
+    "termZh": "多头潜在注意力",
+    "aliases": [
+      "multi-head latent attention",
+      "多头潜在注意力",
+      "MLA",
+      "multi head latent attention",
+      "多头潜注意力"
+    ],
+    "definitionEn": "Compresses attention keys and values into a lower-dimensional latent representation to reduce cache requirements.",
+    "definitionZh": "将注意力键和值压缩到较低维潜在表示中，以降低键值缓存需求。",
+    "category": "Architecture",
+    "sources": [
+      "https://arxiv.org/abs/2405.04434"
+    ]
+  },
+  {
     "id": "ai-education-multi-head-self-attention",
     "termEn": "multi-head self-attention",
     "termZh": "多头自注意力",
@@ -7179,6 +8904,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#multi-head-self-attention",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#multi-head-self-attention"
+    ]
+  },
+  {
+    "id": "ai-advanced-multi-query-attention",
+    "termEn": "multi-query attention",
+    "termZh": "多查询注意力",
+    "aliases": [
+      "multi-query attention",
+      "多查询注意力",
+      "MQA",
+      "multi query attention"
+    ],
+    "definitionEn": "Shares one set of attention keys and values across query heads to reduce decoding memory traffic.",
+    "definitionZh": "让多个查询头共享同一组键和值，降低自回归解码的缓存量与内存带宽需求。",
+    "category": "Architecture",
+    "sources": [
+      "https://arxiv.org/abs/1911.02150"
     ]
   },
   {
@@ -7197,6 +8939,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#multi-sentence-reading-comprehension-multirc",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#multi-sentence-reading-comprehension-multirc"
+    ]
+  },
+  {
+    "id": "ai-advanced-multi-token-prediction",
+    "termEn": "multi-token prediction",
+    "termZh": "多词元预测",
+    "aliases": [
+      "multi-token prediction",
+      "多词元预测",
+      "MTP",
+      "multi token prediction",
+      "多token预测"
+    ],
+    "definitionEn": "Trains a model to predict several future tokens from a shared context, rather than only the immediate next token.",
+    "definitionZh": "训练模型基于共享上下文预测多个未来词元，而不只是紧接着的下一个词元。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2404.19737"
     ]
   },
   {
@@ -7230,6 +8990,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#multimodal-model",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#multimodal-model"
+    ]
+  },
+  {
+    "id": "ai-advanced-multinomial-sampling",
+    "termEn": "multinomial sampling",
+    "termZh": "多项分布采样",
+    "aliases": [
+      "multinomial sampling",
+      "多项分布采样",
+      "multinomial decoding",
+      "随机词元采样"
+    ],
+    "definitionEn": "Samples the next token from its probability distribution rather than always taking the most likely token.",
+    "definitionZh": "依据概率分布随机选择下一词元，而不总是选择最大概率项。",
+    "category": "Reasoning",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/generation_strategies"
     ]
   },
   {
@@ -7379,6 +9156,25 @@
     ]
   },
   {
+    "id": "ai-advanced-scaling-law",
+    "termEn": "neural scaling law",
+    "termZh": "神经网络缩放定律",
+    "aliases": [
+      "neural scaling law",
+      "神经网络缩放定律",
+      "scaling law",
+      "scaling laws",
+      "模型缩放定律",
+      "扩展定律"
+    ],
+    "definitionEn": "An empirical relationship linking model loss or performance to factors such as parameters, data and compute.",
+    "definitionZh": "描述模型损失或表现与参数量、数据量、计算量等因素关系的经验规律，不是对任意任务的保证。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2001.08361"
+    ]
+  },
+  {
     "id": "ai-education-neuron",
     "termEn": "neuron",
     "termZh": "神经元",
@@ -7392,6 +9188,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#neuron",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#neuron"
+    ]
+  },
+  {
+    "id": "ai-advanced-next-token-prediction",
+    "termEn": "next-token prediction",
+    "termZh": "下一词元预测",
+    "aliases": [
+      "next-token prediction",
+      "下一词元预测",
+      "next token prediction",
+      "next-token prediction objective",
+      "下一token预测"
+    ],
+    "definitionEn": "A learning objective that predicts each following token from the preceding context.",
+    "definitionZh": "利用前文预测紧接着出现的词元的学习目标，是自回归语言模型预训练的常见方式。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2407.21783"
     ]
   },
   {
@@ -7608,6 +9422,24 @@
     ]
   },
   {
+    "id": "ai-advanced-nucleus-sampling",
+    "termEn": "nucleus sampling",
+    "termZh": "核采样",
+    "aliases": [
+      "nucleus sampling",
+      "核采样",
+      "top-p sampling",
+      "top p sampling",
+      "top-p采样"
+    ],
+    "definitionEn": "Samples from the smallest high-probability token set whose cumulative probability reaches a chosen threshold.",
+    "definitionZh": "从累计概率达到指定阈值的最小高概率候选集合中采样，候选数量随分布变化。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/1904.09751"
+    ]
+  },
+  {
     "id": "ai-education-numerical-data",
     "termEn": "numerical data",
     "termZh": "数值数据",
@@ -7720,6 +9552,22 @@
     ]
   },
   {
+    "id": "ai-advanced-odds-ratio-preference-optimization",
+    "termEn": "odds ratio preference optimization",
+    "termZh": "赔率比偏好优化",
+    "aliases": [
+      "odds ratio preference optimization",
+      "赔率比偏好优化",
+      "ORPO"
+    ],
+    "definitionEn": "Combines supervised learning and an odds-ratio preference penalty without needing a separate reference model.",
+    "definitionZh": "将监督学习与基于赔率比的偏好惩罚结合在一次训练中，不需要额外的参考模型。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2403.07691"
+    ]
+  },
+  {
     "id": "ai-education-offline-inference",
     "termEn": "offline inference",
     "termZh": "离线推理",
@@ -7749,6 +9597,23 @@
     "sources": [
       "https://cloud.google.com/vertex-ai/docs/glossary#offline_store",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#offline_store"
+    ]
+  },
+  {
+    "id": "ai-advanced-on-policy-training",
+    "termEn": "on-policy training",
+    "termZh": "同策略训练",
+    "aliases": [
+      "on-policy training",
+      "同策略训练",
+      "on-policy learning",
+      "在线同策略训练"
+    ],
+    "definitionEn": "Updates a policy using samples generated by that policy rather than a substantially different behavior policy.",
+    "definitionZh": "主要使用当前策略自身生成的数据更新该策略，与使用不同历史策略采集的数据相区别。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/rloo_trainer"
     ]
   },
   {
@@ -7930,6 +9795,40 @@
     ]
   },
   {
+    "id": "ai-advanced-orchestrator-workers",
+    "termEn": "orchestrator-workers workflow",
+    "termZh": "编排器与工作者工作流",
+    "aliases": [
+      "orchestrator-workers workflow",
+      "编排器与工作者工作流",
+      "orchestrator-workers",
+      "orchestrator workers",
+      "编排器工作者模式"
+    ],
+    "definitionEn": "A coordinator decomposes tasks and delegates work to specialized workers.",
+    "definitionZh": "由协调者拆解任务、分配给专门工作者，再汇总结果的工作流。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/building-effective-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-osworld",
+    "termEn": "OSWorld",
+    "termZh": "计算机操作智能体基准",
+    "aliases": [
+      "OSWorld",
+      "计算机操作智能体基准",
+      "OSWorld benchmark"
+    ],
+    "definitionEn": "A benchmark evaluating multimodal agents on tasks in real computer environments.",
+    "definitionZh": "在真实计算机环境中评估多模态智能体操作与任务完成能力的基准。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2404.07972"
+    ]
+  },
+  {
     "id": "ai-education-out-group-homogeneity-bias",
     "termEn": "out-group homogeneity bias",
     "termZh": "群外同质性偏差",
@@ -7960,6 +9859,57 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#out-of-bag-evaluation-oob-evaluation",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#out-of-bag-evaluation-oob-evaluation"
+    ]
+  },
+  {
+    "id": "ai-advanced-outcome-grading",
+    "termEn": "outcome grading",
+    "termZh": "结果状态评分",
+    "aliases": [
+      "outcome grading",
+      "结果状态评分",
+      "outcome-based evaluation",
+      "结果状态评测"
+    ],
+    "definitionEn": "Evaluates the final environment state rather than trusting the agent's claim that a task succeeded.",
+    "definitionZh": "根据最终环境状态判断任务是否完成，而不是只相信智能体声称已经成功。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/demystifying-evals-for-ai-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-outcome-reward-model",
+    "termEn": "outcome reward model",
+    "termZh": "结果奖励模型",
+    "aliases": [
+      "outcome reward model",
+      "结果奖励模型",
+      "ORM",
+      "outcome-supervised reward model",
+      "结果监督奖励模型"
+    ],
+    "definitionEn": "Scores a completed response or final outcome rather than supervising every intermediate step.",
+    "definitionZh": "对完整回答或最终结果打分的奖励模型，与逐步评价中间推理过程的模型相区别。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/reward_trainer"
+    ]
+  },
+  {
+    "id": "ai-advanced-outcome-supervision",
+    "termEn": "outcome supervision",
+    "termZh": "结果监督",
+    "aliases": [
+      "outcome supervision",
+      "结果监督",
+      "结果级监督"
+    ],
+    "definitionEn": "Training feedback based on the final outcome rather than labels for each reasoning step.",
+    "definitionZh": "主要依据最终结果提供训练反馈，不要求对每个中间推理步骤逐一标注。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2305.20050"
     ]
   },
   {
@@ -8059,6 +10009,40 @@
     ]
   },
   {
+    "id": "ai-advanced-paged-optimizer",
+    "termEn": "paged optimizer",
+    "termZh": "分页优化器",
+    "aliases": [
+      "paged optimizer",
+      "分页优化器",
+      "paged optimizers",
+      "分页优化器机制"
+    ],
+    "definitionEn": "Uses paged memory management to handle optimizer-state memory spikes during training.",
+    "definitionZh": "借助分页内存管理应对训练时优化器状态引起的显存峰值。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://arxiv.org/abs/2305.14314"
+    ]
+  },
+  {
+    "id": "ai-advanced-paged-attention",
+    "termEn": "PagedAttention",
+    "termZh": "分页注意力",
+    "aliases": [
+      "PagedAttention",
+      "分页注意力",
+      "paged attention",
+      "分页注意力机制"
+    ],
+    "definitionEn": "Manages attention caches in blocks, reducing fragmentation and enabling flexible cache sharing.",
+    "definitionZh": "将注意力缓存按块管理，减少内存碎片，并支持缓存块的灵活共享。",
+    "category": "Inference",
+    "sources": [
+      "https://arxiv.org/abs/2309.06180"
+    ]
+  },
+  {
     "id": "ai-education-pandas",
     "termEn": "pandas",
     "termZh": "pandas",
@@ -8071,6 +10055,40 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#pandas",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#pandas"
+    ]
+  },
+  {
+    "id": "ai-advanced-parallel-reasoning",
+    "termEn": "parallel reasoning",
+    "termZh": "并行推理路径探索",
+    "aliases": [
+      "parallel reasoning",
+      "并行推理路径探索",
+      "parallel test-time scaling",
+      "并行思考"
+    ],
+    "definitionEn": "Explores multiple candidate solutions independently before selecting or aggregating results.",
+    "definitionZh": "独立探索多个候选解法，然后选择或汇总结果；不同候选可能仍有相关错误。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2408.03314"
+    ]
+  },
+  {
+    "id": "ai-advanced-parallel-tool-calling",
+    "termEn": "parallel tool calling",
+    "termZh": "并行工具调用",
+    "aliases": [
+      "parallel tool calling",
+      "并行工具调用",
+      "parallel function calling",
+      "并行函数调用"
+    ],
+    "definitionEn": "Executes independent tool calls concurrently while respecting dependencies between their results.",
+    "definitionZh": "在遵守结果依赖关系的前提下，并发执行彼此独立的工具调用以减少等待。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2312.04511"
     ]
   },
   {
@@ -8125,16 +10143,22 @@
   },
   {
     "id": "ai-education-parameter-efficient-tuning",
-    "termEn": "parameter-efficient tuning",
-    "termZh": "参数高效调优",
+    "termEn": "parameter-efficient fine-tuning",
+    "termZh": "参数高效微调",
     "aliases": [
-      "parameter-efficient tuning",
-      "参数高效调优"
+      "parameter-efficient fine-tuning",
+      "参数高效微调",
+      "PEFT",
+      "parameter efficient fine tuning",
+      "parameter-efficient finetuning",
+      "参数高效调优",
+      "parameter-efficient tuning"
     ],
-    "definitionEn": "A set of techniques to fine-tune a large pre-trained language model (PLM) more efficiently than full fine-tuning . Parameter-efficient tuning typically fine-tunes far fewer parameters than full fine-tuning, yet generally produces a large language model that performs as well (or almost as well) as a large language model built from full fine-tuning. Compare and contrast parameter-efficient tuning with: instruction tuning prompt tuning Parameter-efficient tuning is also known as parameter-efficient fine-tuning .",
-    "definitionZh": "一组用于比完全 微调 更高效地 微调 大型 预训练语言模型 (PLM) 的技术。与完全微调相比，参数高效调优通常会微调少得多的 参数 ，但通常会生成性能与完全微调构建的大语言模型相当（或几乎相当）的 大语言模型 。 比较参数高效调优与以下方法的异同： 指令调优 提示调优 参数高效调优也称为 参数高效微调 。",
-    "category": "Generative AI",
+    "definitionEn": "Adapts a model by training a small subset of parameters or added modules.",
+    "definitionZh": "通过训练少量参数或新增模块来适配模型，以减少微调所需的计算与存储。",
+    "category": "Fine-tuning",
     "sources": [
+      "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora",
       "https://developers.google.com/machine-learning/glossary#parameter-efficient-tuning",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#parameter-efficient-tuning"
     ]
@@ -8189,19 +10213,49 @@
   },
   {
     "id": "ai-education-pass-at-k-passk",
-    "termEn": "pass at k (pass@k)",
-    "termZh": "前 k 名的通过率 (pass@k)",
+    "termEn": "pass@k",
+    "termZh": "k次采样通过率",
     "aliases": [
+      "pass@k",
+      "k次采样通过率",
+      "pass at k",
+      "pass@1",
+      "pass@5",
+      "pass@10",
+      "pass@100",
+      "k次采样成功率",
       "pass at k (pass@k)",
       "前 k 名的通过率 (pass@k)",
       "前 k 名的通过率"
     ],
-    "definitionEn": "A metric to determine the quality of code (for example, Python) that a large language model generates. More specifically, pass at k tells you the likelihood that at least one generated block of code out of k generated blocks of code will pass all of its unit tests. Large language models often struggle to generate good code for complex programming problems. Software engineers adapt to this problem by prompting the large language model to generate multiple ( k ) solutions for the same problem. Then, software engineers test each of the solutions against unit tests. The calculation of pass at k depends on the outcome of the unit tests: If one or more of those solutions pass the unit test, then the LLM Passes that code generation challenge. If none of the solutions pass the unit test, then the LLM Fails that code generation challenge.",
-    "definitionZh": "一种用于确定 大语言模型 生成的代码（例如 Python）质量的指标。 更具体地说，Pass@k 表示在生成的 k 个代码块中，至少有一个代码块通过所有单元测试的可能性。 大语言模型通常难以针对复杂的编程问题生成优质代码。软件工程师通过提示大语言模型为同一问题生成 多个 ( k ) 解决方案来应对这一问题。然后，软件工程师会针对单元测试对每个解决方案进行测试。通过率（在 k 处）的计算取决于单元测试的结果： 如果这些解决方案中的 一个或多个 通过了单元测试，则 LLM 通过 了该代码生成挑战。 如果 没有 任何解决方案通过单元测试，则 LLM 未能通过 该代码生成挑战。 通过率（在 k 处）的公式如下：",
-    "category": "Metric",
+    "definitionEn": "The probability that at least one of k generated candidates passes the evaluator, not success of all k attempts.",
+    "definitionZh": "生成k个候选时至少一个通过评价的概率，与k次都成功的可靠性指标不同。",
+    "category": "Reasoning",
     "sources": [
+      "https://arxiv.org/abs/2107.03374",
       "https://developers.google.com/machine-learning/glossary#pass-at-k-passk",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#pass-at-k-passk"
+    ]
+  },
+  {
+    "id": "ai-advanced-pass-to-k",
+    "termEn": "pass^k",
+    "termZh": "连续k次成功率",
+    "aliases": [
+      "pass^k",
+      "连续k次成功率",
+      "pass-to-the-k",
+      "pass to the k",
+      "pass^1",
+      "pass^5",
+      "pass^10",
+      "k次全成功率"
+    ],
+    "definitionEn": "An evaluation metric for succeeding on all k repeated trials, measuring consistency rather than at-least-once success.",
+    "definitionZh": "衡量重复k次尝试都成功的评测指标，强调稳定性，与至少一次成功的pass@k不同。",
+    "category": "Reasoning",
+    "sources": [
+      "https://www.anthropic.com/research/demystifying-evals-for-ai-agents"
     ]
   },
   {
@@ -8381,6 +10435,23 @@
     ]
   },
   {
+    "id": "ai-advanced-pipeline-parallelism",
+    "termEn": "pipeline parallelism",
+    "termZh": "流水线并行",
+    "aliases": [
+      "pipeline parallelism",
+      "流水线并行",
+      "pipeline parallel",
+      "流水并行"
+    ],
+    "definitionEn": "Places different model layers or stages on different devices and pipelines work between them.",
+    "definitionZh": "把模型的不同层或阶段放在不同设备上，并在阶段之间流水执行工作。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/serving/parallelism_scaling/"
+    ]
+  },
+  {
     "id": "ai-cloud-pipeline_run",
     "termEn": "pipeline run",
     "termZh": "流水线运行作业",
@@ -8444,16 +10515,39 @@
     ]
   },
   {
-    "id": "ai-education-plan-and-solve",
-    "termEn": "plan-and-solve",
-    "termZh": "plan-and-solve",
+    "id": "ai-advanced-plan-and-execute",
+    "termEn": "plan-and-execute agent",
+    "termZh": "规划执行型智能体",
     "aliases": [
+      "plan-and-execute agent",
+      "规划执行型智能体",
+      "plan and execute",
+      "规划与执行"
+    ],
+    "definitionEn": "Separates high-level task planning from carrying out individual steps, with possible plan revisions.",
+    "definitionZh": "把高层任务规划与具体步骤执行分开，并可根据执行结果调整计划。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/building-effective-agents"
+    ]
+  },
+  {
+    "id": "ai-education-plan-and-solve",
+    "termEn": "Plan-and-Solve prompting",
+    "termZh": "先规划后求解提示",
+    "aliases": [
+      "Plan-and-Solve prompting",
+      "先规划后求解提示",
+      "Plan-and-Solve",
+      "Plan and Solve",
+      "规划求解提示",
       "plan-and-solve"
     ],
-    "definitionEn": "An agentic strategy where the model first drafts an explicit, multi-step plan before attempting to execute any actions.",
-    "definitionZh": "一种智能体策略，模型先起草一个明确的多步计划，然后再尝试执行任何操作。",
-    "category": "Agentic",
+    "definitionEn": "Prompts a model to devise a task plan before solving its component subtasks.",
+    "definitionZh": "先要求模型制定解题计划，再依次处理子任务，以减少遗漏关键步骤的问题。",
+    "category": "Agents",
     "sources": [
+      "https://arxiv.org/abs/2305.04091",
       "https://developers.google.com/machine-learning/glossary#plan-and-solve",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#plan-and-solve"
     ]
@@ -8587,6 +10681,43 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#post-trained-model",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#post-trained-model"
+    ]
+  },
+  {
+    "id": "ai-advanced-post-training",
+    "termEn": "post-training",
+    "termZh": "后训练",
+    "aliases": [
+      "post-training",
+      "后训练",
+      "post training",
+      "posttraining",
+      "后训练阶段",
+      "post‑training",
+      "post–training"
+    ],
+    "definitionEn": "Training after initial pretraining to improve instruction following, preferences or reasoning; it includes methods such as SFT and reinforcement learning.",
+    "definitionZh": "预训练之后，为改善指令遵循、偏好或推理能力进行的训练，可包含监督微调与强化学习，并非某一种单独算法。",
+    "category": "Post-training",
+    "sources": [
+      "https://github.com/huggingface/trl"
+    ]
+  },
+  {
+    "id": "ai-advanced-post-training-quantization",
+    "termEn": "post-training quantization",
+    "termZh": "训练后量化",
+    "aliases": [
+      "post-training quantization",
+      "训练后量化",
+      "PTQ",
+      "post training quantization"
+    ],
+    "definitionEn": "Converts an already trained model to lower precision, often using calibration without full retraining.",
+    "definitionZh": "在模型训练完成后将其转换为低精度表示，常借助校准数据而不进行完整重训练；与后训练这个总阶段不同。",
+    "category": "Quantization",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/quantization/concept_guide"
     ]
   },
   {
@@ -8784,6 +10915,94 @@
     ]
   },
   {
+    "id": "ai-advanced-preference-dataset",
+    "termEn": "preference dataset",
+    "termZh": "偏好数据集",
+    "aliases": [
+      "preference dataset",
+      "偏好数据集",
+      "preference data",
+      "偏好数据"
+    ],
+    "definitionEn": "Examples identifying preferred and rejected responses, or indicating whether a response is desirable.",
+    "definitionZh": "标明回答优劣关系或回答是否合意的数据，用于训练奖励模型或进行偏好优化。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/reward_trainer"
+    ]
+  },
+  {
+    "id": "ai-advanced-preference-optimization",
+    "termEn": "preference optimization",
+    "termZh": "偏好优化",
+    "aliases": [
+      "preference optimization",
+      "偏好优化",
+      "preference learning for LLMs",
+      "偏好学习"
+    ],
+    "definitionEn": "Adjusting a language model using comparative judgments about which responses are preferred.",
+    "definitionZh": "通过回答之间的偏好比较来调整语言模型，使其更倾向于生成符合目标偏好的回答。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2305.18290"
+    ]
+  },
+  {
+    "id": "ai-advanced-prefill",
+    "termEn": "prefill phase",
+    "termZh": "预填充阶段",
+    "aliases": [
+      "prefill phase",
+      "预填充阶段",
+      "prefill",
+      "prompt processing",
+      "预填充"
+    ],
+    "definitionEn": "Processes the input prompt and builds the initial attention cache before generating new tokens.",
+    "definitionZh": "先处理输入提示并建立初始键值缓存的阶段，之后再逐步生成新词元。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/continuous_batching"
+    ]
+  },
+  {
+    "id": "ai-advanced-prefill-decode-disaggregation",
+    "termEn": "prefill-decode disaggregation",
+    "termZh": "预填充解码分离",
+    "aliases": [
+      "prefill-decode disaggregation",
+      "预填充解码分离",
+      "disaggregated prefilling",
+      "PD disaggregation",
+      "prefill decode disaggregation",
+      "PD分离"
+    ],
+    "definitionEn": "Runs prompt prefill and token decoding in separate serving instances, transferring required cache state between them.",
+    "definitionZh": "把提示预填充与逐词元解码放在不同服务实例上执行，并在两者之间传递所需缓存状态。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/features/disagg_prefill/"
+    ]
+  },
+  {
+    "id": "ai-advanced-prefix-caching",
+    "termEn": "prefix caching",
+    "termZh": "前缀缓存",
+    "aliases": [
+      "prefix caching",
+      "前缀缓存",
+      "automatic prefix caching",
+      "前缀复用"
+    ],
+    "definitionEn": "Reuses cached attention states when requests share an identical prompt prefix.",
+    "definitionZh": "多个请求具有相同提示前缀时，复用已计算的键值缓存，减少重复的提示处理。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/"
+    ]
+  },
+  {
     "id": "ai-education-prior-belief",
     "termEn": "prior belief",
     "termZh": "先验信念",
@@ -8948,6 +11167,40 @@
     ]
   },
   {
+    "id": "ai-advanced-process-reward-model",
+    "termEn": "process reward model",
+    "termZh": "过程奖励模型",
+    "aliases": [
+      "process reward model",
+      "过程奖励模型",
+      "PRM",
+      "process-supervised reward model",
+      "过程监督奖励模型"
+    ],
+    "definitionEn": "Evaluates intermediate reasoning steps instead of assigning only a final-answer score.",
+    "definitionZh": "评价中间推理步骤的奖励模型，可提供比最终答案分数更细的过程反馈。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2305.20050"
+    ]
+  },
+  {
+    "id": "ai-advanced-process-supervision",
+    "termEn": "process supervision",
+    "termZh": "过程监督",
+    "aliases": [
+      "process supervision",
+      "过程监督",
+      "过程级监督"
+    ],
+    "definitionEn": "Training feedback that labels intermediate reasoning steps rather than only completed solutions.",
+    "definitionZh": "对中间推理步骤提供训练反馈，帮助区分哪些步骤正确、哪些步骤发生错误。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2305.20050"
+    ]
+  },
+  {
     "id": "ai-cloud-producer_vpc",
     "termEn": "producer VPC",
     "termZh": "生产者 VPC",
@@ -8961,6 +11214,60 @@
     "sources": [
       "https://cloud.google.com/vertex-ai/docs/glossary#producer_vpc",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#producer_vpc"
+    ]
+  },
+  {
+    "id": "ai-advanced-program-aided-language-model",
+    "termEn": "program-aided language model",
+    "termZh": "程序辅助语言模型",
+    "aliases": [
+      "program-aided language model",
+      "程序辅助语言模型",
+      "PAL prompting",
+      "program aided language model",
+      "程序辅助推理"
+    ],
+    "definitionEn": "Generates a program as an intermediate solution and uses an interpreter to compute the answer.",
+    "definitionZh": "先生成作为中间解法的程序，再由解释器执行以得到答案。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2211.10435"
+    ]
+  },
+  {
+    "id": "ai-advanced-program-of-thoughts",
+    "termEn": "program-of-thoughts prompting",
+    "termZh": "程序思维提示",
+    "aliases": [
+      "program-of-thoughts prompting",
+      "程序思维提示",
+      "program of thoughts",
+      "PoT prompting",
+      "程序思维链"
+    ],
+    "definitionEn": "Generates executable programs for numerical computation while separating calculation from language-based reasoning.",
+    "definitionZh": "让模型生成可执行程序处理数值计算，将具体计算与语言推理部分分开。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2211.12588"
+    ]
+  },
+  {
+    "id": "ai-advanced-progressive-disclosure",
+    "termEn": "progressive disclosure for agents",
+    "termZh": "智能体渐进式信息加载",
+    "aliases": [
+      "progressive disclosure for agents",
+      "智能体渐进式信息加载",
+      "progressive disclosure",
+      "渐进式披露",
+      "渐进式加载"
+    ],
+    "definitionEn": "Loads detailed instructions or resources only when needed, keeping initial context smaller.",
+    "definitionZh": "先提供少量概要信息，在需要时再加载详细指令或资源，以减少初始上下文占用。",
+    "category": "Agents",
+    "sources": [
+      "https://agentskills.io/home"
     ]
   },
   {
@@ -9014,6 +11321,23 @@
     ]
   },
   {
+    "id": "ai-advanced-prompt-lookup-decoding",
+    "termEn": "prompt lookup decoding",
+    "termZh": "提示查找解码",
+    "aliases": [
+      "prompt lookup decoding",
+      "提示查找解码",
+      "prompt lookup",
+      "提示词查找解码"
+    ],
+    "definitionEn": "Proposes continuations by finding repeated sequences in the prompt rather than running a separate draft model.",
+    "definitionZh": "通过查找提示文本中的重复序列提出后续词元候选，而不是运行单独的草稿模型。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/assisted_decoding"
+    ]
+  },
+  {
     "id": "ai-education-prompt-set",
     "termEn": "prompt set",
     "termZh": "提示集",
@@ -9059,6 +11383,22 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#prompt-based-learning",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#prompt-based-learning"
+    ]
+  },
+  {
+    "id": "ai-advanced-proximal-policy-optimization",
+    "termEn": "proximal policy optimization",
+    "termZh": "近端策略优化",
+    "aliases": [
+      "proximal policy optimization",
+      "近端策略优化",
+      "PPO"
+    ],
+    "definitionEn": "A policy-gradient method that limits overly large policy updates, commonly using a clipped probability-ratio objective.",
+    "definitionZh": "一种策略梯度算法，通常通过裁剪新旧策略概率比来限制过大的更新，常用于强化学习与模型对齐。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/1707.06347"
     ]
   },
   {
@@ -9172,6 +11512,58 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#quantization",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#quantization"
+    ]
+  },
+  {
+    "id": "ai-advanced-quantization-aware-training",
+    "termEn": "quantization-aware training",
+    "termZh": "量化感知训练",
+    "aliases": [
+      "quantization-aware training",
+      "量化感知训练",
+      "QAT",
+      "quantization aware training"
+    ],
+    "definitionEn": "Accounts for quantization effects during training so learned weights better tolerate low-precision execution.",
+    "definitionZh": "训练过程中模拟或考虑量化影响，使学习到的权重更能适应低精度执行。",
+    "category": "Quantization",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/quantization/concept_guide"
+    ]
+  },
+  {
+    "id": "ai-advanced-qlora",
+    "termEn": "quantized low-rank adaptation",
+    "termZh": "量化低秩适配",
+    "aliases": [
+      "quantized low-rank adaptation",
+      "量化低秩适配",
+      "QLoRA",
+      "quantized LoRA",
+      "量化LoRA"
+    ],
+    "definitionEn": "Trains LoRA adapters through a frozen low-bit quantized base model to reduce finetuning memory.",
+    "definitionZh": "在冻结的低比特量化基础模型上训练LoRA适配器，以降低微调显存需求。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://arxiv.org/abs/2305.14314"
+    ]
+  },
+  {
+    "id": "ai-advanced-query-rewriting",
+    "termEn": "query rewriting",
+    "termZh": "查询改写",
+    "aliases": [
+      "query rewriting",
+      "查询改写",
+      "query reformulation",
+      "查询重写"
+    ],
+    "definitionEn": "Reformulates a user's question into a search query better suited to retrieving useful evidence.",
+    "definitionZh": "将用户问题改写成更适合检索的查询，以缩小原始问题与所需证据之间的表达差距。",
+    "category": "Retrieval",
+    "sources": [
+      "https://arxiv.org/abs/2305.14283"
     ]
   },
   {
@@ -9376,6 +11768,25 @@
     ]
   },
   {
+    "id": "ai-advanced-react-prompting",
+    "termEn": "ReAct prompting",
+    "termZh": "ReAct推理行动框架",
+    "aliases": [
+      "ReAct prompting",
+      "ReAct推理行动框架",
+      "ReAct framework",
+      "ReAct agent",
+      "ReAct框架",
+      "推理与行动框架"
+    ],
+    "definitionEn": "Interleaves language-model reasoning with environment actions and observations.",
+    "definitionZh": "交替执行语言模型推理、环境动作与结果观察，让后续决策结合外部反馈。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2210.03629"
+    ]
+  },
+  {
     "id": "ai-education-reading-comprehension-with-commonsense-reasoning-dataset-record",
     "termEn": "Reading Comprehension with Commonsense Reasoning Dataset",
     "termZh": "使用常识推理数据集 (ReCoRD) 进行阅读理解",
@@ -9421,6 +11832,74 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#reason",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#reason"
+    ]
+  },
+  {
+    "id": "ai-advanced-reasoning-budget",
+    "termEn": "reasoning budget",
+    "termZh": "推理预算",
+    "aliases": [
+      "reasoning budget",
+      "推理预算",
+      "thinking budget",
+      "思考预算"
+    ],
+    "definitionEn": "A limit on tokens or computational effort allocated to a model's reasoning process.",
+    "definitionZh": "为模型推理过程设置的词元数量或计算开销上限，不保证预算越大答案就越好。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2501.19393"
+    ]
+  },
+  {
+    "id": "ai-advanced-reasoning-distillation",
+    "termEn": "reasoning distillation",
+    "termZh": "推理蒸馏",
+    "aliases": [
+      "reasoning distillation",
+      "推理蒸馏",
+      "reasoning trace distillation",
+      "推理轨迹蒸馏"
+    ],
+    "definitionEn": "Training a student on reasoning examples generated by a stronger teacher model.",
+    "definitionZh": "使用较强教师模型生成的推理样本训练学生模型，以迁移部分推理能力。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2501.12948"
+    ]
+  },
+  {
+    "id": "ai-advanced-reasoning-model",
+    "termEn": "reasoning model",
+    "termZh": "推理模型",
+    "aliases": [
+      "reasoning model",
+      "推理模型",
+      "reasoning models",
+      "推理大模型"
+    ],
+    "definitionEn": "A language model trained to improve multi-step reasoning, often with extended intermediate computation.",
+    "definitionZh": "经过针对性训练以改善多步推理的语言模型，常在生成答案前进行更长的中间计算。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2501.12948"
+    ]
+  },
+  {
+    "id": "ai-advanced-reasoning-trace",
+    "termEn": "reasoning trace",
+    "termZh": "推理轨迹",
+    "aliases": [
+      "reasoning trace",
+      "推理轨迹",
+      "reasoning traces",
+      "推理过程轨迹"
+    ],
+    "definitionEn": "A sequence of intermediate steps generated while solving a problem.",
+    "definitionZh": "模型解题时生成的中间步骤序列；可见轨迹不一定完整或忠实反映其内部计算。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2501.12948"
     ]
   },
   {
@@ -9558,6 +12037,23 @@
     ]
   },
   {
+    "id": "ai-advanced-reference-model",
+    "termEn": "reference model",
+    "termZh": "参考模型",
+    "aliases": [
+      "reference model",
+      "参考模型",
+      "reference policy",
+      "参考策略"
+    ],
+    "definitionEn": "A fixed baseline policy used to measure how far an optimized model departs from its starting behavior.",
+    "definitionZh": "训练时用于比较的固定基线模型，帮助衡量或限制优化后的策略偏离初始行为的程度。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2305.18290"
+    ]
+  },
+  {
     "id": "ai-education-reference-text",
     "termEn": "reference text",
     "termZh": "参考文本",
@@ -9587,6 +12083,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#reflection",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#reflection"
+    ]
+  },
+  {
+    "id": "ai-advanced-reflexion",
+    "termEn": "Reflexion framework",
+    "termZh": "Reflexion反思框架",
+    "aliases": [
+      "Reflexion framework",
+      "Reflexion反思框架",
+      "Reflexion agent",
+      "Reflexion框架"
+    ],
+    "definitionEn": "Uses textual feedback from earlier attempts as memory to improve later agent decisions without weight updates.",
+    "definitionZh": "将先前尝试的文字反馈保存为记忆，在不更新模型权重的情况下改善后续决策。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2303.11366"
     ]
   },
   {
@@ -9638,6 +12151,23 @@
     ]
   },
   {
+    "id": "ai-advanced-reinforce-leave-one-out",
+    "termEn": "REINFORCE leave-one-out",
+    "termZh": "留一法REINFORCE",
+    "aliases": [
+      "REINFORCE leave-one-out",
+      "留一法REINFORCE",
+      "RLOO",
+      "REINFORCE留一法"
+    ],
+    "definitionEn": "Uses other sampled responses for the same prompt as a leave-one-out reward baseline in policy-gradient training.",
+    "definitionZh": "对同一提示采样多个回答，用其他回答的奖励构造留一基线，以降低策略梯度估计的方差。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/rloo_trainer"
+    ]
+  },
+  {
     "id": "ai-education-reinforcement-learning-rl",
     "termEn": "reinforcement learning",
     "termZh": "强化学习 (RL)",
@@ -9656,6 +12186,23 @@
     ]
   },
   {
+    "id": "ai-advanced-rlaif",
+    "termEn": "reinforcement learning from AI feedback",
+    "termZh": "基于AI反馈的强化学习",
+    "aliases": [
+      "reinforcement learning from AI feedback",
+      "基于AI反馈的强化学习",
+      "RLAIF",
+      "基于人工智能反馈的强化学习"
+    ],
+    "definitionEn": "Uses AI-generated evaluations or preferences as feedback for reinforcement learning.",
+    "definitionZh": "使用AI产生的评价或偏好作为强化学习反馈；反馈质量仍取决于评价模型与评价规则。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2212.08073"
+    ]
+  },
+  {
     "id": "ai-education-reinforcement-learning-from-human-feedback-rlhf",
     "termEn": "Reinforcement Learning from Human Feedback",
     "termZh": "基于人类反馈的强化学习 (RLHF)",
@@ -9671,6 +12218,59 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#reinforcement-learning-from-human-feedback-rlhf",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#reinforcement-learning-from-human-feedback-rlhf"
+    ]
+  },
+  {
+    "id": "ai-advanced-rlvr",
+    "termEn": "reinforcement learning with verifiable rewards",
+    "termZh": "可验证奖励强化学习",
+    "aliases": [
+      "reinforcement learning with verifiable rewards",
+      "可验证奖励强化学习",
+      "RLVR",
+      "reinforcement learning from verifiable rewards",
+      "基于可验证奖励的强化学习"
+    ],
+    "definitionEn": "Reinforcement learning using rewards checked by procedures such as answer verification or executable tests.",
+    "definitionZh": "利用答案校验、可执行测试等程序能够验证的奖励进行强化学习，常用于数学和代码任务。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2501.12948"
+    ]
+  },
+  {
+    "id": "ai-advanced-rejection-sampling-finetuning",
+    "termEn": "rejection sampling fine-tuning",
+    "termZh": "拒绝采样微调",
+    "aliases": [
+      "rejection sampling fine-tuning",
+      "拒绝采样微调",
+      "rejection sampling finetuning",
+      "rejection sampling fine tuning",
+      "RSFT"
+    ],
+    "definitionEn": "Generates candidate answers, filters them for quality or correctness, then fine-tunes on retained examples.",
+    "definitionZh": "先生成多个候选回答，再按质量或正确性过滤，并使用保留下来的样本进行微调。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2501.12948"
+    ]
+  },
+  {
+    "id": "ai-advanced-repetition-penalty",
+    "termEn": "repetition penalty",
+    "termZh": "重复惩罚",
+    "aliases": [
+      "repetition penalty",
+      "重复惩罚",
+      "repetition penalties",
+      "词元重复惩罚"
+    ],
+    "definitionEn": "Adjusts scores for previously seen tokens to influence repetition during generation.",
+    "definitionZh": "调整已经出现过的词元分数以影响生成中的重复情况，设置过强也可能损害正常表达。",
+    "category": "Reasoning",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/main_classes/text_generation"
     ]
   },
   {
@@ -9735,6 +12335,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#representation",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#representation"
+    ]
+  },
+  {
+    "id": "ai-advanced-residual-connection",
+    "termEn": "residual connection",
+    "termZh": "残差连接",
+    "aliases": [
+      "residual connection",
+      "残差连接",
+      "skip connection",
+      "残差路径"
+    ],
+    "definitionEn": "Adds a block's input to its transformed output, providing a direct path for information and gradients.",
+    "definitionZh": "把模块输入与变换后的输出相加，为信息与梯度提供较直接的传播路径。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1706.03762"
     ]
   },
   {
@@ -9836,6 +12453,58 @@
     ]
   },
   {
+    "id": "ai-advanced-reward-hacking",
+    "termEn": "reward hacking",
+    "termZh": "奖励投机",
+    "aliases": [
+      "reward hacking",
+      "奖励投机",
+      "reward exploitation",
+      "奖励黑客",
+      "钻奖励漏洞"
+    ],
+    "definitionEn": "Exploiting weaknesses in a reward signal to gain scores without achieving the intended objective.",
+    "definitionZh": "利用奖励信号的漏洞获取高分，却没有真正完成设计者期望的目标。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2210.10760"
+    ]
+  },
+  {
+    "id": "ai-advanced-reward-model",
+    "termEn": "reward model",
+    "termZh": "奖励模型",
+    "aliases": [
+      "reward model",
+      "奖励模型",
+      "reward models",
+      "奖励打分模型"
+    ],
+    "definitionEn": "A model trained to score outputs according to a target preference or quality signal.",
+    "definitionZh": "学习为模型输出打分的模型，分数代表某种偏好或质量信号，并不等同于客观正确性。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/reward_trainer"
+    ]
+  },
+  {
+    "id": "ai-advanced-reward-overoptimization",
+    "termEn": "reward overoptimization",
+    "termZh": "奖励过度优化",
+    "aliases": [
+      "reward overoptimization",
+      "奖励过度优化",
+      "reward model overoptimization",
+      "奖励模型过度优化"
+    ],
+    "definitionEn": "Excessive optimization of an imperfect reward model that raises predicted reward while harming real quality.",
+    "definitionZh": "对不完美的奖励模型优化过度，导致模型预测分数继续上升，而实际质量反而下降。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2210.10760"
+    ]
+  },
+  {
     "id": "ai-education-roc-receiver-operating-characteristic-curve",
     "termEn": "ROC (receiver operating characteristic) Curve",
     "termZh": "ROC（接收者操作特征）曲线",
@@ -9866,6 +12535,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#role-prompting",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#role-prompting"
+    ]
+  },
+  {
+    "id": "ai-advanced-rollout",
+    "termEn": "rollout",
+    "termZh": "轨迹采样",
+    "aliases": [
+      "rollout",
+      "轨迹采样",
+      "rollouts",
+      "采样轨迹"
+    ],
+    "definitionEn": "A sampled sequence of model actions or tokens, used to compute rewards and update a policy.",
+    "definitionZh": "从当前模型采样得到的一段动作或词元序列，用于计算奖励并更新策略。",
+    "category": "Post-training",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/grpo_trainer"
     ]
   },
   {
@@ -9900,6 +12586,24 @@
     ]
   },
   {
+    "id": "ai-advanced-rmsnorm",
+    "termEn": "root mean square normalization",
+    "termZh": "均方根归一化",
+    "aliases": [
+      "root mean square normalization",
+      "均方根归一化",
+      "RMSNorm",
+      "RMS normalization",
+      "均方根层归一化"
+    ],
+    "definitionEn": "Normalizes activations using their root mean square, without the mean-centering step of standard layer normalization.",
+    "definitionZh": "通过激活值的均方根进行归一化，省去标准层归一化中的均值中心化步骤。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1910.07467"
+    ]
+  },
+  {
     "id": "ai-education-root-mean-squared-error-rmse",
     "termEn": "Root Mean Squared Error",
     "termZh": "均方根误差 (RMSE)",
@@ -9915,6 +12619,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#root-mean-squared-error-rmse",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#root-mean-squared-error-rmse"
+    ]
+  },
+  {
+    "id": "ai-advanced-rotary-position-embedding",
+    "termEn": "rotary position embedding",
+    "termZh": "旋转位置编码",
+    "aliases": [
+      "rotary position embedding",
+      "旋转位置编码",
+      "RoPE",
+      "rotary positional embedding",
+      "旋转位置嵌入"
+    ],
+    "definitionEn": "Encodes positions by rotating query and key representations, incorporating relative-position information into attention.",
+    "definitionZh": "通过旋转查询与键的表示来编码位置，使注意力计算包含相对位置信息。",
+    "category": "Architecture",
+    "sources": [
+      "https://arxiv.org/abs/2104.09864"
     ]
   },
   {
@@ -9993,6 +12715,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#rouge-s",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#rouge-s"
+    ]
+  },
+  {
+    "id": "ai-advanced-routed-expert",
+    "termEn": "routed expert",
+    "termZh": "路由专家",
+    "aliases": [
+      "routed expert",
+      "路由专家",
+      "routed experts",
+      "可路由专家"
+    ],
+    "definitionEn": "An expert selected by a router for some tokens rather than always being active.",
+    "definitionZh": "由路由器为部分词元选择的专家，而不是始终参与所有词元的计算。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2401.06066"
     ]
   },
   {
@@ -10122,6 +12861,23 @@
     ]
   },
   {
+    "id": "ai-advanced-scratchpad-reasoning",
+    "termEn": "scratchpad reasoning",
+    "termZh": "草稿区推理",
+    "aliases": [
+      "scratchpad reasoning",
+      "草稿区推理",
+      "reasoning scratchpad",
+      "推理草稿区"
+    ],
+    "definitionEn": "Uses an explicit intermediate workspace for calculations or other steps before producing a final output.",
+    "definitionZh": "在最终输出之前使用显式的中间工作区记录计算或步骤，不等同于模型权重更新。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2112.00114"
+    ]
+  },
+  {
     "id": "ai-education-selection-bias",
     "termEn": "selection bias",
     "termZh": "选择性偏差",
@@ -10135,6 +12891,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#selection-bias",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#selection-bias"
+    ]
+  },
+  {
+    "id": "ai-advanced-selective-state-space",
+    "termEn": "selective state space model",
+    "termZh": "选择性状态空间模型",
+    "aliases": [
+      "selective state space model",
+      "选择性状态空间模型",
+      "selective SSM",
+      "选择性SSM"
+    ],
+    "definitionEn": "A sequence model with input-dependent state-space dynamics that select what information to retain or propagate.",
+    "definitionZh": "通过输入相关的状态空间动态，选择应保留或传播哪些信息的序列模型。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2312.00752"
     ]
   },
   {
@@ -10155,6 +12928,24 @@
     ]
   },
   {
+    "id": "ai-advanced-self-consistency",
+    "termEn": "self-consistency decoding",
+    "termZh": "自一致性解码",
+    "aliases": [
+      "self-consistency decoding",
+      "自一致性解码",
+      "self-consistency",
+      "自洽性解码",
+      "自一致性"
+    ],
+    "definitionEn": "Samples multiple reasoning paths and aggregates their answers, commonly by majority vote.",
+    "definitionZh": "采样多条推理路径，再汇总它们的答案，常用多数投票来选择最终结果。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2203.11171"
+    ]
+  },
+  {
     "id": "ai-education-self-correction",
     "termEn": "self-correction",
     "termZh": "自我修正",
@@ -10168,6 +12959,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#self-correction",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#self-correction"
+    ]
+  },
+  {
+    "id": "ai-advanced-self-refine",
+    "termEn": "Self-Refine",
+    "termZh": "自反馈迭代改进",
+    "aliases": [
+      "Self-Refine",
+      "自反馈迭代改进",
+      "self refinement",
+      "self-refinement",
+      "自我修订"
+    ],
+    "definitionEn": "A method where a model generates feedback on its output and iteratively revises it without additional training.",
+    "definitionZh": "模型对自己的输出生成反馈并反复修订的方法，本身不要求额外训练或更新权重。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2303.17651"
     ]
   },
   {
@@ -10267,6 +13076,23 @@
     ]
   },
   {
+    "id": "ai-advanced-sequence-packing",
+    "termEn": "sequence packing",
+    "termZh": "序列打包",
+    "aliases": [
+      "sequence packing",
+      "序列打包",
+      "sample packing",
+      "样本打包"
+    ],
+    "definitionEn": "Combines multiple shorter training examples into longer sequences to reduce unused padding.",
+    "definitionZh": "把多个较短训练样本组合成长序列，减少填充浪费；实现时需正确处理样本边界与注意力。",
+    "category": "Fine-tuning",
+    "sources": [
+      "https://huggingface.co/docs/trl/main/en/sft_trainer"
+    ]
+  },
+  {
     "id": "ai-education-sequence-to-sequence-task",
     "termEn": "sequence-to-sequence task",
     "termZh": "序列到序列任务",
@@ -10280,6 +13106,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#sequence-to-sequence-task",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#sequence-to-sequence-task"
+    ]
+  },
+  {
+    "id": "ai-advanced-sequential-refinement",
+    "termEn": "sequential refinement",
+    "termZh": "序贯改进推理",
+    "aliases": [
+      "sequential refinement",
+      "序贯改进推理",
+      "sequential test-time scaling",
+      "串行推理改进"
+    ],
+    "definitionEn": "Spends additional inference steps refining a previous candidate rather than only generating independent alternatives.",
+    "definitionZh": "利用额外推理步骤逐次改进已有候选，而不是只生成彼此独立的新候选。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2408.03314"
     ]
   },
   {
@@ -10365,6 +13208,23 @@
     ]
   },
   {
+    "id": "ai-advanced-shared-expert",
+    "termEn": "shared expert",
+    "termZh": "共享专家",
+    "aliases": [
+      "shared expert",
+      "共享专家",
+      "shared experts",
+      "共享专家模块"
+    ],
+    "definitionEn": "An expert activated across tokens to learn common knowledge alongside specialized routed experts.",
+    "definitionZh": "与专门路由专家配合、面向词元共享通用知识的专家模块。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2401.06066"
+    ]
+  },
+  {
     "id": "ai-education-shrinkage",
     "termEn": "shrinkage",
     "termZh": "收缩",
@@ -10443,6 +13303,22 @@
     "sources": [
       "https://cloud.google.com/vertex-ai/docs/glossary#slurm",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#slurm"
+    ]
+  },
+  {
+    "id": "ai-advanced-simple-preference-optimization",
+    "termEn": "simple preference optimization",
+    "termZh": "简单偏好优化",
+    "aliases": [
+      "simple preference optimization",
+      "简单偏好优化",
+      "SimPO"
+    ],
+    "definitionEn": "A reference-free preference method using average sequence log probability as an implicit reward with a target margin.",
+    "definitionZh": "使用序列平均对数概率作为隐式奖励，并设置目标奖励间隔的无参考模型偏好优化方法。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2405.14734"
     ]
   },
   {
@@ -10527,6 +13403,22 @@
     ]
   },
   {
+    "id": "ai-advanced-smoothquant",
+    "termEn": "SmoothQuant",
+    "termZh": "平滑量化",
+    "aliases": [
+      "SmoothQuant",
+      "平滑量化",
+      "SmoothQuant quantization"
+    ],
+    "definitionEn": "Rescales activations and weights to shift quantization difficulty away from activation outliers before low-precision inference.",
+    "definitionZh": "通过等价缩放激活与权重，将激活异常值带来的量化难度部分转移到权重上。",
+    "category": "Quantization",
+    "sources": [
+      "https://arxiv.org/abs/2211.10438"
+    ]
+  },
+  {
     "id": "ai-education-soft-prompt-tuning",
     "termEn": "soft prompt tuning",
     "termZh": "软提示调优",
@@ -10560,6 +13452,40 @@
     ]
   },
   {
+    "id": "ai-advanced-span-corruption",
+    "termEn": "span corruption",
+    "termZh": "片段破坏预训练",
+    "aliases": [
+      "span corruption",
+      "片段破坏预训练",
+      "span denoising",
+      "文本片段去噪"
+    ],
+    "definitionEn": "Masks or replaces contiguous text spans and trains a model to reconstruct missing content.",
+    "definitionZh": "遮盖或替换连续文本片段，再训练模型恢复缺失内容，是去噪预训练的一种方式。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1910.10683"
+    ]
+  },
+  {
+    "id": "ai-advanced-sparse-activation",
+    "termEn": "sparse activation",
+    "termZh": "稀疏激活",
+    "aliases": [
+      "sparse activation",
+      "稀疏激活",
+      "sparsely activated model",
+      "稀疏激活模型"
+    ],
+    "definitionEn": "Uses only a selected subset of available components or experts for a particular input.",
+    "definitionZh": "针对某个输入只使用可用组件或专家中的一部分，使总参数量与实际计算量可以有所分离。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2101.03961"
+    ]
+  },
+  {
     "id": "ai-education-sparse-feature",
     "termEn": "sparse feature",
     "termZh": "稀疏特征",
@@ -10589,6 +13515,22 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#sparse-representation",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#sparse-representation"
+    ]
+  },
+  {
+    "id": "ai-advanced-sparse-retrieval",
+    "termEn": "sparse retrieval",
+    "termZh": "稀疏检索",
+    "aliases": [
+      "sparse retrieval",
+      "稀疏检索",
+      "sparse vector retrieval"
+    ],
+    "definitionEn": "Retrieves content using sparse term-based representations, such as those used in lexical search.",
+    "definitionZh": "使用稀疏词项表示进行检索，例如词法搜索中依据词项匹配进行排序的方法。",
+    "category": "Retrieval",
+    "sources": [
+      "https://www.anthropic.com/research/contextual-retrieval"
     ]
   },
   {
@@ -10637,6 +13579,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#specificational-coding",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#specificational-coding"
+    ]
+  },
+  {
+    "id": "ai-advanced-speculative-decoding",
+    "termEn": "speculative decoding",
+    "termZh": "推测解码",
+    "aliases": [
+      "speculative decoding",
+      "推测解码",
+      "assisted decoding",
+      "投机解码",
+      "推测性解码"
+    ],
+    "definitionEn": "Proposes several candidate tokens cheaply and verifies them with the target model to accelerate generation.",
+    "definitionZh": "先低成本提出多个候选词元，再由目标模型验证，以减少逐词元生成的开销。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/assisted_decoding"
     ]
   },
   {
@@ -10754,6 +13714,23 @@
     ]
   },
   {
+    "id": "ai-advanced-static-kv-cache",
+    "termEn": "static KV cache",
+    "termZh": "静态键值缓存",
+    "aliases": [
+      "static KV cache",
+      "静态键值缓存",
+      "static cache",
+      "静态KV缓存"
+    ],
+    "definitionEn": "Preallocates a fixed capacity for attention keys and values, helping compilation but potentially wasting memory.",
+    "definitionZh": "预先为注意力键和值分配固定容量，有利于编译优化，但可能浪费未使用空间。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/kv_cache"
+    ]
+  },
+  {
     "id": "ai-education-stationarity",
     "termEn": "stationarity",
     "termZh": "平稳性",
@@ -10804,6 +13781,23 @@
     ]
   },
   {
+    "id": "ai-advanced-stop-sequence",
+    "termEn": "stop sequence",
+    "termZh": "停止序列",
+    "aliases": [
+      "stop sequence",
+      "停止序列",
+      "stop sequences",
+      "停止字符串"
+    ],
+    "definitionEn": "A specified generated text sequence that causes a generation process to stop when detected.",
+    "definitionZh": "生成过程中检测到指定文本序列时停止输出的规则，不保证此前内容正确。",
+    "category": "Reasoning",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/main_classes/text_generation"
+    ]
+  },
+  {
     "id": "ai-education-stride",
     "termEn": "stride",
     "termZh": "步长",
@@ -10840,15 +13834,21 @@
   {
     "id": "ai-education-sub-agent",
     "termEn": "sub-agent",
-    "termZh": "分代理",
+    "termZh": "子智能体",
     "aliases": [
       "sub-agent",
+      "子智能体",
+      "subagent",
+      "subagents",
+      "sub-agents",
+      "子代理",
       "分代理"
     ],
-    "definitionEn": "A specialized, narrowly focused model invoked by a manager agent to handle a specific subset of a larger problem. Sub-agents typically have a narrower action space than agents.",
-    "definitionZh": "一种由管理代理调用的专业化、专注型模型，用于处理较大问题中的特定子集。 子代理的 动作空间 通常比代理窄。",
-    "category": "Agentic",
+    "definitionEn": "An agent delegated a bounded subtask, often using its own context and tool set.",
+    "definitionZh": "被委派处理特定子任务的智能体，通常使用独立上下文或工具集合，再向协调者返回结果。",
+    "category": "Agents",
     "sources": [
+      "https://www.anthropic.com/research/multi-agent-research-system",
       "https://developers.google.com/machine-learning/glossary#sub-agent",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#sub-agent"
     ]
@@ -10867,6 +13867,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#subword-token",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#subword-token"
+    ]
+  },
+  {
+    "id": "ai-advanced-subword-tokenization",
+    "termEn": "subword tokenization",
+    "termZh": "子词分词",
+    "aliases": [
+      "subword tokenization",
+      "子词分词",
+      "subword encoding",
+      "子词编码"
+    ],
+    "definitionEn": "Represents text with pieces that may be smaller than words, balancing vocabulary size and sequence length.",
+    "definitionZh": "用可能小于单词的片段表示文本，在词表规模与词元序列长度之间取得折中。",
+    "category": "Foundation models",
+    "sources": [
+      "https://huggingface.co/docs/transformers/tokenizer_summary"
     ]
   },
   {
@@ -10918,18 +13935,25 @@
   },
   {
     "id": "ai-cloud-supervised_fine_tuning",
-    "termEn": "Supervised fine-tuning",
-    "termZh": "监督式微调 (SFT)",
+    "termEn": "supervised fine-tuning",
+    "termZh": "监督微调",
     "aliases": [
-      "Supervised fine-tuning (SFT)",
+      "supervised fine-tuning",
+      "监督微调",
+      "supervised fine tuning",
+      "supervised finetuning",
+      "SFT",
+      "有监督微调",
+      "Supervised fine-tuning",
       "监督式微调 (SFT)",
-      "监督式微调",
-      "SFT"
+      "Supervised fine-tuning (SFT)",
+      "监督式微调"
     ],
-    "definitionEn": "A machine learning technique where a pre-trained model is further trained on a smaller, labeled dataset to adapt it to a specific task.",
-    "definitionZh": "一种机器学习技术，即在预训练模型的基础上，使用较小的带标签数据集进一步训练模型，使其适应特定任务。",
-    "category": "AI infrastructure",
+    "definitionEn": "Trains a pretrained model on demonstrations of desired outputs, often using next-token prediction.",
+    "definitionZh": "在预训练模型上，利用期望输出的示范数据进行训练，常采用下一词元预测目标。",
+    "category": "Fine-tuning",
     "sources": [
+      "https://huggingface.co/docs/trl/main/en/sft_trainer",
       "https://cloud.google.com/vertex-ai/docs/glossary#supervised_fine_tuning",
       "https://cloud.google.com/vertex-ai/docs/glossary?hl=zh-cn#supervised_fine_tuning"
     ]
@@ -10951,6 +13975,40 @@
     ]
   },
   {
+    "id": "ai-advanced-swe-bench",
+    "termEn": "SWE-bench",
+    "termZh": "软件工程修复基准",
+    "aliases": [
+      "SWE-bench",
+      "软件工程修复基准",
+      "SWE bench",
+      "软件工程问题修复基准"
+    ],
+    "definitionEn": "A benchmark using real repository issues and tests to evaluate software issue resolution.",
+    "definitionZh": "使用真实代码仓库问题与测试评估软件修复能力的基准；成绩受版本、任务子集和运行框架影响。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2310.06770"
+    ]
+  },
+  {
+    "id": "ai-advanced-swiglu",
+    "termEn": "SwiGLU",
+    "termZh": "Swish门控线性单元",
+    "aliases": [
+      "SwiGLU",
+      "Swish门控线性单元",
+      "SwiGLU activation",
+      "Swish门控单元"
+    ],
+    "definitionEn": "A gated feed-forward activation combining a Swish-activated branch with another learned projection.",
+    "definitionZh": "把经过Swish激活的分支与另一投影分支相乘的门控前馈结构。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2002.05202"
+    ]
+  },
+  {
     "id": "ai-education-synthetic-feature",
     "termEn": "synthetic feature",
     "termZh": "合成特征",
@@ -10964,6 +14022,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#synthetic-feature",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#synthetic-feature"
+    ]
+  },
+  {
+    "id": "ai-advanced-synthetic-training-data",
+    "termEn": "synthetic training data",
+    "termZh": "合成训练数据",
+    "aliases": [
+      "synthetic training data",
+      "合成训练数据",
+      "model-generated training data",
+      "模型生成训练数据"
+    ],
+    "definitionEn": "Training examples produced by a model or program rather than collected solely from naturally occurring records.",
+    "definitionZh": "由模型或程序生成的训练样本，质量和覆盖范围需要校验，不能仅依赖生成数量。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2306.11644"
     ]
   },
   {
@@ -11013,6 +14088,23 @@
     ]
   },
   {
+    "id": "ai-advanced-target-model",
+    "termEn": "target model in speculative decoding",
+    "termZh": "推测解码目标模型",
+    "aliases": [
+      "target model in speculative decoding",
+      "推测解码目标模型",
+      "target language model",
+      "推测解码验证模型"
+    ],
+    "definitionEn": "The main model that validates candidate tokens and determines accepted output during speculative decoding.",
+    "definitionZh": "在推测解码中负责验证候选词元、决定哪些候选可接受的主模型。",
+    "category": "Inference",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/assisted_decoding"
+    ]
+  },
+  {
     "id": "ai-education-target-network",
     "termEn": "target network",
     "termZh": "目标网络",
@@ -11050,14 +14142,34 @@
     "termZh": "任务分解",
     "aliases": [
       "task decomposition",
-      "任务分解"
+      "任务分解",
+      "task decomposing",
+      "任务拆解"
     ],
-    "definitionEn": "Breaking down a large goal into atomic, executable steps. Agents handle certain problems by performing task decomposition.",
-    "definitionZh": "将大目标分解为可执行的原子步骤。 智能体通过执行任务分解来处理某些问题。",
-    "category": "Machine learning",
+    "definitionEn": "Divides a complex task into smaller subtasks that can be solved and combined.",
+    "definitionZh": "将复杂任务拆成可处理的子任务，再组合结果；拆分本身也可能遗漏依赖关系。",
+    "category": "Agents",
     "sources": [
+      "https://arxiv.org/abs/2305.04091",
       "https://developers.google.com/machine-learning/glossary#task-decomposition",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#task-decomposition"
+    ]
+  },
+  {
+    "id": "ai-advanced-task-adaptive-pretraining",
+    "termEn": "task-adaptive pretraining",
+    "termZh": "任务自适应预训练",
+    "aliases": [
+      "task-adaptive pretraining",
+      "任务自适应预训练",
+      "task adaptive pretraining",
+      "TAPT"
+    ],
+    "definitionEn": "Continued pretraining on unlabeled text associated with a particular downstream task.",
+    "definitionZh": "使用与特定下游任务相关的未标注文本继续预训练，随后再进行有监督任务训练。",
+    "category": "Post-training",
+    "sources": [
+      "https://arxiv.org/abs/2004.10964"
     ]
   },
   {
@@ -11105,6 +14217,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#tensor",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#tensor"
+    ]
+  },
+  {
+    "id": "ai-advanced-tensor-parallelism",
+    "termEn": "tensor parallelism",
+    "termZh": "张量并行",
+    "aliases": [
+      "tensor parallelism",
+      "张量并行",
+      "tensor parallel",
+      "张量并行推理"
+    ],
+    "definitionEn": "Splits computation within model layers across devices, requiring communication to combine partial results.",
+    "definitionZh": "把模型层内部的计算拆到多个设备上，再通过通信合并部分结果。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/serving/parallelism_scaling/"
     ]
   },
   {
@@ -11361,6 +14490,45 @@
     ]
   },
   {
+    "id": "ai-advanced-test-time-compute",
+    "termEn": "test-time compute",
+    "termZh": "测试时计算",
+    "aliases": [
+      "test-time compute",
+      "测试时计算",
+      "inference-time compute",
+      "test time compute",
+      "推理时计算",
+      "推理计算量"
+    ],
+    "definitionEn": "The computation spent producing and checking answers at inference time.",
+    "definitionZh": "在推理阶段用于生成、搜索或检验答案的计算资源，与训练阶段的计算量相区别。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2501.19393"
+    ]
+  },
+  {
+    "id": "ai-advanced-test-time-scaling",
+    "termEn": "test-time scaling",
+    "termZh": "测试时扩展",
+    "aliases": [
+      "test-time scaling",
+      "测试时扩展",
+      "inference-time scaling",
+      "test time scaling",
+      "inference time scaling",
+      "推理时扩展",
+      "推理时缩放"
+    ],
+    "definitionEn": "Improves task performance by allocating more computation during inference rather than only increasing training.",
+    "definitionZh": "通过在推理阶段分配更多计算来改善任务表现，例如生成更长推理或探索多个候选。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2501.19393"
+    ]
+  },
+  {
     "id": "ai-education-text-span",
     "termEn": "text span",
     "termZh": "文本 span",
@@ -11374,6 +14542,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#text-span",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#text-span"
+    ]
+  },
+  {
+    "id": "ai-advanced-text-to-text",
+    "termEn": "text-to-text modeling",
+    "termZh": "文本到文本建模",
+    "aliases": [
+      "text-to-text modeling",
+      "文本到文本建模",
+      "text to text modeling",
+      "文本到文本范式"
+    ],
+    "definitionEn": "Expresses varied language tasks as text input followed by text output.",
+    "definitionZh": "把不同语言任务统一表达为输入文本并生成输出文本的建模方式。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/1910.10683"
     ]
   },
   {
@@ -11488,6 +14673,23 @@
     ]
   },
   {
+    "id": "ai-advanced-time-to-first-token",
+    "termEn": "time to first token",
+    "termZh": "首词元延迟",
+    "aliases": [
+      "time to first token",
+      "首词元延迟",
+      "TTFT",
+      "首Token延迟"
+    ],
+    "definitionEn": "Elapsed time from submitting a generation request to receiving its first output token.",
+    "definitionZh": "从提交生成请求到收到第一个输出词元所经过的时间，是交互延迟的重要指标。",
+    "category": "Inference",
+    "sources": [
+      "https://docs.vllm.ai/en/latest/configuration/optimization/"
+    ]
+  },
+  {
     "id": "ai-education-timestep",
     "termEn": "timestep",
     "termZh": "时间步长",
@@ -11524,16 +14726,143 @@
   {
     "id": "ai-education-tokenizer",
     "termEn": "tokenizer",
-    "termZh": "tokenizer",
+    "termZh": "分词器",
     "aliases": [
-      "tokenizer"
+      "tokenizer",
+      "分词器",
+      "tokenizers",
+      "词元化器"
     ],
-    "definitionEn": "A system or algorithm that translates a sequence of input data into tokens . Most modern foundation models are multimodal . A tokenizer for a multimodal system must translate each input type into the appropriate format. For example, given input data consisting of both text and graphics, the tokenizer might translate input text into subwords and input images into small patches. The tokenizer must then convert all the tokens into a single unified embedding space, which enables the model to \"understand\" a stream of multimodal input.",
-    "definitionZh": "一种将输入数据序列转换为 令牌 的系统或算法。 大多数现代 基础模型 都是 多模态 的。多模态系统的分词器必须将每种输入类型转换为适当的格式。例如，如果输入数据同时包含文本和图形，词元化器可能会将输入文本转换为子字词，并将输入图片转换为小块。然后，分词器必须将所有词元转换为单个统一的嵌入空间，以便模型能够“理解”多模态输入流。",
-    "category": "Machine learning",
+    "definitionEn": "Converts text into token sequences and identifiers according to a vocabulary and processing rules.",
+    "definitionZh": "按照词表与处理规则把文本转换为词元及其编号；同一文本在不同分词器下长度可能不同。",
+    "category": "Foundation models",
     "sources": [
+      "https://huggingface.co/docs/transformers/tokenizer_summary",
       "https://developers.google.com/machine-learning/glossary#tokenizer",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#tokenizer"
+    ]
+  },
+  {
+    "id": "ai-advanced-tool-calling",
+    "termEn": "tool calling",
+    "termZh": "工具调用",
+    "aliases": [
+      "tool calling",
+      "工具调用",
+      "function calling",
+      "tool calls",
+      "function calls",
+      "函数调用"
+    ],
+    "definitionEn": "A model emits structured requests to external tools, then uses their returned results.",
+    "definitionZh": "模型以结构化请求调用外部工具，再结合工具返回的结果继续处理任务。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/building-effective-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-tool-namespacing",
+    "termEn": "tool namespacing",
+    "termZh": "工具命名空间",
+    "aliases": [
+      "tool namespacing",
+      "工具命名空间",
+      "namespaced tools",
+      "工具命名空间划分"
+    ],
+    "definitionEn": "Groups and names tools to make capabilities and boundaries easier for an agent to distinguish.",
+    "definitionZh": "通过分组和命名让智能体更容易区分工具的功能与边界，减少工具选择歧义。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/writing-tools-for-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-tool-response",
+    "termEn": "tool response",
+    "termZh": "工具返回结果",
+    "aliases": [
+      "tool response",
+      "工具返回结果",
+      "tool responses",
+      "tool result",
+      "tool results",
+      "工具响应"
+    ],
+    "definitionEn": "Information returned from a tool invocation for use in subsequent agent steps.",
+    "definitionZh": "工具调用返回的信息，供智能体后续步骤使用；结果也可能包含错误或不可信内容。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/writing-tools-for-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-tool-schema",
+    "termEn": "tool schema",
+    "termZh": "工具模式定义",
+    "aliases": [
+      "tool schema",
+      "工具模式定义",
+      "tool schemas",
+      "工具参数模式"
+    ],
+    "definitionEn": "A machine-readable specification of a tool's inputs and, where provided, outputs.",
+    "definitionZh": "以机器可读形式描述工具输入以及可选输出的结构，帮助模型正确构造调用。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/writing-tools-for-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-tool-selection",
+    "termEn": "tool selection",
+    "termZh": "工具选择",
+    "aliases": [
+      "tool selection",
+      "工具选择",
+      "tool routing",
+      "工具路由"
+    ],
+    "definitionEn": "Choosing a suitable tool for the current goal and available context.",
+    "definitionZh": "根据当前目标和上下文选择合适的工具；工具越多并不意味着选择一定更准确。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/writing-tools-for-agents"
+    ]
+  },
+  {
+    "id": "ai-advanced-tool-integrated-reasoning",
+    "termEn": "tool-integrated reasoning",
+    "termZh": "工具集成推理",
+    "aliases": [
+      "tool-integrated reasoning",
+      "工具集成推理",
+      "TIR",
+      "tool integrated reasoning",
+      "工具增强推理"
+    ],
+    "definitionEn": "Interleaves natural-language reasoning with executable tool interactions such as code execution.",
+    "definitionZh": "把自然语言推理与代码执行等工具交互交替结合，用外部计算辅助解题。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2309.17452"
+    ]
+  },
+  {
+    "id": "ai-advanced-toolformer",
+    "termEn": "Toolformer",
+    "termZh": "工具学习模型Toolformer",
+    "aliases": [
+      "Toolformer",
+      "工具学习模型Toolformer",
+      "Toolformer method"
+    ],
+    "definitionEn": "A research method teaching a model when and how to call APIs using self-supervised examples.",
+    "definitionZh": "通过自监督样本训练模型学习何时以及如何调用API的研究方法。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2302.04761"
     ]
   },
   {
@@ -11550,6 +14879,40 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#top-k-accuracy",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#top-k-accuracy"
+    ]
+  },
+  {
+    "id": "ai-advanced-top-k-sampling",
+    "termEn": "top-k sampling",
+    "termZh": "前k词元采样",
+    "aliases": [
+      "top-k sampling",
+      "前k词元采样",
+      "top k sampling",
+      "top-k采样"
+    ],
+    "definitionEn": "Restricts token sampling to the k highest-probability candidates at each step.",
+    "definitionZh": "每一步只在概率最高的k个候选词元中采样，与衡量分类正确率的top-k accuracy不同。",
+    "category": "Reasoning",
+    "sources": [
+      "https://huggingface.co/docs/transformers/main/en/main_classes/text_generation"
+    ]
+  },
+  {
+    "id": "ai-advanced-tora",
+    "termEn": "ToRA reasoning agent",
+    "termZh": "ToRA推理智能体",
+    "aliases": [
+      "ToRA reasoning agent",
+      "ToRA推理智能体",
+      "ToRA agent",
+      "ToRA框架"
+    ],
+    "definitionEn": "A research agent combining language reasoning with tools for mathematical problem solving.",
+    "definitionZh": "将语言推理与工具结合来求解数学问题的研究智能体。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2309.17452"
     ]
   },
   {
@@ -11744,6 +15107,40 @@
     ]
   },
   {
+    "id": "ai-advanced-training-compute-budget",
+    "termEn": "training compute budget",
+    "termZh": "训练计算预算",
+    "aliases": [
+      "training compute budget",
+      "训练计算预算",
+      "pretraining compute budget",
+      "预训练计算预算"
+    ],
+    "definitionEn": "The computation allocated to model training, often considered jointly with model size and data volume.",
+    "definitionZh": "分配给模型训练的计算资源，通常需要与模型规模和训练数据量共同权衡。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2001.08361"
+    ]
+  },
+  {
+    "id": "ai-advanced-training-data-deduplication",
+    "termEn": "training data deduplication",
+    "termZh": "训练数据去重",
+    "aliases": [
+      "training data deduplication",
+      "训练数据去重",
+      "corpus deduplication",
+      "语料去重"
+    ],
+    "definitionEn": "Removes repeated or near-duplicate training examples to reduce memorization and data redundancy.",
+    "definitionZh": "删除重复或近似重复的训练样本，以减少冗余以及对重复内容的记忆。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2107.06499"
+    ]
+  },
+  {
     "id": "ai-education-training-loss",
     "termEn": "training loss",
     "termZh": "训练损失",
@@ -11776,6 +15173,23 @@
     ]
   },
   {
+    "id": "ai-advanced-training-token-budget",
+    "termEn": "training token budget",
+    "termZh": "训练词元预算",
+    "aliases": [
+      "training token budget",
+      "训练词元预算",
+      "pretraining token budget",
+      "训练token预算"
+    ],
+    "definitionEn": "The number of tokens processed during training, which can include repeated exposure to the same data.",
+    "definitionZh": "训练期间处理的词元数量预算，可包含对同一数据的重复训练，不等于独立文本的数量。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2203.15556"
+    ]
+  },
+  {
     "id": "ai-education-training-serving-skew",
     "termEn": "training-serving skew",
     "termZh": "训练-应用偏差",
@@ -11805,6 +15219,23 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#trajectory",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#trajectory"
+    ]
+  },
+  {
+    "id": "ai-advanced-trajectory-grading",
+    "termEn": "trajectory grading",
+    "termZh": "执行轨迹评分",
+    "aliases": [
+      "trajectory grading",
+      "执行轨迹评分",
+      "trajectory evaluation",
+      "轨迹评测"
+    ],
+    "definitionEn": "Evaluates intermediate actions and tool use, complementing checks of the final task outcome.",
+    "definitionZh": "对中间动作和工具使用方式进行评价，补充只检查最终结果的评测。",
+    "category": "Agents",
+    "sources": [
+      "https://www.anthropic.com/research/demystifying-evals-for-ai-agents"
     ]
   },
   {
@@ -11856,18 +15287,23 @@
   },
   {
     "id": "ai-education-tree-of-thought-prompting-tot",
-    "termEn": "tree-of-thought prompting",
-    "termZh": "思维树提示 (ToT)",
+    "termEn": "tree of thoughts",
+    "termZh": "思维树",
     "aliases": [
-      "tree-of-thought prompting (ToT)",
-      "思维树提示 (ToT)",
+      "tree of thoughts",
+      "思维树",
+      "Tree-of-Thoughts",
+      "ToT",
       "思维树提示",
-      "ToT"
+      "tree-of-thought prompting",
+      "思维树提示 (ToT)",
+      "tree-of-thought prompting (ToT)"
     ],
-    "definitionEn": "A sophisticated prompting strategy that encourages an LLM to pursue and refine the most promising intermediate solutions and to abandon the rest. Tree-of-thought prompting uses an algorithm like the following: Divide a complex problem into different branches (potential strategies), each comprised of multiple steps. Prompt the LLM to work on each branch independently. Ask the LLM to evaluate the quality of the solution to each branch after each step. Continue refining the most promising branch(es); abandon the rest.",
-    "definitionZh": "一种复杂的提示策略，可鼓励 LLM 追求并改进最有希望的中间解决方案，并放弃其余解决方案。 思维树提示使用如下算法： 将复杂问题划分为不同的分支（潜在策略），每个分支都包含多个步骤。 提示 LLM 独立处理每个分支。 在每个步骤之后，要求 LLM 评估每个分支的解决方案的质量。 继续优化最有希望的分支，放弃其余分支。",
-    "category": "Machine learning",
+    "definitionEn": "Explores and evaluates branching intermediate thoughts, allowing lookahead and backtracking.",
+    "definitionZh": "把中间思路组织为分支进行探索与评价，允许前瞻和回溯，而不只沿单一路径生成。",
+    "category": "Reasoning",
     "sources": [
+      "https://arxiv.org/abs/2305.10601",
       "https://developers.google.com/machine-learning/glossary#tree-of-thought-prompting-tot",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#tree-of-thought-prompting-tot"
     ]
@@ -12024,21 +15460,21 @@
     ]
   },
   {
-    "id": "ai-education-unidirectional-language-model",
-    "termEn": "unidirectional language model",
-    "termZh": "单向语言模型",
+    "id": "ai-advanced-unigram-tokenizer",
+    "termEn": "Unigram tokenizer",
+    "termZh": "Unigram概率分词器",
     "aliases": [
-      "unidirectional language model",
-      "单向语言模型",
-      "causal language model",
-      "因果语言模型"
+      "Unigram tokenizer",
+      "Unigram概率分词器",
+      "Unigram tokenization",
+      "Unigram分词",
+      "Unigram"
     ],
-    "definitionEn": "A language model that bases its probabilities only on the tokens appearing before , not after , the target token(s). Contrast with bidirectional language model .",
-    "definitionZh": "一种 语言模型 ，其概率仅基于目标 token 之前而非之后的 token。 与 双向语言模型 相对。",
-    "category": "Machine learning",
+    "definitionEn": "A probabilistic subword tokenizer that selects token segmentations using a learned unigram model.",
+    "definitionZh": "使用学习到的单元概率模型选择子词切分方案的分词方法。",
+    "category": "Foundation models",
     "sources": [
-      "https://developers.google.com/machine-learning/glossary#unidirectional-language-model",
-      "https://developers.google.com/machine-learning/glossary?hl=zh-cn#unidirectional-language-model"
+      "https://huggingface.co/docs/tokenizers/main/en/components"
     ]
   },
   {
@@ -12287,6 +15723,23 @@
     ]
   },
   {
+    "id": "ai-advanced-verifier-guided-search",
+    "termEn": "verifier-guided search",
+    "termZh": "验证器引导搜索",
+    "aliases": [
+      "verifier-guided search",
+      "验证器引导搜索",
+      "verifier guided search",
+      "验证引导搜索"
+    ],
+    "definitionEn": "Uses a learned or programmed evaluator to rank or expand candidate reasoning paths.",
+    "definitionZh": "使用学习得到或程序实现的评价器来排序、选择或扩展候选推理路径。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2408.03314"
+    ]
+  },
+  {
     "id": "ai-cloud-vertex_ai_agent_engine",
     "termEn": "Vertex AI Agent Engine",
     "termZh": "Vertex AI Agent Engine",
@@ -12521,6 +15974,78 @@
     ]
   },
   {
+    "id": "ai-advanced-vision-transformer",
+    "termEn": "Vision Transformer",
+    "termZh": "视觉Transformer",
+    "aliases": [
+      "Vision Transformer",
+      "视觉Transformer",
+      "ViT",
+      "视觉变换器",
+      "Vision Transformers"
+    ],
+    "definitionEn": "Processes sequences of image patches using Transformer blocks for visual representation learning.",
+    "definitionZh": "将图像划分为图块序列，并用Transformer模块学习视觉表示的模型。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2010.11929"
+    ]
+  },
+  {
+    "id": "ai-advanced-vision-language-model",
+    "termEn": "vision-language model",
+    "termZh": "视觉语言模型",
+    "aliases": [
+      "vision-language model",
+      "视觉语言模型",
+      "VLM",
+      "vision language model",
+      "视觉-语言模型",
+      "vision-language models",
+      "vision language models",
+      "VLMs"
+    ],
+    "definitionEn": "A model that relates or jointly processes visual inputs and language, for understanding or generation tasks.",
+    "definitionZh": "能够关联或联合处理视觉输入与语言的模型，可用于理解或生成任务。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2103.00020"
+    ]
+  },
+  {
+    "id": "ai-advanced-visual-instruction-tuning",
+    "termEn": "visual instruction tuning",
+    "termZh": "视觉指令微调",
+    "aliases": [
+      "visual instruction tuning",
+      "视觉指令微调",
+      "多模态视觉指令微调"
+    ],
+    "definitionEn": "Trains a vision-language system on instructions and responses grounded in images.",
+    "definitionZh": "利用与图像相关的指令回答样本训练视觉语言系统，使其更好完成图像条件任务。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2304.08485"
+    ]
+  },
+  {
+    "id": "ai-advanced-visual-projector",
+    "termEn": "visual projector",
+    "termZh": "视觉投影模块",
+    "aliases": [
+      "visual projector",
+      "视觉投影模块",
+      "vision-language projector",
+      "视觉语言投影器"
+    ],
+    "definitionEn": "Maps visual encoder representations into a space that a language model can consume.",
+    "definitionZh": "把视觉编码器的表示映射到语言模型能够使用的表示空间。",
+    "category": "Foundation models",
+    "sources": [
+      "https://arxiv.org/abs/2304.08485"
+    ]
+  },
+  {
     "id": "ai-cloud-vpc_network_peering",
     "termEn": "VPC Network Peering",
     "termZh": "VPC 网络对等互连",
@@ -12565,6 +16090,22 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#wasserstein-loss",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#wasserstein-loss"
+    ]
+  },
+  {
+    "id": "ai-advanced-webarena",
+    "termEn": "WebArena",
+    "termZh": "网页任务智能体基准",
+    "aliases": [
+      "WebArena",
+      "网页任务智能体基准",
+      "WebArena benchmark"
+    ],
+    "definitionEn": "A reproducible web environment for evaluating agents on realistic multi-step website tasks.",
+    "definitionZh": "用于评估智能体完成真实风格、多步骤网站任务能力的可复现网页环境。",
+    "category": "Agents",
+    "sources": [
+      "https://arxiv.org/abs/2307.13854"
     ]
   },
   {
@@ -12729,6 +16270,23 @@
     ]
   },
   {
+    "id": "ai-advanced-wordpiece",
+    "termEn": "WordPiece",
+    "termZh": "WordPiece子词分词",
+    "aliases": [
+      "WordPiece",
+      "WordPiece子词分词",
+      "WordPiece tokenization",
+      "WordPiece分词"
+    ],
+    "definitionEn": "A subword vocabulary method commonly associated with BERT, segmenting words into learned pieces.",
+    "definitionZh": "常用于BERT的子词词表与分词方法，将单词拆成学习得到的子词片段。",
+    "category": "Foundation models",
+    "sources": [
+      "https://huggingface.co/docs/tokenizers/main/en/components"
+    ]
+  },
+  {
     "id": "ai-education-words-in-context-wic",
     "termEn": "Words in Context",
     "termZh": "Words in Context (WiC)",
@@ -12825,6 +16383,24 @@
     "sources": [
       "https://developers.google.com/machine-learning/glossary#z-score-normalization",
       "https://developers.google.com/machine-learning/glossary?hl=zh-cn#z-score-normalization"
+    ]
+  },
+  {
+    "id": "ai-advanced-zero-shot-cot",
+    "termEn": "zero-shot chain-of-thought",
+    "termZh": "零样本思维链",
+    "aliases": [
+      "zero-shot chain-of-thought",
+      "零样本思维链",
+      "zero-shot CoT",
+      "zero shot chain of thought",
+      "零样本思维链提示"
+    ],
+    "definitionEn": "Elicits intermediate reasoning with an instruction rather than providing worked examples.",
+    "definitionZh": "用要求逐步思考之类的指令引出中间推理，而不提供带推理过程的示范。",
+    "category": "Reasoning",
+    "sources": [
+      "https://arxiv.org/abs/2205.11916"
     ]
   },
   {
