@@ -34,6 +34,10 @@
 .landing-page .button:hover { background: var(--app-accent-hover); }
 .landing-page .button.small { padding: 9px 16px; font-size: 13px; gap: 10px; }
 .landing-page .menu-toggle { display: none; padding: 6px; background: transparent; color: var(--app-text); }
+.landing-page .locale-select { font: inherit; font-size: 13px; color: var(--app-text); background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 6px; padding: 7px 5px; max-width: 100px; }
+.landing-page .locale-select:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 3px; }
+@media (min-width: 981px) { .landing-page .nav-actions { gap: 16px; } .landing-page .desktop-nav { gap: 18px; } }
+@media (max-width: 420px) { .landing-page .nav-actions > .button.small { display: none; } }
 .landing-page .mobile-nav { display: none; }
 .landing-page .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; padding-block: 88px; }
 .landing-page .eyebrow { color: var(--app-accent); font-size: 11px; letter-spacing: 1.4px; font-weight: 600; margin-bottom: 18px; }
