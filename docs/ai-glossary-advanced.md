@@ -8,7 +8,7 @@
 
 ## 内容与来源
 
-此次条目依据下列官方文档及原始论文人工核对后撰写简短英文概括和中文解释，不是直接复制论文全文，也不表示相关机构背书。初始Google词库的CC BY 4.0归属仍保留；新来源各自的许可不因收录而改变。每条资源记录均包含HTTPS来源，独立整理数据在 `scripts/glossary/advanced_terms.json`，运行时数据仍统一为 `src/main/resources/glossary/terms.json`。
+此次条目依据下列官方文档及原始论文人工核对后撰写简短英文概括和中文解释，不是直接复制论文全文，也不表示相关机构背书。初始Google词库的CC BY 4.0归属仍保留；新来源各自的许可不因收录而改变。每条资源记录均包含HTTPS来源，独立整理数据在 `src/test/resources/glossary/advanced_terms.json`，运行时数据仍统一为 `src/main/resources/glossary/terms.json`。
 
 不同概念保留区分：post-training是预训练后的训练阶段，post-training quantization是训练后量化；DPO与PPO/GRPO不是同一算法；过程奖励与结果奖励不是同一监督粒度。ReAct仅添加带技术限定词的匹配形式，避免把英文动词react错误高亮；不添加裸的target model等含义过宽的别名。
 

@@ -73,3 +73,13 @@ VITE_API_BASE_URL=http://127.0.0.1:18081 npm run dev -- --host 127.0.0.1 --port 
 进阶专项补充后，当前词库为892个概念、2170个名称/别名；历史795条ES和171处字幕匹配数字为扩充前的验证记录。进阶内容和最新回归结果见[专项记录](ai-glossary-advanced.md)。
 
 第二轮专项之后，当前词库为997个概念、2672个名称/别名；更早的计数属于历史验证记录。新增105个Agent、基础模型与推理概念及9个合并更新条目见[第二轮记录](ai-glossary-agents-models-reasoning.md)。
+
+## Docker 构建回归修复（2026-11-05）
+
+生产部署日志中的 `NoSuchFileException: scripts/glossary/advanced_terms.json` 发生在构建镜像时运行测试的阶段，不是应用启动或ES初始化失败。Docker后端阶段只复制 `pom.xml` 和 `src`，旧测试却依赖仓库的scripts目录；同时POM硬编码 `skipTests=false`，使Dockerfile的 `-DskipTests` 未能跳过测试。
+
+专项源数据现统一存放在 `src/test/resources/glossary/advanced_terms.json`，Java测试从classpath读取，Python合并脚本也从同一个文件读取，不维护两份副本。POM移除强制覆盖，正常 `mvn test` 仍运行测试，`mvn clean package -DskipTests` 明确跳过测试。测试资源不进入生产JAR，运行时仍只读取已合并的997条词库。
+
+已在仅包含pom.xml和src、没有scripts目录的独立临时目录验证打包成功（日志包含 `Tests are skipped.`），并在相同目录执行全量测试通过。本机没有Docker/Podman运行时，此验证覆盖容器后端构建的目录和Maven步骤，不代表执行了完整容器镜像构建。
+
+部署脚本会在服务器构建前端和后端镜像，平台的applicationStop hook还会提前停止旧应用。若构建失败且旧容器尚未删除，可以先在ECS执行 `docker start finance-app` 恢复旧版本，再使用修复版本重新部署。后续如需减少构建期间停机，应把旧容器停机安排到新镜像构建成功之后。

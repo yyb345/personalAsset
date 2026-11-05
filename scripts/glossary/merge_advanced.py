@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SUPPLEMENT = Path(__file__).with_name('advanced_terms.json')
+SUPPLEMENT = ROOT / 'src/test/resources/glossary/advanced_terms.json'
 OUTPUT = ROOT / 'src/main/resources/glossary/terms.json'
 FIELDS = {'id', 'termEn', 'termZh', 'aliases', 'definitionEn', 'definitionZh', 'category', 'sources'}
 

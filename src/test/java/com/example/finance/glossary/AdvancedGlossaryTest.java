@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
-import java.nio.file.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,8 +14,10 @@ class AdvancedGlossaryTest {
         try (var input = new ClassPathResource("glossary/terms.json").getInputStream()) {
             terms = mapper.readValue(input, new TypeReference<List<GlossaryTerm>>() {});
         }
-        var reviewed = mapper.readValue(Files.readString(Path.of("scripts/glossary/advanced_terms.json")),
-            new TypeReference<List<GlossaryTerm>>() {});
+        List<GlossaryTerm> reviewed;
+        try (var input = new ClassPathResource("glossary/advanced_terms.json").getInputStream()) {
+            reviewed = mapper.readValue(input, new TypeReference<List<GlossaryTerm>>() {});
+        }
         var matcher = new GlossaryMatcher(terms);
         var ids = terms.stream().map(GlossaryTerm::id).collect(java.util.stream.Collectors.toSet());
         for (var term : reviewed) {
