@@ -4,6 +4,7 @@ import { checkAuth } from '@/utils/auth'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    { path: '/lingq-lab', name: 'LingqLab', component: () => import('@/views/LingqLab.vue'), meta: { requiresAuth: false } },
     { path: '/dashboard/billing', name: 'Billing', component: () => import('@/views/dashboard/Billing.vue'), meta: { requiresAuth: false } },
     {
       path: '/',

@@ -27,6 +27,7 @@ public class FrontendController {
         "/register",
         "/dashboard",
         "/shadowing",
+        "/lingq-lab",
         "/transcribe"
     })
     public ResponseEntity<Resource> index() {
