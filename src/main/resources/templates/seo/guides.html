@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${notFound == true ? 'Guide Not Found | xLearning' : 'English Learning Guides: Listening, Subtitles &amp; Shadowing | xLearning'}"></title>
+<meta name="description" content="Practical English learning guides with video listening routines, shadowing exercises, dictation, subtitle strategies, and reusable study templates.">
+<meta th:if="${notFound == true}" name="robots" content="noindex, follow">
+<link th:unless="${notFound == true}" rel="canonical" th:href="${pageUrl}">
+<meta property="og:title" content="English Learning Guides | xLearning"><meta property="og:type" content="website"><meta property="og:url" th:content="${pageUrl}">
+<link rel="stylesheet" href="/css/guides.css"></head><body>
+<a class="skip" href="#main">Skip to content</a><header><a class="brand" href="/">xLearning</a><nav aria-label="Main navigation"><a href="/video">Video transcripts</a><a href="/dashboard/youtube">Open workspace</a></nav></header>
+<main id="main"><p class="eyebrow">THE XLEARNING STUDY HANDBOOK</p><h1 th:text="${notFound == true ? 'We could not find that guide' : 'Turn English videos into focused practice'}"></h1><p class="intro">Choose a skill to work on. Each guide includes a practical routine, examples, and an exercise you can use with a short video clip.</p>
+<div class="grid"><a class="card" th:each="guide : ${guides}" th:href="${'/guides/' + guide.slug}"><h2 th:text="${guide.title}"></h2><p th:text="${guide.description}"></p><span>Read the guide →</span></a></div></main>
+<footer><a href="/">xLearning</a> · <a href="/video">Browse video transcripts</a></footer></body></html>

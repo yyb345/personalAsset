@@ -100,7 +100,7 @@
             <div class="transcript-content">
                 <div th:each="segment : ${subtitles}" class="transcript-segment">
                     <span class="time-stamp" th:text="${#numbers.formatDecimal(segment.startTime, 1, 1)} + 's'">0.0s</span>
-                    <span th:text="${segment.cleanText != null ? segment.cleanText : segment.rawText}">Subtitle text</span>
+                    <span th:text="${segment.displayText}">Subtitle text</span>
                 </div>
             </div>
         </section>

@@ -67,6 +67,13 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach(async (to, from, next) => {
+  // Production public homepage is rendered by Spring, including navigation from the workspace.
+  if (import.meta.env.PROD && to.name === 'Landing') {
+    next(false)
+    window.location.assign(to.fullPath)
+    return
+  }
+
   // 检查当前路由是否明确设置了 requiresAuth
   // 优先使用最具体的路由配置（子路由），如果子路由明确设置为 false，则不需要认证
   const currentRoute = to.matched[to.matched.length - 1]

@@ -81,6 +81,11 @@ public class SubtitleSegment {
         return cleanText;
     }
 
+    /** Fall back to the original caption when cleaning produced no readable text. */
+    public String getDisplayText() {
+        return cleanText != null && !cleanText.isBlank() ? cleanText : rawText;
+    }
+
     public void setCleanText(String cleanText) {
         this.cleanText = cleanText;
     }

@@ -61,3 +61,7 @@ unset deepseek_key
 ```
 
 首次接入需要使用更新后的部署脚本重建应用容器，单纯 `docker restart` 不会新增挂载。后续修改密钥后重启应用即可读取。不要通过 `cat`、调试日志或 `set -x` 输出密钥。
+
+## 生产构建
+
+使用 `mvn clean package`，会自动构建并同步 Vue 资源；随后执行 `python3 scripts/verify-package.py target/finance-0.0.1-SNAPSHOT.jar` 验证产物。环境要求及后端测试的跳过前端参数见 [构建说明](docs/build.md)。

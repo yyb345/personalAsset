@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${guide.title + ' | xLearning'}">English learning guide | xLearning</title>
+<meta name="description" th:content="${guide.description}">
+<link rel="canonical" th:href="${pageUrl}">
+<meta property="og:type" content="article"><meta property="og:site_name" content="xLearning">
+<meta property="og:title" th:content="${guide.title}"><meta property="og:description" th:content="${guide.description}"><meta property="og:url" th:content="${pageUrl}">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" th:content="${guide.title}"><meta name="twitter:description" th:content="${guide.description}">
+<link rel="stylesheet" href="/css/guides.css">
+<script type="application/ld+json" th:utext="${jsonLd}"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header><a class="brand" href="/">xLearning</a><nav aria-label="Main navigation"><a href="/guides">Learning guides</a><a href="/video">Video transcripts</a></nav></header>
+<main id="main">
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/guides">English learning guides</a> / <span aria-current="page" th:text="${guide.title}"></span></nav>
+<article>
+<p class="eyebrow">ENGLISH PRACTICE · XLEARNING</p>
+<h1 th:text="${guide.title}"></h1><p class="intro" th:text="${guide.intro}"></p>
+<p class="byline">By xLearning · Practical study guide</p>
+<nav class="toc" aria-label="On this page"><h2>In this guide</h2><ol><li th:each="section, state : ${guide.sections}"><a th:href="${'#step-' + state.count}" th:text="${section.heading}"></a></li><li><a href="#practice">Try the exercise</a></li></ol></nav>
+<section th:each="section, state : ${guide.sections}" th:id="${'step-' + state.count}"><h2 th:text="${section.heading}"></h2><p th:text="${section.body}"></p><p class="example" th:text="${section.example}"></p></section>
+<section id="practice" class="practice"><p class="eyebrow">PUT IT INTO PRACTICE</p><h2 th:text="${guide.exerciseTitle}"></h2><p th:text="${guide.exercise}"></p></section>
+<section><h2 th:text="${guide.question}"></h2><p th:text="${guide.answer}"></p></section>
+<aside class="cta"><h2>Choose a clip and start practicing</h2><p>Browse available video transcripts or open the learning workspace to study a video.</p><a class="button" href="/video">Browse transcripts</a> <a href="/dashboard/youtube">Open workspace →</a></aside>
+</article>
+<aside aria-label="Related guides"><h2>Continue learning</h2><div class="grid"><a class="card" th:each="item : ${related}" th:href="${'/guides/' + item.slug}"><h3 th:text="${item.title}"></h3><p th:text="${item.description}"></p></a></div></aside>
+</main><footer><a href="/">xLearning</a> · <a href="/guides">English learning guides</a> · <a href="/video">Video transcripts</a></footer>
+</body></html>

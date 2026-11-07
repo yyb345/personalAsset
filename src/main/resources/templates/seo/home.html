@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${'用 AI 英文视频练听力、跟读与阅读 | ' + siteName}">用 AI 英文视频练听力、跟读与阅读</title>
+  <meta name="description" content="用 xLearning 把 AI 英文视频变成学习材料：浏览视频字幕，结合跟读、听写和阅读练习，建立自己的英语学习流程。">
+  <link rel="canonical" th:href="${canonicalUrl}">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:title" th:content="${'学 AI，也练英语 | ' + siteName}">
+  <meta property="og:description" content="从真实英文视频出发，用字幕、跟读和阅读练习，把看懂变成学会。">
+  <meta property="og:url" th:content="${canonicalUrl}">
+  <link rel="stylesheet" href="/css/home.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6MKRR655RZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6MKRR655RZ');
+  </script>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<header class="header wrap">
+  <a class="brand" href="/" th:text="${siteName}">xLearning</a>
+  <nav aria-label="主导航"><a href="/video">视频字幕</a><a href="/guides">学习指南</a><a class="nav-action" href="/login">登录</a></nav>
+</header>
+<main id="main">
+  <section class="hero wrap">
+    <div><p class="eyebrow">从感兴趣的内容开始学习</p><h1>学 AI，<br>也练英语。</h1>
+      <p class="lead">把真实英文视频变成你的学习材料。从字幕理解到开口跟读，在探索 AI 的同时，练习听力、阅读和表达。</p>
+      <div class="actions"><a class="button" href="/dashboard/youtube">进入学习工作台 <span aria-hidden="true">↗</span></a><a class="text-link" href="/video">先浏览视频字幕 →</a></div>
+      <p class="note">先选一段短视频，完成一次专注练习。</p>
+    </div>
+    <aside class="practice" aria-label="学习流程示例"><div class="practice-top"><span>你的下一次练习</span><span class="pill">VIDEO → PRACTICE</span></div><h2>让一个片段，<br>带来真正的进步。</h2><ol><li><span>01</span><div><strong>先听，再看字幕</strong><p>抓住主题，找出没听清的句子。</p></div></li><li><span>02</span><div><strong>理解表达，开口跟读</strong><p>留意术语、重音和句子节奏。</p></div></li><li><span>03</span><div><strong>用自己的话复述</strong><p>把新知识变成自己的表达。</p></div></li></ol></aside>
+  </section>
+  <section class="section wrap" aria-labelledby="tools-title"><p class="eyebrow">按你的目标练习</p><h2 id="tools-title">从理解内容，到主动表达</h2><div class="cards">
+    <article><span class="number">01 / LISTEN</span><h3>视频与字幕学习</h3><p>浏览英文视频字幕，定位不熟悉的表达，再进入视频学习工作台开展练习。</p><a href="/video">浏览视频字幕 →</a></article>
+    <article><span class="number">02 / SPEAK</span><h3>跟读练习</h3><p>选择短句反复听、开口模仿，把注意力放在连读、重音和自然的语音节奏上。</p><a href="/shadowing">打开跟读工具 →</a></article>
+    <article><span class="number">03 / READ</span><h3>英文阅读</h3><p>在阅读工作台学习英文材料，结合上下文理解词汇，逐步积累可以复用的表达。</p><a href="/lingq-lab">打开阅读工作台 →</a></article>
+  </div></section>
+  <section class="guide-section"><div class="wrap guide-content"><div><p class="eyebrow">给学习一个清晰的方法</p><h2>不知道怎么开始？<br>先完成一次短练习。</h2><p>学习指南提供视频听力、字幕使用、跟读和听写的具体步骤。挑选一个目标，跟着流程练，再回到视频检验理解。</p></div><a class="button" href="/guides">查看英语学习指南 →</a></div></section>
+</main>
+<footer class="wrap footer"><a class="brand" href="/" th:text="${siteName}">xLearning</a><p>用感兴趣的内容，推动每一次学习。</p><nav aria-label="页脚导航"><a href="/video">视频字幕</a><a href="/guides">学习指南</a><a href="/dashboard/youtube">学习工作台</a></nav></footer>
+</body>
+</html>

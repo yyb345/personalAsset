@@ -28,19 +28,22 @@ public class SeoController {
     @Autowired
     private SubtitleSegmentRepository subtitleSegmentRepository;
 
+    @Autowired private SiteProperties site;
+    @Autowired private PublicVideoCatalog publicVideos;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/{videoId}")
     public String videoPage(@PathVariable String videoId, Model model, HttpServletResponse response) {
         Optional<YoutubeVideo> videoOpt = youtubeVideoRepository.findByVideoId(videoId);
 
-        if (videoOpt.isEmpty() || !"completed".equals(videoOpt.get().getStatus())) {
+        if (videoOpt.isEmpty() || !publicVideos.contains(videoId)) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return "seo/not-found";
         }
 
         YoutubeVideo video = videoOpt.get();
-        String pageUrl = "https://www.xlearning.top/video/" + video.getVideoId();
+        String pageUrl = site.url("/video/" + video.getVideoId());
         model.addAttribute("video", video);
         model.addAttribute("pageUrl", pageUrl);
         model.addAttribute("youtubeUrl", "https://www.youtube.com/watch?v=" + video.getVideoId());
@@ -54,7 +57,7 @@ public class SeoController {
         // 构建完整的字幕文本用于 SEO
         StringBuilder fullText = new StringBuilder();
         for (SubtitleSegment segment : subtitles) {
-            String text = segment.getCleanText() != null ? segment.getCleanText() : segment.getRawText();
+            String text = segment.getDisplayText();
             fullText.append(text).append(" ");
         }
         model.addAttribute("fullText", fullText.toString().trim());
@@ -65,8 +68,10 @@ public class SeoController {
     @GetMapping("")
     public String videoList(Model model) {
         // 获取所有已完成的视频列表
-        List<YoutubeVideo> videos = youtubeVideoRepository.findByStatus("completed");
+        List<YoutubeVideo> videos = publicVideos.all();
         model.addAttribute("videos", videos);
+        model.addAttribute("pageUrl", site.url("/video"));
+        model.addAttribute("jsonLd", "{\"@context\":\"https://schema.org\",\"@type\":\"CollectionPage\"}");
         return "seo/video-list";
     }
 
@@ -83,35 +88,28 @@ public class SeoController {
     private String buildVideoJsonLd(YoutubeVideo video, String pageUrl) {
         try {
             ObjectNode videoNode = objectMapper.createObjectNode();
-            videoNode.put("@type", "VideoObject");
+            videoNode.put("@type", "Article");
             videoNode.put("name", video.getTitle());
             videoNode.put("description", buildSeoDescription(video));
             videoNode.put("url", pageUrl);
             if (video.getThumbnailUrl() != null) {
                 videoNode.put("thumbnailUrl", video.getThumbnailUrl());
             }
-            if (video.getDuration() != null) {
-                videoNode.put("duration", "PT" + video.getDuration() + "S");
-            }
-            if (video.getCreatedAt() != null) {
-                videoNode.put("uploadDate", video.getCreatedAt().toString());
-            }
-            videoNode.put("embedUrl", "https://www.youtube.com/embed/" + video.getVideoId());
-            videoNode.put("contentUrl", "https://www.youtube.com/watch?v=" + video.getVideoId());
+            videoNode.put("isBasedOn", "https://www.youtube.com/watch?v=" + video.getVideoId());
 
             ArrayNode breadcrumbItems = objectMapper.createArrayNode();
             ObjectNode home = objectMapper.createObjectNode();
             home.put("@type", "ListItem");
             home.put("position", 1);
             home.put("name", "Home");
-            home.put("item", "https://www.xlearning.top/");
+            home.put("item", site.url("/"));
             breadcrumbItems.add(home);
 
             ObjectNode videos = objectMapper.createObjectNode();
             videos.put("@type", "ListItem");
             videos.put("position", 2);
             videos.put("name", "Videos");
-            videos.put("item", "https://www.xlearning.top/video");
+            videos.put("item", site.url("/video"));
             breadcrumbItems.add(videos);
 
             ObjectNode current = objectMapper.createObjectNode();
@@ -140,7 +138,7 @@ public class SeoController {
             ObjectNode root = objectMapper.createObjectNode();
             root.put("@context", "https://schema.org");
             root.set("@graph", graph);
-            return objectMapper.writeValueAsString(root);
+            return objectMapper.writeValueAsString(root).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026");
         } catch (Exception e) {
             return "{}";
         }

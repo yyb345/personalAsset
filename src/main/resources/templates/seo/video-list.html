@@ -10,11 +10,11 @@
     <!-- Open Graph -->
     <meta property="og:title" content="YouTube Video Transcripts - xLearning">
     <meta property="og:description" content="Browse YouTube video transcripts for English learning.">
-    <meta property="og:url" content="https://www.xlearning.top/video">
+    <meta property="og:url" th:content="${pageUrl}">
     <meta property="og:type" content="website">
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://www.xlearning.top/video">
+    <link rel="canonical" th:href="${pageUrl}">
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,6 +48,7 @@
 
     <main class="container">
         <h1>YouTube Video Transcripts</h1>
+        <p><a href="/guides">English learning guides: listening, shadowing and subtitle practice →</a></p>
         <p class="page-intro">Browse our collection of YouTube videos with transcripts. Click any video to view the full transcript and start learning.</p>
 
         <div class="video-grid" th:if="${!videos.isEmpty()}">
@@ -78,14 +79,6 @@
     </footer>
 
     <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": "YouTube Video Transcripts",
-        "description": "Browse YouTube video transcripts for English learning",
-        "url": "https://www.xlearning.top/video"
-    }
-    </script>
+    <script type="application/ld+json" th:utext="${jsonLd}"></script>
 </body>
 </html>

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 前端路由控制器
- * 处理所有非 API 请求，返回 index.html，让 Vue Router 处理前端路由
+ * 为学习工作台和账号页面提供 Vue 应用入口；公开首页由 HomeController 渲染。
  */
 @RestController
 public class FrontendController {
@@ -22,7 +22,6 @@ public class FrontendController {
      * 所以我们需要列出所有可能的前端路由
      */
     @GetMapping(value = {
-        "/",
         "/login",
         "/register",
         "/dashboard",
@@ -36,6 +35,7 @@ public class FrontendController {
             if (resource.exists()) {
                 return ResponseEntity.ok()
                     .contentType(MediaType.TEXT_HTML)
+                    .header("X-Robots-Tag", "noindex, follow")
                     .body(resource);
             } else {
                 // 如果找不到 index.html，返回 404

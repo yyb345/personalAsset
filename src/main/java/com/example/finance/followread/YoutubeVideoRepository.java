@@ -16,6 +16,15 @@ public interface YoutubeVideoRepository extends JpaRepository<YoutubeVideo, Long
     int updateAiSummary(@org.springframework.data.repository.query.Param("id") Long id,
                         @org.springframework.data.repository.query.Param("summary") String summary);
 
+    String PUBLIC_PREDICATE = "v.status = 'completed' and exists (select s.id from SubtitleSegment s where s.videoId = v.id "
+        + "and (length(trim(coalesce(s.cleanText, ''))) > 0 or length(trim(coalesce(s.rawText, ''))) > 0))";
+
+    @org.springframework.data.jpa.repository.Query("select v from YoutubeVideo v where " + PUBLIC_PREDICATE + " order by v.createdAt desc, v.id desc")
+    List<YoutubeVideo> findPublicVideos();
+
+    @org.springframework.data.jpa.repository.Query("select count(v) > 0 from YoutubeVideo v where v.videoId = :videoId and " + PUBLIC_PREDICATE)
+    boolean existsPublicVideo(@org.springframework.data.repository.query.Param("videoId") String videoId);
+
     Optional<YoutubeVideo> findByVideoId(String videoId);
     List<YoutubeVideo> findByCreatedBy(Long userId);
     List<YoutubeVideo> findByStatus(String status);

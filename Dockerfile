@@ -33,11 +33,13 @@ RUN mvn dependency:go-offline -B
 # 复制后端源代码
 COPY src ./src
 
-# 复制前端构建产物到后端静态资源目录
-COPY --from=frontend-builder /frontend/dist ./src/main/resources/static
+# 使用独立构建目录，避免与仓库中的旧静态产物混合
+COPY --from=frontend-builder /frontend/dist ./frontend/dist
 
 # 构建后端应用
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -Dfrontend.skip=true \
+    && jar tf target/finance-0.0.1-SNAPSHOT.jar | grep -q BOOT-INF/classes/static/robots.txt \
+    && jar tf target/finance-0.0.1-SNAPSHOT.jar | grep -q BOOT-INF/classes/static/assets/
 
 # ============================================
 # Stage 3: 最终运行阶段

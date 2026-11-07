@@ -63,7 +63,7 @@
       <section class="closing shell"><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>{{ tr("下一次突破，") }}<br>{{ tr("从这一次学习开始。") }}</h2><p>{{ tr("通过视频学 AI，在学习中练英语。") }}</p><router-link to="/dashboard/youtube" class="button">{{ tr("开始探索") }}<ArrowUpRight :size="18"/></router-link><span class="preview-note">{{ tr("游客可预览前 6 个视频 · 登录后浏览全部") }}</span></section>
     </main>
 
-    <footer class="shell site-footer"><div><BrandLogo :aria-label="locale === 'zh-CN' ? 'X Learning 首页' : 'X Learning Home'" /><p>{{ tr("学 AI，也练英语。") }}</p></div><div class="footer-links"><a href="#directions">{{ tr("学习方向") }}</a><router-link to="/dashboard/youtube">{{ tr("AI 学习") }}</router-link><router-link to="/lingq-lab">{{ tr("英语学习") }}</router-link><router-link to="/login">{{ tr("登录") }}</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
+    <footer class="shell site-footer"><div><BrandLogo :aria-label="locale === 'zh-CN' ? 'X Learning 首页' : 'X Learning Home'" /><p>{{ tr("学 AI，也练英语。") }}</p></div><div class="footer-links"><a href="/guides">{{ tr("英语学习指南") }}</a><a href="/video">{{ tr("视频字幕") }}</a><a href="#directions">{{ tr("学习方向") }}</a><router-link to="/dashboard/youtube">{{ tr("AI 学习") }}</router-link><router-link to="/lingq-lab">{{ tr("英语学习") }}</router-link><router-link to="/login">{{ tr("登录") }}</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
   </div>
 </template>
 
