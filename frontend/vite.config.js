@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [vue()],
   resolve: {
     alias: {
@@ -19,13 +19,14 @@ export default defineConfig({
     }
   },
   build: {
+    manifest: true,
     outDir: 'dist',
     emptyOutDir: true,
     // 优化构建性能和内存使用
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks: isSsrBuild ? undefined : {
           'vue-vendor': ['vue', 'vue-router'],
           'ui-vendor': ['lucide-vue-next'],
           'editor-vendor': ['@tiptap/vue-3', '@tiptap/starter-kit', '@tiptap/core']
@@ -37,6 +38,6 @@ export default defineConfig({
     // 禁用 sourcemap 以节省内存
     sourcemap: false
   }
-})
+}))
 
 

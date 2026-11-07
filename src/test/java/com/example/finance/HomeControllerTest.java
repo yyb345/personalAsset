@@ -20,13 +20,21 @@ class HomeControllerTest {
     }
 
     @Test
-    void publicHomepageLoadsOriginalVueAppWithConfiguredCanonical() throws Exception {
+    void publicHomepageIncludesOriginalContentWithoutJavascriptAndConfiguredCanonical() throws Exception {
         for (String path : new String[]{"/", "/index.html"}) {
             var html = mvc.perform(get(path)).andExpect(status().isOk())
                     .andExpect(header().doesNotExist("X-Robots-Tag"))
                     .andReturn().getResponse().getContentAsString();
             var document = org.jsoup.Jsoup.parse(html);
             assertThat(document.select("#app")).hasSize(1);
+            assertThat(document.select("#app").attr("data-prerendered")).isEqualTo("true");
+            assertThat(document.select("h1").text()).contains("Explore AI.", "English.");
+            assertThat(document.select("html").attr("lang")).isEqualTo("en");
+            assertThat(document.select(".locale-select option").eachAttr("value"))
+                    .containsExactly("en-US", "zh-CN");
+            assertThat(document.select("a[href=/guides]")).isNotEmpty();
+            assertThat(document.select("a[href=/video]")).isNotEmpty();
+            assertThat(document.select(".demo-tabs button")).hasSize(2);
             assertThat(document.select("script[type=module]")).isNotEmpty();
             assertThat(document.select("link[rel=canonical]").eachAttr("href"))
                     .containsExactly("https://learn.example/");

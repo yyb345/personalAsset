@@ -8,7 +8,7 @@ try {
   const stored = localStorage.getItem('locale')
   if (['en-US', 'zh-CN'].includes(stored)) savedLocale = stored
 } catch { /* Language selection still works when storage is unavailable. */ }
-document.documentElement.setAttribute('lang', savedLocale)
+if (typeof document !== 'undefined') document.documentElement.setAttribute('lang', savedLocale)
 
 const i18n = createI18n({
   legacy: false, // 使用 Composition API 模式

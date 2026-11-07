@@ -74,7 +74,9 @@ import { setLocale } from '@/i18n'
 import { landingEnglish } from '@/i18n/landing'
 
 const { locale } = useI18n()
-watch(locale, value => { document.title = value === 'zh-CN' ? 'X Learning - 学 AI，也练英语' : 'X Learning - Explore AI. Build your English.' }, { immediate: true })
+watch(locale, value => {
+  if (typeof document !== 'undefined') document.title = value === 'zh-CN' ? 'X Learning - 学 AI，也练英语' : 'X Learning - Explore AI. Build your English.'
+}, { immediate: true })
 const tr = (text) => locale.value === 'zh-CN' ? text : (landingEnglish[text] || text)
 const localize = (items) => items.map(item => Object.fromEntries(Object.entries(item).map(([key, value]) => [key, typeof value === 'string' ? tr(value) : Array.isArray(value) ? value.map(tr) : value])))
 import BrandLogo from '@/components/BrandLogo.vue'

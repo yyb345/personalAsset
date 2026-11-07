@@ -11,7 +11,19 @@ assert.doesNotMatch(html, /(?:src|href)="\/src\//, 'Unbuilt source entry found')
 const assets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)(?:[?#][^"]*)?"/g)].map(match => match[1])
 assert(assets.some(path => path.endsWith('.js')), 'Built shell must reference a generated JavaScript entry')
 for (const path of assets) await access(resolve(dist, `.${path}`))
+const home = await readFile(resolve(dist, 'home.html'), 'utf8')
+assert.match(home, /<html lang="en">/, 'Prerendered language must match the default English content')
+assert.match(home, /data-prerendered="true"/, 'Missing prerendered homepage')
+assert.match(home, /<h1[^>]*>Explore AI\.<br>Build your /, 'Homepage must include the original heading without JavaScript')
+for (const path of ['/guides', '/video', '/dashboard/youtube', '/lingq-lab']) {
+  assert(home.includes(`href="${path}"`), `Missing crawlable homepage link: ${path}`)
+}
+assert.match(home, /class="demo-tabs"/, 'Original interactive demo must remain in the rendered component')
+assert.match(home, /Language \/ 语言/, 'Original language selector must remain available')
+for (const match of home.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)(?:[?#][^"]*)?"/g)) {
+  await access(resolve(dist, `.${match[1]}`))
+}
 const robots = await readFile(resolve(dist, 'robots.txt'), 'utf8')
 assert.match(robots, /^User-agent:\s*\*/mi, 'robots.txt must declare a crawler policy')
 assert.match(robots, /^Sitemap:\s*https?:\/\/\S+\/sitemap\.xml\s*$/mi, 'robots.txt must link to the sitemap')
-console.log(`Verified frontend build: metadata, robots.txt, and ${assets.length} linked assets`)
+console.log(`Verified frontend build: prerendered content, original controls, metadata, robots.txt, and linked assets`)

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-/** Serve the original bilingual Vue landing page with the configured canonical origin. */
+/** Serve the original Vue landing page prerendered during the frontend build. */
 @RestController
 public class HomeController {
     private final SiteProperties site;
@@ -21,7 +21,7 @@ public class HomeController {
 
     @GetMapping({"/", "/index.html"})
     public ResponseEntity<String> home() throws IOException {
-        var resource = new ClassPathResource("static/index.html");
+        var resource = new ClassPathResource("static/home.html");
         if (!resource.exists()) return ResponseEntity.notFound().build();
         var document = Jsoup.parse(resource.getContentAsString(StandardCharsets.UTF_8));
         document.select("link[rel=canonical]").remove();

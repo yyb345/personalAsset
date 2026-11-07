@@ -153,6 +153,7 @@
                 <excludes>
                     <!-- Frontend output comes exclusively from the current Vite build. -->
                     <exclude>static/index.html</exclude>
+                    <exclude>static/home.html</exclude>
                     <exclude>static/assets/**</exclude>
                     <exclude>static/robots.txt</exclude>
                 </excludes>

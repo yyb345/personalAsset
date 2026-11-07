@@ -8,6 +8,7 @@ const router = createRouter({
     { path: '/dashboard/billing', name: 'Billing', component: () => import('@/views/dashboard/Billing.vue'), meta: { requiresAuth: false } },
     {
       path: '/',
+      alias: '/index.html',
       name: 'Landing',
       component: () => import('@/views/Landing.vue')
     },
