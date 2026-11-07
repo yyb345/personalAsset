@@ -2,7 +2,7 @@
 
 ## 页面与索引
 
-- `/` 和 `/index.html` 由 Thymeleaf 输出中文首页，canonical 统一为 `/`；正文和指南、视频链接不依赖 JavaScript。
+- `/` 和 `/index.html` 保留原有 Vue 双语首页、布局、语言切换及演示交互，canonical 统一为 `/`，服务端按站点配置写入 canonical。首页正文仍依赖 JavaScript 渲染；后续如增加预渲染，应直接复用原组件，不另建不同设计的首页。
 - `/guides`、`/guides/{slug}`、`/video` 和符合条件的 `/video/{videoId}` 可索引。
 - Vue 账号、账单、学习工作台及当前工具页面返回 `X-Robots-Tag: noindex, follow`。工具需要独立介绍页后再开放索引。
 - 视频公开页面仅包含处理完成且至少存在一条非空字幕的视频。详情、列表和 sitemap 共用数据库条件；未知或不符合条件的详情返回 404。
@@ -14,7 +14,7 @@
 
 ## 构建与上线验收
 
-按 [build.md](build.md) 构建与验证 JAR。首页源码在 `templates/seo/home.html`，样式在 `static/css/home.css`；Vue Landing 继续用于前端开发，生产工作台返回首页时加载服务端首页。
+按 [build.md](build.md) 构建与验证 JAR。首页源码在 `frontend/src/views/Landing.vue`，沿用原有样式与双语内容；生产和开发共用同一组件，工作台可通过 Vue Router 返回首页。
 
 部署后检查首页原始 HTML、`/robots.txt`、`/sitemap.xml`，以及指南和视频详情的 canonical；确认账号和工作台响应有 noindex，未知详情返回 404。最后在 Search Console 检查代表 URL 并提交 sitemap。当前修改未执行线上部署或 Search Console 操作。
 

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 前端路由控制器
- * 为学习工作台和账号页面提供 Vue 应用入口；公开首页由 HomeController 渲染。
+ * 为学习工作台和账号页面提供 Vue 应用入口；公开首页由 HomeController 提供同一应用入口及 canonical。
  */
 @RestController
 public class FrontendController {

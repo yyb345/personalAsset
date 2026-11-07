@@ -24,9 +24,7 @@ with ZipFile(args.jar) as jar:
     unexpected = {name for name in names if name.startswith(prefix + 'assets/') and not name.endswith('/')} - expected
     if unexpected:
         raise SystemExit(f'Stale generated assets remain: {sorted(unexpected)}')
-    for stylesheet in ('guides.css', 'home.css'):
+    for stylesheet in ('guides.css',):
         if prefix + 'css/' + stylesheet not in names:
             raise SystemExit(f'Backend static css/{stylesheet} is missing')
-    if 'BOOT-INF/classes/templates/seo/home.html' not in names:
-        raise SystemExit('Server-rendered homepage template is missing')
 print(f'Verified {args.jar}: {len(expected)} frontend files match the current build; backend CSS preserved')
