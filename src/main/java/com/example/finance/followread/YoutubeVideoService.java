@@ -285,12 +285,38 @@ public class YoutubeVideoService {
      * 获取视频元数据
      */
     private void fetchVideoMetadata(YoutubeVideo video) throws Exception {
-        // 使用 yt-dlp 获取视频信息
-        updateProgress(video, "正在连接YouTube服务器...");
+        JsonNode root = readSubtitleMetadata(video);
+
+        video.setTitle(root.path("title").asText());
+        video.setDescription(root.path("description").asText());
+        video.setDuration(root.path("duration").asInt());
+        video.setChannel(root.path("channel").asText());
+        video.setThumbnailUrl(root.path("thumbnail").asText());
+
+        // 检查字幕可用性（支持多语言）
+        JsonNode subtitles = root.path("subtitles");
+        JsonNode automaticCaptions = root.path("automatic_captions");
+
+        // 检测可用的字幕语言（优先顺序：en, zh, ja, ko）
+        String detectedLanguage = detectAvailableSubtitleLanguage(subtitles, automaticCaptions);
+        boolean hasSubtitle = detectedLanguage != null;
+
+        video.setHasSubtitle(hasSubtitle);
+        video.setSubtitleLanguage(detectedLanguage != null ? detectedLanguage : "en");
+
+        videoRepository.save(video);
+
+        log.info("检测到字幕语言: videoId={}, language={}, hasSubtitle={}",
+            video.getVideoId(), detectedLanguage, hasSubtitle);
+    }
+
+    JsonNode readSubtitleMetadata(YoutubeVideo video) throws Exception {
         
         // 构建命令，如果有 cookies 文件则使用
         List<String> command = new ArrayList<>();
         command.add("yt-dlp");
+        command.add("--ignore-config");
+        command.add("--no-playlist");
         
         // 检查是否有 cookies 文件
         String cookieFile = getCookieFilePath(video.getVideoId());
@@ -308,8 +334,9 @@ public class YoutubeVideoService {
         
         ProcessBuilder pb = new ProcessBuilder(command);
         
+        pb.redirectError(ProcessBuilder.Redirect.DISCARD);
         Process process = pb.start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
         StringBuilder json = new StringBuilder();
         String line;
         
@@ -326,60 +353,20 @@ public class YoutubeVideoService {
         // 解析 JSON
         updateProgress(video, "正在解析视频信息...");
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(json.toString());
+        return mapper.readTree(json.toString());
         
-        video.setTitle(root.path("title").asText());
-        video.setDescription(root.path("description").asText());
-        video.setDuration(root.path("duration").asInt());
-        video.setChannel(root.path("channel").asText());
-        video.setThumbnailUrl(root.path("thumbnail").asText());
-        
-        // 检查字幕可用性（支持多语言）
-        JsonNode subtitles = root.path("subtitles");
-        JsonNode automaticCaptions = root.path("automatic_captions");
-        
-        // 检测可用的字幕语言（优先顺序：en, zh, ja, ko, 其他）
-        String detectedLanguage = detectAvailableSubtitleLanguage(subtitles, automaticCaptions);
-        boolean hasSubtitle = detectedLanguage != null;
-        
-        video.setHasSubtitle(hasSubtitle);
-        video.setSubtitleLanguage(detectedLanguage != null ? detectedLanguage : "en");
-        
-        videoRepository.save(video);
-        
-        log.info("检测到字幕语言: videoId={}, language={}, hasSubtitle={}", 
-            video.getVideoId(), detectedLanguage, hasSubtitle);
     }
 
-    /**
-     * 检测可用的字幕语言
-     */
     private String detectAvailableSubtitleLanguage(JsonNode subtitles, JsonNode automaticCaptions) {
-        // 优先顺序：en, zh, ja, ko, 其他
-        String[] preferredLanguages = {"en", "zh", "zh-Hans", "zh-Hant", "ja", "ko"};
-        
-        // 先检查官方字幕
-        for (String lang : preferredLanguages) {
-            if (subtitles.has(lang)) {
-                return lang;
+        // Language preference takes priority over whether captions are manual or automatic.
+        Set<String> languages = new LinkedHashSet<>(List.of("en", "zh", "ja", "ko"));
+        subtitles.fieldNames().forEachRemaining(key -> languages.add(key.replaceFirst("-orig$", "")));
+        automaticCaptions.fieldNames().forEachRemaining(key -> languages.add(key.replaceFirst("-orig$", "")));
+        for (String language : languages) {
+            if (SubtitleTrackSelector.select(subtitles, automaticCaptions, language) != null) {
+                return language;
             }
         }
-        
-        // 再检查自动生成字幕
-        for (String lang : preferredLanguages) {
-            if (automaticCaptions.has(lang)) {
-                return lang;
-            }
-        }
-        
-        // 如果都没有，返回第一个可用的
-        if (subtitles.isObject() && subtitles.size() > 0) {
-            return subtitles.fieldNames().next();
-        }
-        if (automaticCaptions.isObject() && automaticCaptions.size() > 0) {
-            return automaticCaptions.fieldNames().next();
-        }
-        
         return null;
     }
 
@@ -391,7 +378,7 @@ public class YoutubeVideoService {
     }
     
     /**
-     * 获取字幕（支持指定语言，如果失败会自动尝试其他语言）
+     * 获取目标语言字幕；下载失败明确报错，不切换语言
      */
     private List<SubtitleSegment> fetchSubtitles(YoutubeVideo video, String language) throws Exception {
         // 确定要使用的语言
@@ -400,96 +387,24 @@ public class YoutubeVideoService {
             targetLanguage = "en"; // 默认英文
         }
         
-        // 尝试下载字幕：先尝试指定语言，如果失败则尝试所有可用语言
-        List<String> languagesToTry = new ArrayList<>();
-        languagesToTry.add(targetLanguage);
-        
-        // 添加常见语言作为备选
-        String[] fallbackLanguages = {"zh", "zh-Hans", "zh-Hant", "zh-CN", "zh-TW", "en", "ja", "ko"};
-        for (String lang : fallbackLanguages) {
-            if (!languagesToTry.contains(lang)) {
-                languagesToTry.add(lang);
-            }
+        JsonNode metadata;
+        try {
+            metadata = readSubtitleMetadata(video);
+        } catch (Exception e) {
+            throw new java.io.IOException("字幕信息获取失败，无法判断目标语言是否可用: " + targetLanguage, e);
         }
-        
-        Exception lastException = null;
-        String downloadedLanguage = null;
-        String downloadedFilePath = null;
-        
-        // 策略1: 先尝试指定语言
-        for (String langToTry : languagesToTry) {
-            try {
-                log.info("尝试下载字幕: videoId={}, language={}", video.getVideoId(), langToTry);
-                updateProgress(video, String.format("正在下载%s字幕...", getLanguageDisplayName(langToTry)));
-                
-                if (downloadSubtitleWithLanguage(video, langToTry)) {
-                    // 尝试多种可能的文件名格式
-                    File subtitleFile = findSubtitleFile(video.getVideoId(), langToTry);
-                    if (subtitleFile != null && subtitleFile.exists()) {
-                        downloadedLanguage = langToTry;
-                        downloadedFilePath = subtitleFile.getAbsolutePath();
-                        log.info("✅ 成功下载字幕: videoId={}, language={}, file={}", 
-                            video.getVideoId(), langToTry, downloadedFilePath);
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("下载字幕失败: videoId={}, language={}, error={}", 
-                    video.getVideoId(), langToTry, e.getMessage());
-                lastException = e;
-            }
+        SubtitleTrackSelector.Track track = SubtitleTrackSelector.select(
+            metadata.path("subtitles"), metadata.path("automatic_captions"), targetLanguage);
+        if (track == null) {
+            throw new IllegalStateException("没有可用的目标语言字幕: " + targetLanguage);
         }
-        
-        // 策略2: 如果所有指定语言都失败，尝试下载所有可用字幕（不指定语言）
-        if (downloadedFilePath == null) {
-            try {
-                log.info("尝试下载所有可用字幕: videoId={}", video.getVideoId());
-                updateProgress(video, "正在下载所有可用字幕...");
-                
-                if (downloadAllAvailableSubtitles(video)) {
-                    // 查找任何下载成功的字幕文件
-                    File subtitleFile = findAnySubtitleFile(video.getVideoId());
-                    if (subtitleFile != null && subtitleFile.exists()) {
-                        downloadedFilePath = subtitleFile.getAbsolutePath();
-                        // 从文件名推断语言
-                        String fileName = subtitleFile.getName();
-                        if (fileName.contains(".zh.") || fileName.contains(".zh-Hans.") || fileName.contains(".zh-Hant.")) {
-                            downloadedLanguage = "zh";
-                        } else if (fileName.contains(".en.")) {
-                            downloadedLanguage = "en";
-                        } else if (fileName.contains(".ja.")) {
-                            downloadedLanguage = "ja";
-                        } else if (fileName.contains(".ko.")) {
-                            downloadedLanguage = "ko";
-                        } else {
-                            downloadedLanguage = targetLanguage; // 使用原始目标语言
-                        }
-                        log.info("✅ 成功下载字幕（所有语言）: videoId={}, file={}", 
-                            video.getVideoId(), downloadedFilePath);
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("下载所有字幕失败: videoId={}, error={}", video.getVideoId(), e.getMessage());
-                lastException = e;
-            }
+        updateProgress(video, "正在下载" + getLanguageDisplayName(targetLanguage) + "字幕...");
+        List<SubtitleSegment> segments = downloadSelectedSubtitles(video, metadata, track, targetLanguage);
+        if (segments.isEmpty()) {
+            throw new java.io.IOException("目标语言字幕下载结果为空: " + targetLanguage);
         }
-        
-        // 如果仍然失败，抛出异常
-        if (downloadedFilePath == null || !new File(downloadedFilePath).exists()) {
-            log.error("❌ 所有字幕下载尝试都失败了: videoId={}", video.getVideoId());
-            throw new RuntimeException("Failed to download subtitles after trying multiple languages. " +
-                (lastException != null ? "Last error: " + lastException.getMessage() : ""));
-        }
-        
-        // 更新视频的语言信息
-        if (downloadedLanguage != null) {
-            video.setSubtitleLanguage(downloadedLanguage);
-            videoRepository.save(video);
-        }
-        
-        // 解析 VTT 字幕文件
-        updateProgress(video, "正在解析字幕文件...");
-        List<SubtitleSegment> segments = parseVttFile(downloadedFilePath, video.getId(), downloadedLanguage);
+        video.setSubtitleLanguage(targetLanguage);
+        videoRepository.save(video);
         
         // 保存字幕片段
         updateProgress(video, String.format("正在保存字幕片段 (0/%d)...", segments.size()));
@@ -506,181 +421,49 @@ public class YoutubeVideoService {
         return segments;
     }
     
-    /**
-     * 使用指定语言下载字幕
-     */
-    private boolean downloadSubtitleWithLanguage(YoutubeVideo video, String language) throws Exception {
-        // 构建命令，如果有 cookies 文件则使用
-        List<String> command = new ArrayList<>();
-        command.add("yt-dlp");
-        
-        // 检查是否有 cookies 文件
-        String cookieFile = getCookieFilePath(video.getVideoId());
-        if (cookieFile != null) {
-            command.add("--cookies");
-            command.add(cookieFile);
-        }
-        
-        command.add("--write-sub");
-        command.add("--write-auto-sub");
-        command.add("--sub-lang");
-        command.add(language);
-        command.add("--sub-format");
-        command.add("vtt");
-        command.add("--skip-download");
-        command.add("-o");
-        command.add(SUBTITLE_DIR + "%(id)s.%(ext)s");
-        command.add(video.getSourceUrl());
-
-        log.info("🎬 yt-dlp command(videoId={}, language={}): {}", 
-            video.getVideoId(), language, String.join(" ", command));
-        
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.redirectErrorStream(true);
-        
-        Process process = pb.start();
-        
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+    List<SubtitleSegment> downloadSelectedSubtitles(YoutubeVideo video, JsonNode metadata,
+            SubtitleTrackSelector.Track track, String language) throws Exception {
+        // Freeze the exact URL selected from metadata, avoiding a second extraction that
+        // could select a translated or dubbed track under the same language key.
+        Path directory = Files.createTempDirectory(Paths.get(SUBTITLE_DIR), "subtitle-");
+        try {
+            var info = (com.fasterxml.jackson.databind.node.ObjectNode) metadata.deepCopy();
+            var subtitles = info.putObject("subtitles");
+            subtitles.putArray(track.key()).add(track.format());
+            info.putObject("automatic_captions");
+            info.remove("requested_subtitles");
+            Path infoFile = directory.resolve("selected.info.json");
+            new ObjectMapper().writeValue(infoFile.toFile(), info);
+            List<String> command = new ArrayList<>(List.of("yt-dlp", "--ignore-config",
+                "--load-info-json", infoFile.toString(), "--write-subs", "--no-write-auto-subs",
+                "--sub-langs", "^" + track.key() + "$", "--sub-format", "vtt", "--skip-download",
+                "--retries", "2", "-o", directory.resolve("caption.%(ext)s").toString()));
+            String cookieFile = getCookieFilePath(video.getVideoId());
+            if (cookieFile != null) {
+                command.add("--cookies");
+                command.add(cookieFile);
             }
-        }
-        
-        int exitCode = process.waitFor();
-        
-        if (output.length() > 0) {
-            log.info("yt-dlp 输出: {}", output.toString());
-        }
-        
-        // 检查输出中是否有 "There are no subtitles" 的提示
-        if (output.toString().contains("There are no subtitles")) {
-            log.warn("该语言没有字幕: videoId={}, language={}", video.getVideoId(), language);
-            return false;
-        }
-        
-        return exitCode == 0;
-    }
-    
-    /**
-     * 下载所有可用字幕（不指定语言）
-     */
-    private boolean downloadAllAvailableSubtitles(YoutubeVideo video) throws Exception {
-        // 构建命令，如果有 cookies 文件则使用
-        List<String> command = new ArrayList<>();
-        command.add("yt-dlp");
-        
-        // 检查是否有 cookies 文件
-        String cookieFile = getCookieFilePath(video.getVideoId());
-        if (cookieFile != null) {
-            command.add("--cookies");
-            command.add(cookieFile);
-        }
-        
-        command.add("--write-sub");
-        command.add("--write-auto-sub");
-        // 不指定 --sub-lang，让 yt-dlp 下载所有可用字幕
-        command.add("--sub-format");
-        command.add("vtt");
-        command.add("--skip-download");
-        command.add("-o");
-        command.add(SUBTITLE_DIR + "%(id)s.%(ext)s");
-        command.add(video.getSourceUrl());
-
-        log.info("🎬 yt-dlp command(videoId={}, all languages): {}", 
-            video.getVideoId(), String.join(" ", command));
-        
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.redirectErrorStream(true);
-        
-        Process process = pb.start();
-        
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+            Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+            // Drain output but do not expose signed subtitle URLs or cookies in logs.
+            try (var reader = process.inputReader(StandardCharsets.UTF_8)) {
+                while (reader.readLine() != null) { }
             }
-        }
-        
-        int exitCode = process.waitFor();
-        
-        if (output.length() > 0) {
-            log.info("yt-dlp 输出: {}", output.toString());
-        }
-        
-        return exitCode == 0;
-    }
-    
-    /**
-     * 查找字幕文件（支持多种文件名格式）
-     */
-    private File findSubtitleFile(String videoId, String language) {
-        File subtitleDir = new File(SUBTITLE_DIR);
-        if (!subtitleDir.exists()) {
-            return null;
-        }
-        
-        String langCode = getLanguageCode(language);
-        
-        // 尝试多种可能的文件名格式
-        String[] possibleNames = {
-            videoId + "." + langCode + ".vtt",
-            videoId + "." + language + ".vtt",
-            videoId + ".vtt"
-        };
-        
-        for (String name : possibleNames) {
-            File file = new File(subtitleDir, name);
-            if (file.exists()) {
-                return file;
+            int exitCode = process.waitFor();
+            Path file = directory.resolve("caption." + track.key() + ".vtt");
+            if (exitCode != 0 || !Files.isRegularFile(file) || Files.size(file) == 0) {
+                throw new java.io.IOException("目标语言字幕下载失败: " + language
+                    + " (track=" + track.key() + ", exit=" + exitCode + ")");
             }
-        }
-        
-        // 如果都不存在，列出所有匹配的文件
-        File[] files = subtitleDir.listFiles((dir, name) -> 
-            name.startsWith(videoId) && name.endsWith(".vtt"));
-        
-        if (files != null && files.length > 0) {
-            // 优先返回包含目标语言代码的文件
-            for (File file : files) {
-                if (file.getName().contains(langCode) || file.getName().contains(language)) {
-                    return file;
+            return parseVttFile(file.toString(), video.getId(), language);
+        } finally {
+            try (var paths = Files.walk(directory)) {
+                for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) {
+                    Files.deleteIfExists(path);
                 }
             }
-            // 如果没有匹配的，返回第一个
-            return files[0];
         }
-        
-        return null;
     }
     
-    /**
-     * 查找任何字幕文件（不指定语言）
-     */
-    private File findAnySubtitleFile(String videoId) {
-        File subtitleDir = new File(SUBTITLE_DIR);
-        if (!subtitleDir.exists()) {
-            return null;
-        }
-        
-        File[] files = subtitleDir.listFiles((dir, name) -> 
-            name.startsWith(videoId) && name.endsWith(".vtt"));
-        
-        if (files != null && files.length > 0) {
-            // 返回第一个找到的文件
-            return files[0];
-        }
-        
-        return null;
-    }
-
-    /**
-     * 获取语言显示名称
-     */
     private String getLanguageDisplayName(String language) {
         if (language == null) return "英文";
         String lang = language.toLowerCase();
@@ -704,86 +487,9 @@ public class YoutubeVideoService {
     private List<SubtitleSegment> parseVttFile(String filePath, Long videoId, String language) throws Exception {
         List<SubtitleSegment> segments = new ArrayList<>();
         
-        // 提取视频ID（从文件路径中）
-        String videoIdStr = new File(filePath).getName().split("\\.")[0];
-        File subtitleDir = new File(SUBTITLE_DIR);
-        
-        // 尝试多个可能的文件名格式
-        Path path = null;
-        List<String> triedPaths = new ArrayList<>();
-        
-        // 1. 尝试原始路径
-        path = Paths.get(filePath);
-        triedPaths.add(filePath);
-        if (Files.exists(path)) {
-            log.info("找到字幕文件: {}", filePath);
-        } else {
-            // 2. 尝试带语言代码的文件名（简化版）
-            if (language != null) {
-                String langCode = getLanguageCode(language);
-                String altPath = SUBTITLE_DIR + videoIdStr + "." + langCode + ".vtt";
-                path = Paths.get(altPath);
-                triedPaths.add(altPath);
-                if (Files.exists(path)) {
-                    log.info("找到字幕文件: {}", altPath);
-                }
-            }
-            
-            // 3. 如果还没找到，列出目录中所有匹配的文件
-            if (!Files.exists(path) && subtitleDir.exists()) {
-                File[] files = subtitleDir.listFiles((dir, name) -> 
-                    name.startsWith(videoIdStr) && name.endsWith(".vtt"));
-                
-                if (files != null && files.length > 0) {
-                    // 使用第一个找到的文件
-                    path = files[0].toPath();
-                    log.info("找到字幕文件（自动匹配）: {}", path);
-                }
-            }
-            
-            // 4. 尝试常见语言后缀
-        if (!Files.exists(path)) {
-                String[] commonLangs = {"en", "zh", "ja", "ko", "zh-Hans", "zh-Hant", "en-US", "zh-CN", "zh-TW"};
-                for (String lang : commonLangs) {
-                    String altPath = SUBTITLE_DIR + videoIdStr + "." + lang + ".vtt";
-                    Path alt = Paths.get(altPath);
-                    triedPaths.add(altPath);
-                    if (Files.exists(alt)) {
-                        path = alt;
-                        log.info("找到字幕文件: {}", altPath);
-                        break;
-                    }
-                }
-            }
-            
-            // 5. 尝试不带语言后缀的文件名（yt-dlp 可能生成这种格式）
-        if (!Files.exists(path)) {
-                String altPath = SUBTITLE_DIR + videoIdStr + ".vtt";
-                Path alt = Paths.get(altPath);
-                triedPaths.add(altPath);
-                if (Files.exists(alt)) {
-                    path = alt;
-                    log.info("找到字幕文件: {}", altPath);
-                }
-            }
-        }
-        
-        if (path == null || !Files.exists(path)) {
-            // 列出所有尝试过的路径
-            log.error("字幕文件未找到，尝试过的路径: {}", String.join(", ", triedPaths));
-            
-            // 列出目录中的所有文件
-            if (subtitleDir.exists()) {
-                File[] allFiles = subtitleDir.listFiles();
-                if (allFiles != null) {
-                    log.error("字幕目录中的所有文件: {}", 
-                        Arrays.toString(Arrays.stream(allFiles).map(File::getName).toArray()));
-                }
-            }
-            
-            throw new RuntimeException("Subtitle file not found: " + filePath + 
-                (language != null ? " (language: " + language + ")" : "") +
-                ". Tried paths: " + String.join(", ", triedPaths));
+        Path path = Paths.get(filePath);
+        if (!Files.isRegularFile(path)) {
+            throw new java.io.IOException("Subtitle file not found: " + filePath);
         }
         
         List<String> lines = Files.readAllLines(path);
