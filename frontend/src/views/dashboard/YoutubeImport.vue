@@ -93,19 +93,19 @@
         </div>
 
         <!-- 搜索结果 -->
-        <div v-if="searchResults.length > 0 || hasSearched" class="search-results">
+        <div v-if="visibleSearchResults.length > 0 || hasSearched" class="search-results">
           <div class="search-results-header">
-            <span>{{ $t('youtube.search.results', { count: searchTotal }) }}</span>
+            <span>{{ $t('youtube.search.results', { count: visibleSearchResults.length }) }}</span>
             <button class="close-results-btn" @click="clearSearch">{{ $t('youtube.search.close') }}</button>
           </div>
 
-          <div v-if="searchResults.length === 0 && hasSearched" class="no-results">
+          <div v-if="visibleSearchResults.length === 0 && hasSearched" class="no-results">
             <p>{{ $t('youtube.search.noResults') }}</p>
           </div>
 
           <div v-else class="search-result-list">
             <div
-              v-for="result in searchResults"
+              v-for="result in visibleSearchResults"
               :key="result.videoId"
               class="search-result-card"
               :class="{ 'is-locked': isVideoLocked(result.videoId) }"
@@ -660,7 +660,7 @@
 </template>
 
 <script>
-import { categories, learningPaths, enrichVideo, filterVideos } from '@/features/video-library/catalog';
+import { categories, learningPaths, enrichVideo, filterVideos, isVideoVisibleForLocale } from '@/features/video-library/catalog';
 import { checkAuth } from '@/utils/auth';
 import axios from '../../utils/axios';
 import { Pencil, Download, Trash2, BookOpen, NotebookPen, Pin } from 'lucide-vue-next';
@@ -763,7 +763,13 @@ export default {
   },
   computed: {
     filteredVideos() {
-      return filterVideos(this.catalog, this.filters);
+      return filterVideos(this.catalog, this.filters, this.$i18n.locale);
+    },
+    visibleSearchResults() {
+      const catalogById = new Map(this.catalog.map(video => [video.videoId, video]));
+      return this.searchResults.filter(result => isVideoVisibleForLocale(
+        catalogById.get(result.videoId) || result, this.$i18n.locale
+      ));
     },
     myVideos() {
       const start = this.currentPage * this.pageSize;
@@ -807,7 +813,8 @@ export default {
     }
   },
   watch: {
-    filters: { deep: true, handler() { this.currentPage = 0; } }
+    filters: { deep: true, handler() { this.currentPage = 0; } },
+    '$i18n.locale'() { this.currentPage = 0; }
   },
   mounted() {
     // 检查 URL 参数是否包含 debug=true
@@ -892,7 +899,7 @@ export default {
       this.filters = { category: 'all', difficulty: 'all', duration: 'all', path: this.filters.path === path ? '' : path };
     },
     pathCount(path) {
-      return filterVideos(this.catalog, { category: 'all', difficulty: 'all', duration: 'all', path: path.id }).length;
+      return filterVideos(this.catalog, { category: 'all', difficulty: 'all', duration: 'all', path: path.id }, this.$i18n.locale).length;
     },
     videoObjective(video) {
       return video.objective?.[this.$i18n.locale] || video.objective?.['zh-CN']
@@ -905,6 +912,10 @@ export default {
         videoId: v.videoId,
         title: v.title ?? '',
         channel: v.channel ?? '',
+        sourceLanguage: v.sourceLanguage ?? v.source_language ?? '',
+        videoLanguage: v.videoLanguage ?? v.video_language ?? '',
+        subtitleLanguage: v.subtitleLanguage ?? v.subtitle_language ?? '',
+        language: v.language ?? '',
         duration: v.duration ?? 0,
         thumbnailUrl: v.thumbnailUrl ?? v.thumbnail_url ?? '',
         status: v.status ?? 'added',

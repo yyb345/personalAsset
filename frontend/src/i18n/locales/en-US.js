@@ -46,6 +46,7 @@ export default {
   },
 
   dashboard: {
+    upgrade: 'Upgrade',
     studyDays: 'Study Days',
     library: 'Library',
     youtubeVideos: 'AI & English Learning',

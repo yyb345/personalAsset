@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { enrichVideo, filterVideos } from './catalog.js'
+import { enrichVideo, filterVideos, isVideoVisibleForLocale } from './catalog.js'
 const filters = { category: 'all', difficulty: 'all', duration: 'all', path: '' }
 const video = (videoId, title, duration, difficultyLevel = 'auto', previewAllowed = false) => enrichVideo({ videoId, title, duration, difficultyLevel, previewAllowed })
 
@@ -42,4 +42,34 @@ test('editorial goals override automatic classification for reviewed videos', ()
   assert.equal(result.category, 'english')
   assert.ok(result.objective['zh-CN'])
   assert.equal(result.editorial, true)
+})
+
+test('English locale hides Chinese videos across metadata formats and translated subtitles', () => {
+  const videos = [
+    { ...video('english', 'AI basics', 300), subtitleLanguage: 'en-US' },
+    { ...video('chinese', 'AI basics', 300), subtitleLanguage: 'zh-Hans' },
+    { ...video('traditional', 'AI basics', 300), subtitleLanguage: 'zh_TW' },
+    { ...video('translated', '专访前 FAIR 研究总监：对 AI 的思考', 300), subtitleLanguage: 'en' },
+    video('legacy', '大模型基础', 300),
+    video('unknown', 'New video', 0)
+  ]
+  assert.deepEqual(filterVideos(videos, filters, 'en-US').map(v => v.videoId), ['english', 'unknown'])
+  assert.equal(filterVideos(videos, filters, 'zh-CN').length, videos.length)
+  assert.equal(filterVideos(videos, filters).length, videos.length)
+})
+
+test('original video language takes priority over localized titles and subtitle language', () => {
+  assert.equal(isVideoVisibleForLocale({ title: '中文译名', sourceLanguage: 'en', subtitleLanguage: 'zh' }, 'en-US'), true)
+  assert.equal(isVideoVisibleForLocale({ title: 'AI interview', sourceLanguage: 'zh-CN', subtitleLanguage: 'en' }, 'en-US'), false)
+  assert.equal(isVideoVisibleForLocale({ title: 'AI interview', language: 'zh' }, 'en-US'), false)
+})
+
+test('locale filtering also applies to curated path counts without changing preview eligibility', () => {
+  const videos = [
+    { ...video('LCEmiRjPEtQ', 'Software Is Changing', 2371), status: 'completed', subtitleLanguage: 'en' },
+    { ...video('AVQzG2MY858', '大模型基础', 849), status: 'completed', subtitleLanguage: 'en' }
+  ]
+  const matches = filterVideos(videos, { ...filters, path: 'foundations' }, 'en-US')
+  assert.deepEqual(matches.map(v => v.videoId), ['LCEmiRjPEtQ'])
+  assert.equal(matches[0].previewAllowed, false)
 })

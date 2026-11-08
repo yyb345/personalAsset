@@ -46,6 +46,7 @@ export default {
   },
 
   dashboard: {
+    upgrade: '升级会员',
     studyDays: '学习天数',
     library: '收藏',
     youtubeVideos: 'AI 与英语学习',

@@ -38,12 +38,24 @@ export function enrichVideo(video) {
   }
 }
 
-export function filterVideos(videos, filters) {
+export function isVideoVisibleForLocale(video, locale) {
+  if (!String(locale || '').toLowerCase().startsWith('en')) return true
+  // Subtitles may be translated into English, so they cannot override a Chinese
+  // title. Prefer the original language when an importer supplies it.
+  const sourceLanguage = String(video.sourceLanguage || video.videoLanguage || '').toLowerCase().replaceAll('_', '-')
+  if (sourceLanguage) return !/^(zh|cmn|yue)(-|$)/.test(sourceLanguage)
+  const subtitleLanguage = String(video.subtitleLanguage || video.language || '').toLowerCase().replaceAll('_', '-')
+  return !/^(zh|cmn|yue)(-|$)/.test(subtitleLanguage)
+    && !/\p{Script=Han}/u.test(video.title || '')
+}
+
+export function filterVideos(videos, filters, locale) {
   const path = learningPaths.find(item => item.id === filters.path)
   const sequence = path ? curatedSequences[path.id] : null
   const matches = videos.filter(video => {
     const duration = Number(video.duration) || 0
-    return (filters.category === 'all' || video.category === filters.category)
+    return isVideoVisibleForLocale(video, locale)
+      && (filters.category === 'all' || video.category === filters.category)
       && (!path || (sequence.includes(video.videoId) && video.status === 'completed'))
       && (filters.difficulty === 'all' || video.difficulty === filters.difficulty)
       && (filters.duration === 'all'

@@ -3,14 +3,6 @@
     <!-- 移动端菜单按钮 -->
     <button class="mobile-menu-toggle" @click="toggleMobileSidebar">☰</button>
 
-    <!-- 语言切换 - 右上角 -->
-    <div class="language-switcher">
-      <select v-model="currentLocale" @change="changeLanguage" class="language-select">
-        <option value="zh-CN">中文</option>
-        <option value="en-US">English</option>
-      </select>
-    </div>
-
     <!-- 侧边栏遮罩层 -->
     <div
       class="sidebar-overlay"
@@ -72,7 +64,6 @@
 
       <nav class="menu">
         <ul>
-          <li><router-link to="/dashboard/billing" class="menu-item" @click="closeMobileSidebar"><span class="menu-text">会员 · 付款</span></router-link></li>
           <li>
             <router-link
               to="/dashboard/youtube"
@@ -105,6 +96,20 @@
     </div>
 
     <main class="main-content" ref="mainContent">
+      <header class="dashboard-topbar">
+        <router-link v-if="isAuthenticated" to="/dashboard/billing" class="upgrade-link">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z" />
+          </svg>
+          <span>{{ $t('dashboard.upgrade') }}</span>
+        </router-link>
+        <div class="language-switcher">
+          <select v-model="currentLocale" @change="changeLanguage" class="language-select" :aria-label="$t('language.switchTo')">
+            <option value="zh-CN">中文</option>
+            <option value="en-US">English</option>
+          </select>
+        </div>
+      </header>
       <router-view />
     </main>
   </div>
