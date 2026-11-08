@@ -37,6 +37,7 @@ export function applyHomeMetadata(locale, doc = globalThis.document) {
     meta(attribute, `${prefix}:title`, variant.title)
     meta(attribute, `${prefix}:description`, variant.description)
   }
+  meta('property', 'og:type', 'website')
   meta('property', 'og:url', origin + variant.path)
   meta('property', 'og:locale', variant.ogLocale)
   if (canonical) canonical.href = origin + variant.path

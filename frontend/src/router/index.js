@@ -4,9 +4,12 @@ import { setLocale } from '@/i18n'
 import { localeForHomePath, applyHomeMetadata } from '@/features/homepage/metadata'
 import { homeRoutes } from '@/features/homepage/routes'
 
+import { articleRoutes, articleForPath, applyArticleMetadata } from '@/features/articles'
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    ...articleRoutes(() => import('@/views/DiscoveryLoopArticle.vue')),
     { path: '/lingq-lab', name: 'LingqLab', component: () => import('@/views/LingqLab.vue'), meta: { requiresAuth: false } },
     { path: '/dashboard/billing', name: 'Billing', component: () => import('@/views/dashboard/Billing.vue'), meta: { requiresAuth: false } },
     ...homeRoutes(() => import('@/views/Landing.vue')),
@@ -95,6 +98,13 @@ router.beforeEach(async (to, from, next) => {
 // One sanitized page_view per successful navigation; the initial document is deduplicated.
 router.afterEach((to, _from, failure) => {
   if (!failure) {
+    const article = articleForPath(to.path)
+    if (article) {
+      setLocale(article.lang === 'zh-CN' ? 'zh-CN' : 'en-US')
+      applyArticleMetadata(article)
+    } else {
+      document.querySelector('#article-schema')?.remove()
+    }
     const locale = localeForHomePath(to.path)
     if (locale) { setLocale(locale); applyHomeMetadata(locale) }
     window.xLearningAnalytics?.page(to.path)

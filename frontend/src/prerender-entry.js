@@ -3,16 +3,19 @@ import { renderToString } from '@vue/server-renderer'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import App from './App.vue'
 import Landing from './views/Landing.vue'
+import DiscoveryLoopArticle from './views/DiscoveryLoopArticle.vue'
+import { articleRoutes } from './features/articles'
 import { createSiteI18n } from './i18n'
 import { homeRoutes } from './features/homepage/routes'
 
 // Render the same components and translations as the client, without browser globals or API calls.
-export async function render(locale = 'en-US') {
-  const path = locale === 'zh-CN' ? '/zh/' : '/'
+export async function render(locale = 'en-US', requestedPath) {
+  const path = requestedPath || (locale === 'zh-CN' ? '/zh/' : '/')
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
       ...homeRoutes(Landing),
+      ...articleRoutes(DiscoveryLoopArticle),
       // Resolve links using normal router semantics without loading workspace code.
       { path: '/:pathMatch(.*)*', component: { render: () => null } }
     ]

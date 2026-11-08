@@ -19,3 +19,12 @@
 部署后检查首页原始 HTML、`/robots.txt`、`/sitemap.xml`，以及指南和视频详情的 canonical；确认账号和工作台响应有 noindex，未知详情返回 404。最后在 Search Console 检查代表 URL 并提交 sitemap。代码尚未部署；已有线上核查和 Search Console 操作记录见 `seo-live-audit.md`。
 
 中文指南、中文视频独立 URL、视频人工发布状态和列表分页留待后续迭代；当前只为首页建立中英文独立 URL。
+
+## Discovery Loop 双语文章
+
+- 英文：`/articles/jeff-dean-discovery-loop-ai-scientific-discovery`
+- 中文：`/zh/articles/jeff-dean-discovery-loop-ai-scientific-discovery`
+- 正文与本地化 SEO 字段：`frontend/src/features/articles/discovery-loop.js`。
+- 页面组件：`frontend/src/views/DiscoveryLoopArticle.vue`，包含语言切换、目录、FAQ 和视频字幕入口；首页页脚提供文章链接。
+- 前端构建输出 `article-discovery-loop-en.html` 与 `article-discovery-loop-zh.html`，由 `HomeController` 提供公开可索引的完整 HTML。两版分别设置 canonical、双向 hreflang、Open Graph 与 Article JSON-LD，并纳入 `/sitemap.xml`。
+- `npm --prefix frontend run build` 检查两版正文与元信息；`HomeControllerTest` 验证服务端路由、本地化正文及配置域名下的 SEO 地址。

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile, writeFile, rm } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { ARTICLE_VARIANTS, articleHead } from '../src/features/articles/index.js'
 import { HOME_VARIANTS } from '../src/features/homepage/metadata.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -42,5 +43,21 @@ for (const [locale, variant] of Object.entries(HOME_VARIANTS)) {
   assert(html.includes('data-prerendered="true"'), 'Failed to insert rendered homepage')
   await writeFile(resolve(dist, variant.file), html)
   console.log(`Prerendered original landing page: ${variant.path} (${locale})`)
+}
+// Article documents include the full body and reciprocal language metadata before JavaScript runs.
+collect('src/views/DiscoveryLoopArticle.vue')
+for (const [locale, article] of Object.entries(ARTICLE_VARIANTS)) {
+  const body = await render(locale, article.path)
+  assert(body.includes(article.title), 'Article body must contain its heading')
+  const html = shell
+    .replace(/(<html\b[^>]*lang=")[^"]*(")/, `$1${article.lang}$2`)
+    .replace(/<title>[\s\S]*?<\/title>/g, '')
+    .replace(/<meta (?:name="(?:description|twitter:[^"]+)"|property="og:[^"]+")[^>]*>/g, '')
+    .replace(/<link rel="(?:canonical|alternate)"[^>]*>/g, '')
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, '')
+    .replace('</head>', [...css].filter(file => !shell.includes(`href="/${file}"`)).map(file => `<link rel="stylesheet" href="/${file}">`).join('\n') + articleHead(article, origin) + '</head>')
+    .replace('<div id="app"></div>', () => `<div id="app" data-prerendered="true">${body}</div>`)
+  await writeFile(resolve(dist, article.file), html)
+  console.log(`Prerendered article: ${article.path}`)
 }
 await rm(resolve(root, '.prerender'), { recursive: true, force: true })

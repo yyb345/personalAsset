@@ -51,3 +51,29 @@ for (const [name, document] of [['index.html', html], ['home.html', home], ['hom
   assert.equal((document.match(/src="\/js\/learning-analytics\.js"/g) || []).length, 1, `${name} must load the shared tracker exactly once`)
   assert.doesNotMatch(document, /gtag\(['"]config['"]/, `${name} must not initialize GA again inline`)
 }
+
+// Article SEO must be present in the initial HTML, not added only by the client.
+const { ARTICLE_VARIANTS } = await import('../src/features/articles/index.js')
+for (const article of Object.values(ARTICLE_VARIANTS)) {
+  const document = await readFile(resolve(dist, article.file), 'utf8')
+  assert(document.includes(`<html lang="${article.lang}">`))
+  assert.equal((document.match(/<h1[\s>]/g) || []).length, 1)
+  assert(document.includes(article.title))
+  assert(document.includes(article.description))
+  const canonical = document.match(/<link rel="canonical" href="([^"]+)"/)[1]
+  const origin = new URL(canonical).origin
+  assert.equal(canonical, origin + article.path)
+  assert(document.includes(`hreflang="en" href="${origin}${ARTICLE_VARIANTS['en-US'].path}"`))
+  assert(document.includes(`hreflang="zh-Hans" href="${origin}${ARTICLE_VARIANTS['zh-CN'].path}"`))
+  const schema = JSON.parse(document.match(/<script id="article-schema" type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])
+  assert.equal(schema['@type'], 'Article')
+  assert.equal(schema.mainEntityOfPage, canonical)
+  assert.equal(schema.inLanguage, article.lang)
+  assert.equal((document.match(/application\/ld\+json/g) || []).length, 1)
+  for (const section of article.sections) assert(document.includes(`id="${section[0]}"`))
+  for (const [question, answer] of article.faq) {
+    assert(document.includes(question)); assert(document.includes(answer))
+  }
+  for (const match of document.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)(?:[?#][^"]*)?"/g)) await access(resolve(dist, `.${match[1]}`))
+}
+console.log('Verified both article documents: content, canonical, hreflang, schema, FAQ, and assets')

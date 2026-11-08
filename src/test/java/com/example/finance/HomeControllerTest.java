@@ -69,6 +69,27 @@ class HomeControllerTest {
                 .andExpect(header().string("Location", "/zh/"));
     }
 
+    @Test
+    void articlesHaveLocalizedContentAndConfiguredSeoUrls() throws Exception {
+        String slug = "/articles/jeff-dean-discovery-loop-ai-scientific-discovery";
+        for (String prefix : new String[]{"", "/zh"}) {
+            String path = prefix + slug;
+            var html = mvc.perform(get(path)).andExpect(status().isOk())
+                .andExpect(header().doesNotExist("X-Robots-Tag"))
+                .andReturn().getResponse().getContentAsString();
+            var document = org.jsoup.Jsoup.parse(html);
+            assertThat(document.select("h1")).hasSize(1);
+            assertThat(document.select("h1").text()).contains("Discovery Loop");
+            assertThat(document.select("html").attr("lang")).isEqualTo(prefix.isEmpty() ? "en" : "zh-CN");
+            assertThat(document.select("link[rel=canonical]").attr("href")).isEqualTo("https://learn.example" + path);
+            assertThat(document.select("link[hreflang=en]").attr("href")).isEqualTo("https://learn.example" + slug);
+            assertThat(document.select("link[hreflang=zh-Hans]").attr("href")).isEqualTo("https://learn.example/zh" + slug);
+            var schema = new com.fasterxml.jackson.databind.ObjectMapper().readTree(document.getElementById("article-schema").data());
+            assertThat(schema.get("mainEntityOfPage").asText()).isEqualTo("https://learn.example" + path);
+            assertThat(document.select("article section")).hasSize(10);
+        }
+    }
+
     private void assertAlternates(org.jsoup.nodes.Document document) {
         assertThat(document.select("link[rel=alternate][hreflang]")).hasSize(3);
         assertThat(document.select("link[hreflang=en]").attr("href")).isEqualTo("https://learn.example/");
