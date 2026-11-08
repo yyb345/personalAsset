@@ -3,10 +3,10 @@
     <header class="site-header">
       <nav class="shell nav-bar" :aria-label="tr('主导航')">
         <BrandLogo :aria-label="locale === 'zh-CN' ? 'X Learning 首页' : 'X Learning Home'" />
-        <div class="desktop-nav"><router-link to="/lingq-lab">{{ tr("英语学习") }}</router-link><a href="#directions">{{ tr("学习方向") }}</a><a href="#workspace">{{ tr("学习体验") }}</a><a href="#process">{{ tr("如何开始") }}</a></div>
-        <div class="nav-actions"><select class="locale-select" :value="locale" aria-label="Language / 语言" @change="setLocale($event.target.value)"><option value="en-US">English</option><option value="zh-CN">中文</option></select><router-link to="/login" class="sign-in">{{ tr("登录") }}</router-link><router-link to="/dashboard/youtube" class="button small">{{ tr("AI 学习") }}<ArrowUpRight :size="15" /></router-link><button class="menu-toggle" :aria-expanded="menuOpen" aria-controls="mobile-nav" :aria-label="tr(menuOpen ? '关闭菜单' : '打开菜单')" @click="menuOpen = !menuOpen"><X v-if="menuOpen" :size="22"/><Menu v-else :size="22"/></button></div>
+        <div class="desktop-nav"><router-link data-seo-action="start_learning" data-learning-type="reading" to="/lingq-lab">{{ tr("英语学习") }}</router-link><a href="#directions">{{ tr("学习方向") }}</a><a href="#workspace">{{ tr("学习体验") }}</a><a href="#process">{{ tr("如何开始") }}</a></div>
+        <div class="nav-actions"><select class="locale-select" :value="locale" aria-label="Language / 语言" @change="switchLanguage($event.target.value)"><option value="en-US">English</option><option value="zh-CN">中文</option></select><router-link to="/login" class="sign-in">{{ tr("登录") }}</router-link><router-link data-seo-action="start_learning" data-learning-type="video" to="/dashboard/youtube" class="button small">{{ tr("AI 学习") }}<ArrowUpRight :size="15" /></router-link><button class="menu-toggle" :aria-expanded="menuOpen" aria-controls="mobile-nav" :aria-label="tr(menuOpen ? '关闭菜单' : '打开菜单')" @click="menuOpen = !menuOpen"><X v-if="menuOpen" :size="22"/><Menu v-else :size="22"/></button></div>
       </nav>
-      <nav v-if="menuOpen" id="mobile-nav" class="mobile-nav" :aria-label="tr('移动导航')"><a v-for="item in navigation" :key="item.id" :href="`#${item.id}`" @click="menuOpen = false">{{ item.label }}</a><router-link to="/lingq-lab" @click="menuOpen = false">{{ tr("英语学习") }}</router-link><router-link to="/login">{{ tr("登录账户") }}</router-link></nav>
+      <nav v-if="menuOpen" id="mobile-nav" class="mobile-nav" :aria-label="tr('移动导航')"><a v-for="item in navigation" :key="item.id" :href="`#${item.id}`" @click="menuOpen = false">{{ item.label }}</a><router-link data-seo-action="start_learning" data-learning-type="reading" to="/lingq-lab" @click="menuOpen = false">{{ tr("英语学习") }}</router-link><router-link to="/login">{{ tr("登录账户") }}</router-link></nav>
     </header>
 
     <main>
@@ -15,12 +15,12 @@
           <p class="eyebrow"><span class="status-dot"></span> A NEW WAY TO LEARN</p>
           <h1>{{ tr("学 AI，") }}<br>{{ tr("也练") }}<span class="accent">{{ tr("英语。") }}</span></h1>
           <p class="hero-description">{{ tr("AI 学习：通过视频、字幕与笔记，理解人工智能。") }}<br>{{ tr("英语学习：导入文章、点击查词与词卡复习，积累英语能力。") }}</p>
-          <div class="hero-actions"><router-link to="/dashboard/youtube" class="button">{{ tr("AI 学习") }}<ArrowUpRight :size="18"/></router-link><router-link to="/lingq-lab" class="text-link">{{ tr("英语学习") }}<ArrowUpRight :size="16"/></router-link></div>
+          <div class="hero-actions"><router-link data-seo-action="start_learning" data-learning-type="video" to="/dashboard/youtube" class="button">{{ tr("AI 学习") }}<ArrowUpRight :size="18"/></router-link><router-link data-seo-action="start_learning" data-learning-type="reading" to="/lingq-lab" class="text-link">{{ tr("英语学习") }}<ArrowUpRight :size="16"/></router-link></div>
           <div class="hero-notes"><span><Check :size="14"/>{{ tr("视频驱动学习") }}</span><span><Check :size="14"/>{{ tr("英语 × 人工智能") }}</span><span><Check :size="14"/>{{ tr("支持游客预览") }}</span></div>
         </div>
         <aside class="hero-library" :aria-label="tr('学习路线预览')">
           <div class="library-preview-heading"><span class="preview-icon"><NotebookPen :size="20" /></span><div><strong>{{ tr("给好奇心，一个清晰的方向") }}</strong><p>{{ tr("从感兴趣的专题开始，按照自己的节奏学习") }}</p></div></div>
-          <router-link v-for="(item, index) in previewTopics" :key="item.title" :to="item.to" class="preview-topic">
+          <router-link v-for="(item, index) in previewTopics" :key="item.title" :to="item.to" data-seo-action="start_learning" :data-learning-type="item.to === '/lingq-lab' ? 'reading' : 'video'" class="preview-topic">
             <span class="topic-index">0{{ index + 1 }}</span><div><strong>{{ item.title }}</strong><p>{{ item.description }}</p></div><ArrowUpRight :size="17" />
           </router-link>
           <div class="preview-footer"><Check :size="15" />{{ tr("视频与字幕") }}<span>·</span>{{ tr("跟读练习") }}<span>·</span>{{ tr("学习笔记") }}</div>
@@ -36,7 +36,7 @@
             <div class="track-top"><span class="track-number">{{ track.number }} / LEARNING PATH</span><component :is="track.icon" :size="28" :stroke-width="1.3"/></div>
             <p class="track-label">{{ track.label }}</p><h3>{{ track.title }}</h3><p class="track-description">{{ track.description }}</p>
             <div class="track-tags"><span v-for="tag in track.tags" :key="tag">{{ tag }}</span></div>
-            <router-link :to="track.to" class="track-link">{{ track.action }} <ArrowUpRight :size="20"/></router-link>
+            <router-link :to="track.to" data-seo-action="start_learning" :data-learning-type="track.id === 'english' ? 'reading' : 'video'" class="track-link">{{ track.action }} <ArrowUpRight :size="20"/></router-link>
           </article>
         </div>
         <p class="library-note"><Layers :size="14"/>{{ tr("从 AI 基础、大模型到智能体与应用，按专题学习；也可先从英语练习开始。") }}</p>
@@ -56,27 +56,30 @@
       </section>
 
       <section id="process" class="section shell">
-        <div class="section-heading"><div><p class="eyebrow">03 / YOUR NEXT STEP</p><h2>{{ tr("从好奇，到掌握。") }}</h2></div><router-link to="/dashboard/youtube" class="text-link">{{ tr("现在就开始") }}<ArrowUpRight :size="17"/></router-link></div>
+        <div class="section-heading"><div><p class="eyebrow">03 / YOUR NEXT STEP</p><h2>{{ tr("从好奇，到掌握。") }}</h2></div><router-link data-seo-action="start_learning" data-learning-type="video" to="/dashboard/youtube" class="text-link">{{ tr("现在就开始") }}<ArrowUpRight :size="17"/></router-link></div>
         <div class="steps"><article v-for="step in steps" :key="step.number"><span>{{ step.number }}</span><h3>{{ step.title }}</h3><p>{{ step.description }}</p></article></div>
       </section>
 
-      <section class="closing shell"><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>{{ tr("下一次突破，") }}<br>{{ tr("从这一次学习开始。") }}</h2><p>{{ tr("通过视频学 AI，在学习中练英语。") }}</p><router-link to="/dashboard/youtube" class="button">{{ tr("开始探索") }}<ArrowUpRight :size="18"/></router-link><span class="preview-note">{{ tr("游客可预览前 6 个视频 · 登录后浏览全部") }}</span></section>
+      <section class="closing shell"><p class="eyebrow">STAY CURIOUS. KEEP EVOLVING.</p><h2>{{ tr("下一次突破，") }}<br>{{ tr("从这一次学习开始。") }}</h2><p>{{ tr("通过视频学 AI，在学习中练英语。") }}</p><router-link data-seo-action="start_learning" data-learning-type="video" to="/dashboard/youtube" class="button">{{ tr("开始探索") }}<ArrowUpRight :size="18"/></router-link><span class="preview-note">{{ tr("游客可预览前 6 个视频 · 登录后浏览全部") }}</span></section>
     </main>
 
-    <footer class="shell site-footer"><div><BrandLogo :aria-label="locale === 'zh-CN' ? 'X Learning 首页' : 'X Learning Home'" /><p>{{ tr("学 AI，也练英语。") }}</p></div><div class="footer-links"><a href="/guides">{{ tr("英语学习指南") }}</a><a href="/video">{{ tr("视频字幕") }}</a><a href="#directions">{{ tr("学习方向") }}</a><router-link to="/dashboard/youtube">{{ tr("AI 学习") }}</router-link><router-link to="/lingq-lab">{{ tr("英语学习") }}</router-link><router-link to="/login">{{ tr("登录") }}</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
+    <footer class="shell site-footer"><div><BrandLogo :aria-label="locale === 'zh-CN' ? 'X Learning 首页' : 'X Learning Home'" /><p>{{ tr("学 AI，也练英语。") }}</p></div><div class="footer-links"><a href="/guides">{{ tr("英语学习指南") }}</a><a href="/video">{{ tr("视频字幕") }}</a><a href="#directions">{{ tr("学习方向") }}</a><router-link data-seo-action="start_learning" data-learning-type="video" to="/dashboard/youtube">{{ tr("AI 学习") }}</router-link><router-link data-seo-action="start_learning" data-learning-type="reading" to="/lingq-lab">{{ tr("英语学习") }}</router-link><router-link to="/login">{{ tr("登录") }}</router-link></div><span class="copyright">© {{ new Date().getFullYear() }} X Learning</span></footer>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { setLocale } from '@/i18n'
+import { useRouter } from 'vue-router'
+import { HOME_VARIANTS, applyHomeMetadata } from '@/features/homepage/metadata'
 import { landingEnglish } from '@/i18n/landing'
 
 const { locale } = useI18n()
-watch(locale, value => {
-  if (typeof document !== 'undefined') document.title = value === 'zh-CN' ? 'X Learning - 学 AI，也练英语' : 'X Learning - Explore AI. Build your English.'
-}, { immediate: true })
+const router = useRouter()
+watch(locale, value => applyHomeMetadata(value), { immediate: true })
+function switchLanguage(value) {
+  if (HOME_VARIANTS[value]) router.push({ path: HOME_VARIANTS[value].path, hash: router.currentRoute.value.hash })
+}
 const tr = (text) => locale.value === 'zh-CN' ? text : (landingEnglish[text] || text)
 const localize = (items) => items.map(item => Object.fromEntries(Object.entries(item).map(([key, value]) => [key, typeof value === 'string' ? tr(value) : Array.isArray(value) ? value.map(tr) : value])))
 import BrandLogo from '@/components/BrandLogo.vue'

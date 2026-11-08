@@ -1,0 +1,192 @@
+[
+  {
+    "videoId": "AVQzG2MY858",
+    "title": "LLM、SLM 与前沿模型：练习用英语解释差异",
+    "topic": "AI 模型",
+    "overview": "这段 IBM Technology 讲解从 LLM、SLM 和 frontier model 的用法出发，比较通用能力、专门任务与模型选择。先听开头约四分钟，重点关注讲者如何定义概念、纠正常见误解，再把概念放进具体使用场景。",
+    "focus": "练习定义与对比：听清 umbrella term、generalists 和 specialists 之间的关系，而不是只记住缩写。模型规模和产品例子反映视频录制时的语境，不作为当前产品选型结论。",
+    "terms": [
+      {
+        "seconds": 23.3,
+        "expression": "umbrella term",
+        "explanation": "统称、上位概念。听讲者如何说明三种称呼并非完全独立的类别。"
+      },
+      {
+        "seconds": 61.4,
+        "expression": "parameters",
+        "explanation": "参数。在这里指训练中学到的权重；注意后面是如何用关系从句补充定义的。"
+      },
+      {
+        "seconds": 83.5,
+        "expression": "generalists",
+        "explanation": "通才。与后面面向特定任务的 specialists 对照记忆。"
+      },
+      {
+        "seconds": 135.9,
+        "expression": "specialists",
+        "explanation": "专门处理某类任务的模型。注意讲者并没有把“小”简单等同于“更差”。"
+      }
+    ],
+    "exerciseTitle": "听懂一种对比，而不是背三个缩写",
+    "steps": [
+      "先听 00:23–00:57，写下讲者用于区分三类模型的关键词，不看字幕。",
+      "再听 02:07–02:51，用两列记录 generalists 和 specialists 的侧重点，并核对字幕。",
+      "用三句英文解释：什么是 LLM，SLM 为什么可能适合某些任务，为什么还需要按场景选择。避免照抄原句。"
+    ],
+    "answer": "检查复述是否包含：LLM 是这里的统称；SLM 更强调特定任务和效率；模型选择与使用场景有关。视频在约 02:31 举出分类、路由和摘要等任务，不是在给所有模型设定统一能力标准。",
+    "guideSlugs": [
+      "build-vocabulary-from-videos",
+      "active-listening-with-youtube"
+    ],
+    "reviewedOn": "2026-11-08"
+  },
+  {
+    "videoId": "Lg-meK5IU8Q",
+    "title": "AI Agent Skills：听懂工作流程与按需加载",
+    "topic": "AI Agent",
+    "overview": "视频用生成报告的例子说明：知道事实并不等于知道某项工作的具体步骤。讲者继而介绍技能文件中的名称、描述和指令，以及脚本、参考文档等可选资源，最后解释为什么需要按需加载。",
+    "focus": "适合练习技术定义与流程说明。重点听 procedural knowledge 的含义，以及描述字段如何帮助选择技能；不要把自动字幕里的文件术语拼写直接当作代码。",
+    "terms": [
+      {
+        "seconds": 36.9,
+        "expression": "procedural knowledge",
+        "explanation": "程序性知识：怎样执行一项工作。把它与片头提到的事实知识区分开。"
+      },
+      {
+        "seconds": 155.1,
+        "expression": "trigger condition",
+        "explanation": "触发条件。这里用于说明技能描述如何帮助判断何时适用。"
+      },
+      {
+        "seconds": 274.6,
+        "expression": "progressive disclosure",
+        "explanation": "渐进披露、按需展开。听后续分层说明如何控制载入上下文的内容。"
+      }
+    ],
+    "exerciseTitle": "把技术解释变成一张流程图",
+    "steps": [
+      "听 00:24–01:35，分别记下“模型已经知道什么”和“执行任务还缺什么”。",
+      "听 02:04–03:24，画出技能文件的名称、描述、指令三个部分，并写出各自作用。",
+      "听 04:25–05:20，用自己的话解释为什么一开始不加载全部技能内容；再用英文给一位同事讲解。"
+    ],
+    "answer": "流程图至少应区分技能名称、用于判断适用场景的描述，以及真正执行工作的指令。按需加载部分的关键是先用少量元信息判断相关性，再读取需要的内容，而非一开始填满上下文。",
+    "guideSlugs": [
+      "take-notes-from-english-videos",
+      "build-vocabulary-from-videos"
+    ],
+    "reviewedOn": "2026-11-08"
+  },
+  {
+    "videoId": "LCEmiRjPEtQ",
+    "title": "Software Is Changing：用英语复述三种编程方式",
+    "topic": "软件与 AI",
+    "overview": "Andrej Karpathy 在演讲开头用 Software 1.0、2.0、3.0 描述代码、神经网络权重和提示词三种表达程序的方式。对英语学习者而言，前六分钟可以作为一段完整的技术比较练习：先记录定义，再追踪讲者如何举例和总结。",
+    "focus": "练习演讲中的分类框架，而不是把版本编号当作行业统一标准。字幕存在重叠、重复和自动识别误差，专有名词及完整句子请结合原音核对。",
+    "terms": [
+      {
+        "seconds": 102.3,
+        "expression": "software 1.0",
+        "explanation": "讲者用于称呼直接编写计算机代码的框架。注意这是演讲中的分类方式。"
+      },
+      {
+        "seconds": 106.8,
+        "expression": "neural networks",
+        "explanation": "神经网络。这里在对比直接写代码与通过训练形成权重。"
+      },
+      {
+        "seconds": 199.6,
+        "expression": "prompts",
+        "explanation": "提示词。在讲者的 Software 3.0 类比中，它们被视作给语言模型的程序。"
+      }
+    ],
+    "exerciseTitle": "不用字幕解释 1.0、2.0、3.0",
+    "steps": [
+      "听 01:42–02:12，写下 1.0 和 2.0 分别由什么构成，不要逐字抄字幕。",
+      "听 03:05–04:15，补上 3.0 及讲者给出的分类任务例子。",
+      "合上字幕，用 45–60 秒英文解释三者的区别，再回看 05:40–06:10，检查你是否理解不同方法仍可能共同使用。"
+    ],
+    "answer": "检查三个关键词是否齐全：显式代码、神经网络权重、提示词。复述应说明这是讲者的比较框架；不应推导出代码已经消失，或所有任务都应交给提示词。",
+    "guideSlugs": [
+      "take-notes-from-english-videos",
+      "english-shadowing-for-beginners"
+    ],
+    "reviewedOn": "2026-11-08"
+  },
+  {
+    "videoId": "rtuKId76DZI",
+    "title": "All My Job Offers In Tech：听懂实习与求职经历",
+    "topic": "科技职场",
+    "overview": "Joma 用带有玩笑和自我调侃的口语回顾自己的科技行业求职经历。开头先交代 Waterloo 的实习安排，再介绍他当时使用的申请系统和排序方式。适合练习从口语铺垫中提取人物、时间顺序和制度解释。",
+    "focus": "先抓求职叙事中的事实线索，再辨认笑话与观点。视频讲的是个人经历，不能当作当前招聘流程或薪酬信息；原字幕有较多重复，请用原音确认句子边界。",
+    "terms": [
+      {
+        "seconds": 60.6,
+        "expression": "internships",
+        "explanation": "实习。注意讲者随后用学期交替说明自己的学习与实习安排。"
+      },
+      {
+        "seconds": 83.7,
+        "expression": "interview",
+        "explanation": "面试。这里是申请记录与后续结果解释的一部分。"
+      },
+      {
+        "seconds": 89.5,
+        "expression": "ranked",
+        "explanation": "被排序、进入排名。含义依赖视频中介绍的实习匹配系统，不等于已经拿到录用。"
+      }
+    ],
+    "exerciseTitle": "把口语求职叙事整理成清楚的笔记",
+    "steps": [
+      "听 00:47–01:18，只记录学校、实习次数及学期安排三个信息点。",
+      "听 01:18–02:15，按讲者的说明整理申请系统中的几种结果，特别区分 ranked 与录用。",
+      "用 4–5 句英文复述这段经历的背景。删去语气词与重复，但保留“这是个人当时经历”的范围。"
+    ],
+    "answer": "笔记应保留：讲者介绍 Waterloo 的交替学习与实习安排，以及申请系统中的面试和排序语境。检查你有没有把 ranked 误听为已经收到工作邀请；复述无需复制片头的玩笑。",
+    "guideSlugs": [
+      "take-notes-from-english-videos",
+      "english-dictation-practice"
+    ],
+    "reviewedOn": "2026-11-08"
+  },
+  {
+    "videoId": "sW9npZVpiMI",
+    "title": "Why You Need Math：听懂编程短片里的转折与解释",
+    "topic": "编程英语",
+    "overview": "短片先用终端里渲染甜甜圈的情节制造反差，再解释讲者为什么认为数学对某些编程工作有帮助。先观看情节，再练习听懂从玩笑转向说明的连接方式；它是带喜剧表达的观点视频，而非系统数学课程。",
+    "focus": "适合短段跟读和表达积累。字幕含重复、停顿和自动识别误差，优先用原音确认 I figured it out 这类完整表达，不把片中的比例说法当作统计数据。",
+    "terms": [
+      {
+        "seconds": 64.8,
+        "expression": "figured it out",
+        "explanation": "想明白了、弄出来了。适用于解决问题后的口语表达，留意连读。"
+      },
+      {
+        "seconds": 66.6,
+        "expression": "projection equation",
+        "explanation": "投影方程。这里出现在展示程序效果之前的数学表述中。"
+      },
+      {
+        "seconds": 118.2,
+        "expression": "render",
+        "explanation": "渲染、绘制。结合屏幕上的终端图形理解动词含义。"
+      },
+      {
+        "seconds": 174.5,
+        "expression": "computer graphics",
+        "explanation": "计算机图形学。视频将它列为数学相关的编程方向之一。"
+      }
+    ],
+    "exerciseTitle": "先听情节，再解释观点",
+    "steps": [
+      "看 01:02–02:02，先不用字幕：人物试图展示什么？对方对结果有什么反应？",
+      "对照字幕，挑选 01:04 附近 figured it out 的短句跟读三次，第三次脱离字幕复述。",
+      "听 02:27–03:00，用两句英文解释讲者的理由，并标明这是他的观点；再举一个你自己的编程任务作对比。"
+    ],
+    "answer": "情节中的结果是终端渲染的甜甜圈。后续理由涉及修改大小、旋转，以及计算机图形、机器学习等方向。好的复述能区分“这段程序做了什么”和“讲者据此提出什么观点”，无需把片中百分比当作事实。",
+    "guideSlugs": [
+      "english-shadowing-for-beginners",
+      "english-dictation-practice"
+    ],
+    "reviewedOn": "2026-11-08"
+  }
+]

@@ -283,6 +283,7 @@ export default {
           const res = await axios.get(`/api/youtube/sentences/${this.videoId}`)
           if (this.disposed) return
           this.videoData = res.data
+          if (Array.isArray(res.data.sentences) && res.data.sentences.length) window.xLearningAnalytics?.materialOpened('video')
           this.loading = false
           await this.$nextTick()
           this.initPlayer()

@@ -1,9 +1,14 @@
 <template>
-  <router-link to="/" class="brand-logo" aria-label="X Learning 首页">
+  <router-link :to="locale === 'zh-CN' ? '/zh/' : '/'" class="brand-logo" aria-label="X Learning 首页">
     <span class="brand-logo-mark" aria-hidden="true">X</span>
     <span>X Learning</span>
   </router-link>
 </template>
+
+<script setup>
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
+</script>
 
 <style scoped>
 .brand-logo {

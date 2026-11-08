@@ -2,7 +2,7 @@
 
 ## 页面与索引
 
-- `/` 和 `/index.html` 返回构建时从原有 `Landing.vue` 预渲染的首页，canonical 统一为 `/`，服务端按站点配置写入 canonical。初始 HTML 包含正文、导航和原版样式，无需 JavaScript 即可读取。默认英语与原版新访客行为一致；JavaScript 加载后仍挂载原应用，恢复保存的语言偏好，提供中英文切换、移动菜单及演示交互。没有独立维护另一套首页设计。
+- `/` 和 `/index.html` 返回构建时从原有 `Landing.vue` 预渲染的首页，canonical 统一为 `/`，服务端按站点配置写入 canonical。初始 HTML 包含正文、导航和原版样式，无需 JavaScript 即可读取。`/` 固定为英文，新增 `/zh/` 固定为中文；显式 URL 优先于已保存偏好。切换语言会导航到对应首页 URL，工作台仍保存语言偏好，移动菜单及演示交互沿用原组件。两种语言各自 canonical，并互相提供 `en`、`zh-Hans` 和 `x-default` hreflang。没有独立维护另一套首页设计。
 - `/guides`、`/guides/{slug}`、`/video` 和符合条件的 `/video/{videoId}` 可索引。
 - Vue 账号、账单、学习工作台及当前工具页面返回 `X-Robots-Tag: noindex, follow`。工具需要独立介绍页后再开放索引。
 - 视频公开页面仅包含处理完成且至少存在一条非空字幕的视频。详情、列表和 sitemap 共用数据库条件；未知或不符合条件的详情返回 404。
@@ -14,8 +14,8 @@
 
 ## 构建与上线验收
 
-按 [build.md](build.md) 构建与验证 JAR。首页源码在 `frontend/src/views/Landing.vue`，沿用原有样式与双语内容。构建先生成客户端资源，再使用 Vue server renderer 输出 `frontend/dist/home.html`；后端首页读取该文件，工作台仍读取空的 `index.html` 应用入口。生产和开发共用同一组件，工作台可通过 Vue Router 返回首页。Vite 开发模式仍为客户端渲染，需访问后端地址验证预渲染 HTML。
+按 [build.md](build.md) 构建与验证 JAR。首页源码在 `frontend/src/views/Landing.vue`，沿用原有样式与双语内容。构建先生成客户端资源，再使用 Vue server renderer 输出 `frontend/dist/home.html` 和 `frontend/dist/home-zh.html`；后端分别在 `/` 和 `/zh/` 读取对应文件，工作台仍读取空的 `index.html` 应用入口。生产和开发共用同一组件，工作台可通过 Vue Router 返回首页。Vite 开发模式仍为客户端渲染，需访问后端地址验证预渲染 HTML。
 
-部署后检查首页原始 HTML、`/robots.txt`、`/sitemap.xml`，以及指南和视频详情的 canonical；确认账号和工作台响应有 noindex，未知详情返回 404。最后在 Search Console 检查代表 URL 并提交 sitemap。当前修改未执行线上部署或 Search Console 操作。
+部署后检查首页原始 HTML、`/robots.txt`、`/sitemap.xml`，以及指南和视频详情的 canonical；确认账号和工作台响应有 noindex，未知详情返回 404。最后在 Search Console 检查代表 URL 并提交 sitemap。代码尚未部署；已有线上核查和 Search Console 操作记录见 `seo-live-audit.md`。
 
-内容扩充、视频人工发布状态、列表分页和独立多语言 URL 留待后续迭代。
+中文指南、中文视频独立 URL、视频人工发布状态和列表分页留待后续迭代；当前只为首页建立中英文独立 URL。

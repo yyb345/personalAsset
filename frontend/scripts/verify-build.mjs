@@ -12,6 +12,23 @@ const assets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)(?:[?#][^"]*)
 assert(assets.some(path => path.endsWith('.js')), 'Built shell must reference a generated JavaScript entry')
 for (const path of assets) await access(resolve(dist, `.${path}`))
 const home = await readFile(resolve(dist, 'home.html'), 'utf8')
+const chineseHome = await readFile(resolve(dist, 'home-zh.html'), 'utf8')
+assert.match(chineseHome, /<html lang="zh-CN">/, 'Chinese URL must start in Chinese without JavaScript')
+assert.match(chineseHome, /<h1[^>]*>学 AI，<br>也练/, 'Chinese homepage must render original Chinese copy')
+assert.match(chineseHome, /<title>X Learning - 学 AI，也练英语<\/title>/)
+assert.match(chineseHome, /class="brand-logo[^>]*|brand-logo"/, 'Chinese homepage keeps the original logo')
+assert(chineseHome.includes('href="/zh/"'), 'Chinese logo must keep visitors on the Chinese homepage')
+for (const [document, path] of [[home, '/'], [chineseHome, '/zh/']]) {
+  const canonical = document.match(/<link rel="canonical" href="([^"]+)"/)[1]
+  const origin = new URL(canonical).origin
+  assert.equal(canonical, origin + path)
+  for (const [language, alternate] of [['en', '/'], ['zh-Hans', '/zh/'], ['x-default', '/']]) {
+    assert(document.includes(`hreflang="${language}" href="${origin}${alternate}"`), 'Missing reciprocal language alternate')
+  }
+  for (const match of document.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)(?:[?#][^"]*)?"/g)) {
+    await access(resolve(dist, `.${match[1]}`))
+  }
+}
 assert.match(home, /<html lang="en">/, 'Prerendered language must match the default English content')
 assert.match(home, /data-prerendered="true"/, 'Missing prerendered homepage')
 assert.match(home, /<h1[^>]*>Explore AI\.<br>Build your /, 'Homepage must include the original heading without JavaScript')
@@ -27,3 +44,10 @@ const robots = await readFile(resolve(dist, 'robots.txt'), 'utf8')
 assert.match(robots, /^User-agent:\s*\*/mi, 'robots.txt must declare a crawler policy')
 assert.match(robots, /^Sitemap:\s*https?:\/\/\S+\/sitemap\.xml\s*$/mi, 'robots.txt must link to the sitemap')
 console.log(`Verified frontend build: prerendered content, original controls, metadata, robots.txt, and linked assets`)
+
+// Both document entry points share exactly one analytics initializer.
+await access(resolve(dist, 'js/learning-analytics.js'))
+for (const [name, document] of [['index.html', html], ['home.html', home], ['home-zh.html', chineseHome]]) {
+  assert.equal((document.match(/src="\/js\/learning-analytics\.js"/g) || []).length, 1, `${name} must load the shared tracker exactly once`)
+  assert.doesNotMatch(document, /gtag\(['"]config['"]/, `${name} must not initialize GA again inline`)
+}

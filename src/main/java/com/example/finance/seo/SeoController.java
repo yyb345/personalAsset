@@ -30,6 +30,8 @@ public class SeoController {
 
     @Autowired private SiteProperties site;
     @Autowired private PublicVideoCatalog publicVideos;
+    @Autowired private VideoLessonCatalog lessons;
+    @Autowired private GuideCatalog guideCatalog;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -53,6 +55,14 @@ public class SeoController {
         // 获取字幕内容用于 SEO（使用 YoutubeVideo 的主键 id）
         List<SubtitleSegment> subtitles = subtitleSegmentRepository.findByVideoIdOrderBySegmentOrder(video.getId());
         model.addAttribute("subtitles", subtitles);
+        var lesson = lessons.matching(videoId, subtitles);
+        model.addAttribute("lesson", lesson.orElse(null));
+        model.addAttribute("relatedGuides", lesson.map(value -> value.guideSlugs().stream()
+            .map(guideCatalog::find).flatMap(Optional::stream).toList()).orElse(List.of()));
+        model.addAttribute("relatedLessons", lessons.all().stream()
+            .filter(value -> !value.videoId().equals(videoId) && publicVideos.contains(value.videoId()))
+            .limit(3).toList());
+        lesson.ifPresent(value -> model.addAttribute("seoDescription", value.overview()));
 
         // 构建完整的字幕文本用于 SEO
         StringBuilder fullText = new StringBuilder();
@@ -70,6 +80,9 @@ public class SeoController {
         // 获取所有已完成的视频列表
         List<YoutubeVideo> videos = publicVideos.all();
         model.addAttribute("videos", videos);
+        var publicIds = videos.stream().map(YoutubeVideo::getVideoId).collect(java.util.stream.Collectors.toSet());
+        model.addAttribute("featuredLessons", lessons.all().stream()
+            .filter(lesson -> publicIds.contains(lesson.videoId())).toList());
         model.addAttribute("pageUrl", site.url("/video"));
         model.addAttribute("jsonLd", "{\"@context\":\"https://schema.org\",\"@type\":\"CollectionPage\"}");
         return "seo/video-list";

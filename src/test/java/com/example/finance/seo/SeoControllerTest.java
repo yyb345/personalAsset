@@ -25,6 +25,8 @@ class SeoControllerTest {
         ReflectionTestUtils.setField(controller, "subtitleSegmentRepository", subtitles);
         ReflectionTestUtils.setField(controller, "site", new SiteProperties("https://example.com/", "Example"));
         ReflectionTestUtils.setField(controller, "publicVideos", new PublicVideoCatalog(repository));
+        ReflectionTestUtils.setField(controller, "lessons", new VideoLessonCatalog(new ObjectMapper()));
+        ReflectionTestUtils.setField(controller, "guideCatalog", new GuideCatalog(new ObjectMapper()));
         var model = new ExtendedModelMap();
         assertThat(controller.videoPage("abc123", model, new MockHttpServletResponse())).isEqualTo("seo/video");
         assertThat(model.get("pageUrl")).isEqualTo("https://example.com/video/abc123");

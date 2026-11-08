@@ -3,22 +3,24 @@ import { renderToString } from '@vue/server-renderer'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import App from './App.vue'
 import Landing from './views/Landing.vue'
-import i18n from './i18n'
+import { createSiteI18n } from './i18n'
+import { homeRoutes } from './features/homepage/routes'
 
 // Render the same components and translations as the client, without browser globals or API calls.
-export async function render() {
+export async function render(locale = 'en-US') {
+  const path = locale === 'zh-CN' ? '/zh/' : '/'
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: '/', component: Landing },
+      ...homeRoutes(Landing),
       // Resolve links using normal router semantics without loading workspace code.
       { path: '/:pathMatch(.*)*', component: { render: () => null } }
     ]
   })
   const app = createSSRApp(App)
   app.use(router)
-  app.use(i18n)
-  await router.push('/')
+  app.use(createSiteI18n(locale))
+  await router.push(path)
   await router.isReady()
   return renderToString(app)
 }

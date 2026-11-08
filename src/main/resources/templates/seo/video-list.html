@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Video Transcripts - Learn English | xLearning</title>
     <meta name="description" content="Browse YouTube video transcripts for English learning. Practice listening, reading, and speaking with interactive subtitles.">
-    <meta name="keywords" content="YouTube transcript, English learning, subtitle, listening practice">
 
     <!-- Open Graph -->
     <meta property="og:title" content="YouTube Video Transcripts - xLearning">
@@ -16,6 +15,8 @@
     <!-- Canonical URL -->
     <link rel="canonical" th:href="${pageUrl}">
 
+    <link rel="stylesheet" href="/css/video-learning.css">
+    <script defer src="/js/learning-analytics.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
@@ -42,14 +43,26 @@
     <header>
         <div class="container">
             <a href="/" class="logo">xLearning</a>
-            <a href="/dashboard/youtube" style="color: white; text-decoration: none;">Go to App</a>
+            <a href="/dashboard/youtube" data-seo-action="start_learning" data-learning-type="video" style="color: white; text-decoration: none;">Go to App</a>
         </div>
     </header>
 
     <main class="container">
-        <h1>YouTube Video Transcripts</h1>
-        <p><a href="/guides">English learning guides: listening, shadowing and subtitle practice →</a></p>
-        <p class="page-intro">Browse our collection of YouTube videos with transcripts. Click any video to view the full transcript and start learning.</p>
+        <h1>Learn English with AI, Software &amp; Everyday Videos</h1>
+        <p class="page-intro">English video transcripts with practical study routes: explore AI concepts, follow a developer's story, or practise everyday conversation. Browse every public transcript below, or begin with a focused exercise.</p>
+        <section class="study-section hub-intro" lang="zh-CN" aria-labelledby="hub-study-title">
+            <p class="study-eyebrow">把感兴趣的内容变成英语练习</p>
+            <h2 id="hub-study-title">先选一个主题，再练一小段</h2>
+            <p>想听懂 AI 技术讲解，可以从模型对比和 Agent Skills 入手；想练自然口语，可以选择科技职场故事或日常生活视频。不需要一次读完整份字幕：先听一段，记录不确定的表达，再用原音核对。</p>
+            <div class="study-routes"><div><h3>听懂概念</h3><p>记下讲者如何定义、对比、举例，再用自己的话解释。术语学习要保留上下文。</p><a href="/guides/build-vocabulary-from-videos">建立视频表达笔记 →</a></div><div><h3>练习口语</h3><p>选一个短片段反复听、跟读，再脱离字幕复述。注意口语中的停顿和重音。</p><a href="/guides/english-shadowing-for-beginners">查看短段跟读步骤 →</a></div><div><h3>检验理解</h3><p>先不看字幕写出要点，再对照原文。分清听不清的词和没理解的概念。</p><a href="/guides/active-listening-with-youtube">查看主动听力流程 →</a></div></div>
+        </section>
+        <section th:if="${!featuredLessons.isEmpty()}" class="featured-section" lang="zh-CN" aria-labelledby="featured-title">
+            <h2 id="featured-title">有练习笔记的精选视频</h2>
+            <p class="page-intro">以下页面附有基于字幕整理的内容概览、时间点表达和复述练习；进入后可先看笔记，再听原视频。</p>
+            <div class="lesson-grid"><article class="lesson-card" th:each="lesson : ${featuredLessons}"><p class="study-eyebrow" th:text="${lesson.topic}"></p><h3><a th:href="${lesson.path}" th:text="${lesson.title}"></a></h3><p th:text="${lesson.overview}"></p><a th:href="${lesson.path}">查看字幕与练习 →</a></article></div>
+        </section>
+        <h2 class="all-videos-title">All public video transcripts</h2>
+        <p class="page-intro">Transcripts can contain recognition errors and overlapping captions. Use the original video to verify wording, names, and tone. <a href="/guides/choose-english-learning-videos">Choose a video for your study goal →</a></p>
 
         <div class="video-grid" th:if="${!videos.isEmpty()}">
             <article th:each="video : ${videos}" class="video-card">
@@ -73,7 +86,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2024 xLearning - Learn English with YouTube Videos</p>
+            <p>&copy; xLearning - Learn English with YouTube Videos</p>
             <p><a href="/">Home</a></p>
         </div>
     </footer>

@@ -230,7 +230,7 @@ export default {
         videoId: this.videoId,
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
         events: {
-          onReady: () => { this.ytReady = true }
+          onReady: () => { this.ytReady = true; window.xLearningAnalytics?.materialOpened('video') }
         }
       })
     },

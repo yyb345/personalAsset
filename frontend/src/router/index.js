@@ -1,17 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { checkAuth } from '@/utils/auth'
+import { setLocale } from '@/i18n'
+import { localeForHomePath, applyHomeMetadata } from '@/features/homepage/metadata'
+import { homeRoutes } from '@/features/homepage/routes'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/lingq-lab', name: 'LingqLab', component: () => import('@/views/LingqLab.vue'), meta: { requiresAuth: false } },
     { path: '/dashboard/billing', name: 'Billing', component: () => import('@/views/dashboard/Billing.vue'), meta: { requiresAuth: false } },
-    {
-      path: '/',
-      alias: '/index.html',
-      name: 'Landing',
-      component: () => import('@/views/Landing.vue')
-    },
+    ...homeRoutes(() => import('@/views/Landing.vue')),
     {
       path: '/login',
       name: 'Login',
@@ -94,12 +92,12 @@ router.beforeEach(async (to, from, next) => {
   }
 })
 
-// Google Analytics 页面追踪
-router.afterEach((to) => {
-  if (window.gtag) {
-    window.gtag('config', 'G-6MKRR655RZ', {
-      page_path: to.fullPath
-    })
+// One sanitized page_view per successful navigation; the initial document is deduplicated.
+router.afterEach((to, _from, failure) => {
+  if (!failure) {
+    const locale = localeForHomePath(to.path)
+    if (locale) { setLocale(locale); applyHomeMetadata(locale) }
+    window.xLearningAnalytics?.page(to.path)
   }
 })
 

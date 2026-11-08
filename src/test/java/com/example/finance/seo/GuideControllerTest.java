@@ -83,7 +83,7 @@ class GuideControllerTest {
         var factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         var document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
-        assertThat(document.getElementsByTagNameNS("http://www.sitemaps.org/schemas/sitemap/0.9", "url").getLength()).isEqualTo(13);
+        assertThat(document.getElementsByTagNameNS("http://www.sitemaps.org/schemas/sitemap/0.9", "url").getLength()).isEqualTo(14);
         for (var guide : catalog.all()) assertThat(xml).contains("<loc>" + "https://www.xlearning.top" + guide.getPath() + "</loc>");
     }
 }

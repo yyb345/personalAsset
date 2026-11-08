@@ -9,7 +9,7 @@ parser.add_argument('jar', type=Path)
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
 dist = root / 'frontend/dist'
-if any(not (dist / file).is_file() for file in ('index.html', 'home.html', 'robots.txt')):
+if any(not (dist / file).is_file() for file in ('index.html', 'home.html', 'home-zh.html', 'robots.txt')):
     parser.error('frontend/dist is missing; run mvn clean package first')
 with ZipFile(args.jar) as jar:
     names = set(jar.namelist())

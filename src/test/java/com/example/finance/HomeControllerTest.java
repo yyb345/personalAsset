@@ -38,8 +38,42 @@ class HomeControllerTest {
             assertThat(document.select("script[type=module]")).isNotEmpty();
             assertThat(document.select("link[rel=canonical]").eachAttr("href"))
                     .containsExactly("https://learn.example/");
+            assertAlternates(document);
             assertThat(html).doesNotContain("th:");
         }
+    }
+
+    @Test
+    void chineseHomepageHasChineseBodyAndSelfCanonicalBeforeJavascript() throws Exception {
+        var html = mvc.perform(get("/zh/")).andExpect(status().isOk())
+                .andExpect(header().doesNotExist("X-Robots-Tag"))
+                .andReturn().getResponse().getContentAsString();
+        var document = org.jsoup.Jsoup.parse(html);
+        assertThat(document.select("html").attr("lang")).isEqualTo("zh-CN");
+        assertThat(document.title()).contains("学 AI，也练英语");
+        assertThat(document.select("h1").text()).contains("学 AI", "英语");
+        assertThat(document.select(".hero-description").text()).contains("笔记", "词卡复习");
+        assertThat(document.select("#app").attr("data-prerendered")).isEqualTo("true");
+        assertThat(document.select("link[rel=canonical]").eachAttr("href"))
+                .containsExactly("https://learn.example/zh/");
+        assertThat(document.select("meta[property=og:url]").attr("content"))
+                .isEqualTo("https://learn.example/zh/");
+        assertThat(document.select("meta[name=description]").attr("content")).contains("英文视频", "查词");
+        assertThat(document.select(".brand-logo").first().attr("href")).isEqualTo("/zh/");
+        assertAlternates(document);
+    }
+
+    @Test
+    void chineseUrlWithoutTrailingSlashPermanentlyRedirects() throws Exception {
+        mvc.perform(get("/zh")).andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/zh/"));
+    }
+
+    private void assertAlternates(org.jsoup.nodes.Document document) {
+        assertThat(document.select("link[rel=alternate][hreflang]")).hasSize(3);
+        assertThat(document.select("link[hreflang=en]").attr("href")).isEqualTo("https://learn.example/");
+        assertThat(document.select("link[hreflang=zh-Hans]").attr("href")).isEqualTo("https://learn.example/zh/");
+        assertThat(document.select("link[hreflang=x-default]").attr("href")).isEqualTo("https://learn.example/");
     }
 
     @Test

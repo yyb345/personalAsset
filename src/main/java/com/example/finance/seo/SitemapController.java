@@ -29,6 +29,7 @@ public class SitemapController {
 
         // 仅包含可被搜索引擎索引的公开 SEO 页面
         xml.append(buildUrl(site.url("/"), "daily", "1.0"));
+        xml.append(buildUrl(site.url("/zh/"), "daily", "1.0"));
         xml.append(buildUrl(site.url("/video"), "daily", "0.9"));
 
         xml.append(buildUrl(site.url("/guides"), "monthly", "0.8"));
