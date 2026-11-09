@@ -1,54 +1,61 @@
 <template>
   <main class="checkout-page">
-    <section class="order-summary" aria-label="订单摘要">
+    <section class="order-summary" :aria-label="t('billing.orderSummary')">
       <div class="summary-inner">
         <router-link to="/dashboard/youtube" class="back-link"><ArrowLeft :size="16" /><span class="brand-mark">X</span><span>X Learning</span></router-link>
         <div class="price-heading">
-          <h1>开通 X Learning 会员</h1>
-          <div class="price"><span>¥99.00</span><span class="price-caption">人民币<br />一次性付款</span></div>
+          <h1>{{ t('billing.title') }}</h1>
+          <div class="price"><span>{{ price }}</span><span class="price-caption">{{ t('billing.currencyName') }}<br />{{ t('billing.oneTime') }}</span></div>
         </div>
-        <div class="product-row"><div class="product-icon">X<span>+</span></div><div class="product-name"><strong>X Learning 会员</strong><span>一次购买，无自动续费</span></div><strong>¥99.00</strong></div>
+        <div class="product-row"><div class="product-icon">X<span>+</span></div><div class="product-name"><strong>{{ t('billing.productName') }}</strong><span>{{ t('billing.purchaseNote') }}</span></div><strong>{{ price }}</strong></div>
         <dl class="totals">
-          <div><dt>小计</dt><dd>¥99.00</dd></div>
-          <div class="total-row"><dt>今日应付</dt><dd>¥99.00<span>CNY</span></dd></div>
+          <div><dt>{{ t('billing.subtotal') }}</dt><dd>{{ price }}</dd></div>
+          <div class="total-row"><dt>{{ t('billing.total') }}</dt><dd>{{ price }}<span>USD</span></dd></div>
         </dl>
-        <p class="summary-note"><Check :size="15" />付款确认后，会员状态会同步至你的账号。</p>
-        <router-link class="return-link" to="/dashboard/youtube">返回学习空间 <ArrowUpRight :size="13" /></router-link>
+        <p class="summary-note"><Check :size="15" />{{ t('billing.summaryNote') }}</p>
+        <router-link class="return-link" to="/dashboard/youtube">{{ t('billing.back') }} <ArrowUpRight :size="13" /></router-link>
       </div>
     </section>
-    <section class="payment-panel" aria-label="会员付款">
+    <section class="payment-panel" :aria-label="t('billing.paymentSection')">
       <div class="payment-inner">
-        <div class="secure-label"><LockKeyhole :size="14" /> 安全结账</div>
-        <h2>{{ active ? '会员已开通' : '完成你的会员付款' }}</h2>
-        <p class="intro">{{ active ? '感谢你的支持，继续探索与学习。' : '确认订单后，前往 Stripe 收银台完成支付。' }}</p>
-        <div class="payment-method"><span class="card-symbol"><CreditCard :size="22" /></span><div><strong>Stripe 安全支付</strong><span>在安全收银台选择可用的付款方式</span></div><LockKeyhole :size="15" class="method-lock" /></div>
-        <div class="payment-details"><span>付款金额</span><strong>¥99.00 <small>CNY</small></strong></div>
-        <div v-if="active" class="success-message" role="status"><Check :size="18" />你已是 X Learning 会员</div>
-        <button v-else class="pay-button" :disabled="loading || paying || (authenticated && !enabled)" @click="checkout"><LockKeyhole :size="16" />{{ loading ? '正在加载…' : paying ? '正在前往收银台…' : authenticated ? '支付 ¥99.00' : '登录后开通会员' }}<ArrowUpRight :size="16" /></button>
-        <p v-if="!loading && !enabled" class="notice">付款暂未开放，请稍后再试。</p>
-        <p v-if="route.query.canceled" class="notice" role="status">你已取消付款，可以重新发起。</p>
-        <p v-if="route.query.session_id && !active" class="notice" role="status">正在等待付款确认，请稍后刷新记录。以到账结果为准。</p>
-        <p v-if="error" class="error" role="alert">{{ error }}</p>
-        <p class="payment-note">一次性支付，无自动续费。支付信息由 Stripe 安全处理。</p>
-        <div class="stripe-footer">支付服务由 <strong>stripe</strong> 提供 <span></span><LockKeyhole :size="12" /> 安全加密</div>
-        <details class="history"><summary>付款记录 <span>{{ payments.length }}</span></summary><div class="history-content"><button class="refresh" :disabled="loading" @click="load"><RefreshCw :size="13" />刷新记录</button><p v-if="!payments.length">{{ authenticated ? '暂无付款记录' : '登录后查看你的付款记录' }}</p><ul v-else><li v-for="payment in payments" :key="payment.id"><span>{{ new Date(payment.createdAt).toLocaleString() }}</span><strong>{{ labels[payment.status] || payment.status }}</strong><span v-if="payment.status === 'paid'">¥{{ (payment.amount / 100).toFixed(2) }}</span></li></ul></div></details>
+        <select class="billing-language" :value="locale" @change="setLocale($event.target.value)" :aria-label="t('billing.language')"><option value="en-US">English</option><option value="zh-CN">中文</option></select>
+        <div class="secure-label"><LockKeyhole :size="14" /> {{ t('billing.secureCheckout') }}</div>
+        <h2>{{ active ? t('billing.activeTitle') : t('billing.paymentTitle') }}</h2>
+        <p class="intro">{{ active ? t('billing.activeIntro') : t('billing.intro') }}</p>
+        <div class="payment-method"><span class="card-symbol"><CreditCard :size="22" /></span><div><strong>{{ t('billing.stripePayment') }}</strong><span>{{ t('billing.methods') }}</span></div><LockKeyhole :size="15" class="method-lock" /></div>
+        <div class="payment-details"><span>{{ t('billing.amount') }}</span><strong>{{ price }} <small>USD</small></strong></div>
+        <div v-if="active" class="success-message" role="status"><Check :size="18" />{{ t('billing.activeMessage') }}</div>
+        <button v-else class="pay-button" :disabled="loading || paying || (authenticated && !enabled)" @click="checkout"><LockKeyhole :size="16" />{{ loading ? t('billing.loading') : paying ? t('billing.redirecting') : authenticated ? t('billing.pay', { amount: price }) : t('billing.login') }}<ArrowUpRight :size="16" /></button>
+        <p v-if="!loading && !enabled" class="notice">{{ t('billing.unavailable') }}</p>
+        <p v-if="route.query.canceled" class="notice" role="status">{{ t('billing.canceled') }}</p>
+        <p v-if="route.query.session_id && !active" class="notice" role="status">{{ t('billing.pendingConfirmation') }}</p>
+        <p v-if="error" class="error" role="alert">{{ t(error) }}</p>
+        <p class="payment-note">{{ t('billing.paymentNote') }}</p>
+        <div class="stripe-footer">{{ t('billing.poweredBy') }} <strong>stripe</strong> {{ t('billing.provided') }} <span></span><LockKeyhole :size="12" /> {{ t('billing.encrypted') }}</div>
+        <details class="history"><summary>{{ t('billing.history') }} <span>{{ payments.length }}</span></summary><div class="history-content"><button class="refresh" :disabled="loading" @click="load"><RefreshCw :size="13" />{{ t('billing.refresh') }}</button><p v-if="!payments.length">{{ authenticated ? t('billing.noPayments') : t('billing.loginHistory') }}</p><ul v-else><li v-for="payment in payments" :key="payment.id"><span>{{ formatDate(payment.createdAt) }}</span><strong>{{ paymentStatus(payment.status) }}</strong><span v-if="payment.status === 'paid'">{{ formatMoney(payment.amount, payment.currency) }}</span></li></ul></div></details>
       </div>
     </section>
   </main>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { ArrowLeft, LockKeyhole, ArrowUpRight, Check, RefreshCw, CreditCard } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import axios from '@/utils/axios'
 import { track, confirmedPurchase } from '@/utils/learningAnalytics'
+import { useI18n } from 'vue-i18n'
+import { setLocale } from '@/i18n'
+const { t, locale } = useI18n()
+const formatMoney = (amount, currency = 'usd') => new Intl.NumberFormat(locale.value, { style: 'currency', currency: currency.toUpperCase() }).format(amount / 100)
+const price = computed(() => formatMoney(1500))
+const formatDate = value => new Date(value).toLocaleString(locale.value)
+const paymentStatus = status => ['pending', 'paid', 'failed', 'expired'].includes(status) ? t(`billing.${status}`) : status
 const route = useRoute()
 const router = useRouter()
 const authenticated = ref(false)
 const loading = ref(true), paying = ref(false), enabled = ref(false), active = ref(false)
 const payments = ref([]), error = ref('')
 let confirmationTimer, confirmationAttempts = 0, disposed = false
-const labels = { pending: '等待付款确认', paid: '付款成功', failed: '付款失败', expired: '已过期' }
 async function load() {
   clearTimeout(confirmationTimer)
   loading.value = true
@@ -68,7 +75,7 @@ async function load() {
       if (confirmed) track('purchase', { transaction_id: confirmed.id })
       else if (confirmationAttempts++ < 20) confirmationTimer = setTimeout(load, 3000)
     }
-  } catch { error.value = '无法加载付款信息，请稍后重试。' }
+  } catch { error.value = 'billing.loadError' }
   finally { loading.value = false }
 }
 async function checkout() {
@@ -81,12 +88,13 @@ async function checkout() {
     if (url.protocol !== 'https:' || url.hostname !== 'checkout.stripe.com') throw new Error('Invalid checkout URL')
     track('begin_checkout')
     window.location.assign(url.href)
-  } catch { error.value = '无法发起付款，请刷新记录后重试。'; paying.value = false }
+  } catch { error.value = 'billing.checkoutError'; paying.value = false }
 }
 onMounted(load)
 onBeforeUnmount(() => { disposed = true; clearTimeout(confirmationTimer) })
 </script>
 <style scoped>
+.billing-language { display: block; margin: 0 0 20px auto; padding: 6px 10px; border: 1px solid #d9dce2; border-radius: 6px; background: white; color: #505563; }
 .checkout-page { min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; background: #fff; color: #30313d; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
 .checkout-page * { box-sizing: border-box; }
 .order-summary { padding: 58px 48px 64px; background: #fafbfc; box-shadow: inset -1px 0 #edf0f3; }

@@ -70,5 +70,5 @@ export function consumeLearningDetails() {
 export function confirmedPurchase(payments, sessionId) {
   if (typeof sessionId !== 'string' || !sessionId || !Array.isArray(payments)) return undefined
   return payments.find(payment => payment.sessionId === sessionId && payment.status === 'paid'
-    && payment.amount === 9900 && payment.currency === 'cny')
+    && payment.amount === 1500 && payment.currency === 'usd')
 }

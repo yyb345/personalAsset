@@ -31,27 +31,6 @@
           <p>{{ userBio }}</p>
         </div>
 
-        <div class="profile-stats">
-          <div class="stat-item">
-            <div class="stat-info">
-              <div class="stat-label">{{ $t('dashboard.studyDays') }}</div>
-              <div class="stat-value">{{ studyDays }}</div>
-            </div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-info">
-              <div class="stat-label">{{ $t('dashboard.library') }}</div>
-              <div class="stat-value">{{ completedVideos }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="profile-tags">
-          <span class="tag">{{ userGender || $t('dashboard.profile.gender') }}</span>
-          <span class="tag">{{ userLocation || $t('dashboard.profile.location') }}</span>
-          <span class="tag">{{ userLevel || $t('dashboard.profile.level') }}</span>
-        </div>
-
         <div class="profile-actions">
           <button v-if="isAuthenticated" class="btn-profile-action btn-logout" @click="handleLogout">
             <span>🚪</span> {{ $t('common.logout') }}
@@ -131,11 +110,6 @@ const userName = ref('')
 const userId = ref('')
 const userAvatar = ref('')
 const userBio = ref('')
-const userGender = ref('')
-const userLocation = ref('')
-const userLevel = ref('')
-const studyDays = ref(0)
-const completedVideos = ref(0)
 const isAuthenticated = ref(false)
 const sidebarOpen = ref(false)
 const currentLocale = ref(getLocale())
@@ -175,15 +149,12 @@ onMounted(async () => {
       userId.value = response.data.username || 'user_' + Math.random().toString(36).substr(2, 9)
       userBio.value = response.data.bio || 'Love learning, improve every day ✨'
       
-      // 模拟一些统计数据（实际应该从后端获取）
-      studyDays.value = Math.floor(Math.random() * 100) + 1
     } else {
       isAuthenticated.value = false
       window.xLearningAnalytics?.setAuthenticated(false)
       userName.value = 'Guest User'
       userId.value = 'guest_' + toBase62(Date.now())
       userBio.value = ''
-      studyDays.value = 0
     }
   } catch (error) {
     console.error('Failed to fetch user info:', error)
@@ -192,11 +163,8 @@ onMounted(async () => {
     userName.value = 'Guest User'
     userId.value = 'guest_' + toBase62(Date.now())
     userBio.value = ''
-    studyDays.value = 0
   }
   
-  // 加载视频库数量
-  loadVideoLibraryCount()
 })
 
 onBeforeUnmount(() => {
@@ -306,17 +274,6 @@ const updateSidebarWidth = () => {
   }
 }
 
-const loadVideoLibraryCount = async () => {
-  try {
-    const response = await axios.get('/api/youtube/videos', { params: { page: 0, size: 1 } })
-    const data = response.data
-    // 兼容分页格式 { totalElements } 或 直接数组
-    completedVideos.value = typeof data.totalElements === 'number' ? data.totalElements : (Array.isArray(data) ? data.length : 0) || 0
-  } catch (error) {
-    console.error('Failed to load video library count:', error)
-    completedVideos.value = 0
-  }
-}
 </script>
 
 <style scoped src="@/assets/styles/dashboard.css"></style>

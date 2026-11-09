@@ -83,7 +83,7 @@ python3 -m unittest discover -s scripts/tests -p 'test_search_analysis.py'
 | `sign_up` | 邮箱注册 API 成功后，method=email；不包含 OAuth 注册 |
 | `upgrade_clicked` | 登录用户点击 Dashboard 顶部升级入口 |
 | `begin_checkout` | Stripe checkout 创建成功且目标 URL 校验通过，即将跳转 |
-| `purchase` | 付款返回页获取当前用户后台订单，匹配返回 session 且 paid，金额 9900 分、币种 cny |
+| `purchase` | 付款返回页获取当前用户后台订单，匹配返回 session 且 paid，金额 1500 分、币种 usd |
 
 原有 `start_learning` 表示入口点击，`material_opened` 表示材料/播放器加载，均不代表实际播放。
 
@@ -91,7 +91,7 @@ python3 -m unittest discover -s scripts/tests -p 'test_search_analysis.py'
 
 通用参数：`ui_language`（en-US/zh-CN）、`auth_state`（guest/logged_in/unknown）。学习事件还带 `content_language`（en/zh/unknown）、`content_category`、`entry_point`（library/learning_path/search/direct）。分类上下文在 SPA 内从视频选择传递一次；直达/刷新可能为 unknown/other/direct。unknown 登录状态表示当前尚未成功获取认证结果。
 
-业务事件参数经过白名单，不发送用户 ID、邮箱、标题、字幕、笔记、搜索词、私人材料 ID 和 Stripe session。购买事件只含内部订单 UUID、currency=CNY、value=99 和固定会员 items。在内存及 localStorage 去重，并用 GA transaction_id 辅助去重。存储受限或跨设备时仍可能重复发送。
+业务事件参数经过白名单，不发送用户 ID、邮箱、标题、字幕、笔记、搜索词、私人材料 ID 和 Stripe session。购买事件只含内部订单 UUID、currency=USD、value=15 和固定会员 items。在内存及 localStorage 去重，并用 GA transaction_id 辅助去重。存储受限或跨设备时仍可能重复发送。
 
 付款返回页最多等待约一分钟的后台确认。用户未返回、提前关页、较晚到账或屏蔽 GA 时可能漏报，因此 GA 不代替后台财务记录。未来需要完整支付统计时，应增加服务端 Measurement Protocol 和可靠队列，不在支付 webhook 内阻塞发送。
 
