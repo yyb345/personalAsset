@@ -47,7 +47,7 @@ import { useI18n } from 'vue-i18n'
 import { setLocale } from '@/i18n'
 const { t, locale } = useI18n()
 const formatMoney = (amount, currency = 'usd') => new Intl.NumberFormat(locale.value, { style: 'currency', currency: currency.toUpperCase() }).format(amount / 100)
-const price = computed(() => formatMoney(1500))
+const price = computed(() => formatMoney(99))
 const formatDate = value => new Date(value).toLocaleString(locale.value)
 const paymentStatus = status => ['pending', 'paid', 'failed', 'expired'].includes(status) ? t(`billing.${status}`) : status
 const route = useRoute()

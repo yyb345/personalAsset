@@ -1,12 +1,12 @@
 # Stripe 会员收款
 
-当前方案：一次性 15 美元购买会员，无自动续费。入口 `/dashboard/billing`。
+当前方案：一次性 0.99 美元购买会员，无自动续费。入口 `/dashboard/billing`。
 会员状态由已验证、已到账的付款记录计算：`GET /api/billing/membership`。
 尚未对现有学习功能设置会员限制，退款也不会自动撤销会员；需要按业务规则扩展。
 
 ## 服务器配置
 
-在 Stripe Dashboard 创建商品及 **一次性 USD 15.00** 的 Price。后端在创建 Checkout 前验证价格、币种及类型。
+在 Stripe Dashboard 创建商品及 **一次性 USD 0.99** 的 Price。后端在创建 Checkout 前验证价格、币种及类型。
 通过部署平台的环境变量注入，不能写入 Git 或前端：
 
 ```sh
@@ -36,7 +36,7 @@ stripe listen --forward-to localhost:8081/api/billing/webhook
 
 将 CLI 返回的签名密钥设为本地 `STRIPE_WEBHOOK_SECRET`。
 Webhook 校验原始请求体的 HMAC 签名及 5 分钟时间窗口，再从 Stripe 查询最新 Session。
-仅确认 `payment_status=paid` 且美元 1500 美分时开通会员。重复通知不会重复开通，返回页面不作为付款凭证。
+仅确认 `payment_status=paid` 且美元 99 美分时开通会员。重复通知不会重复开通，返回页面不作为付款凭证。
 新表 `stripe_payments` 由现有 Hibernate `ddl-auto=update` 配置创建。
 
 ## 验收

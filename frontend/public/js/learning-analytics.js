@@ -109,7 +109,7 @@
     } else if (name === 'upgrade_clicked') {
       send(name, { entry_point: 'dashboard_header' });
     } else if (name === 'begin_checkout' || name === 'purchase') {
-      var commerce = { currency: 'USD', value: 15, items: [{ item_id: 'membership', item_name: 'X Learning membership', price: 15, quantity: 1 }] };
+      var commerce = { currency: 'USD', value: 0.99, items: [{ item_id: 'membership', item_name: 'X Learning membership', price: 0.99, quantity: 1 }] };
       if (name === 'purchase') {
         // Only an opaque internal order UUID is allowed; never send Stripe sessions or user IDs.
         if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(input.transaction_id || '')) return;

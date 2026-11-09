@@ -38,7 +38,7 @@ public class BillingController {
         if (!(boolean) config().get("enabled")) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "支付尚未开放");
         if ((boolean) membership(auth).get("active")) throw new ResponseStatusException(HttpStatus.CONFLICT, "你已是会员");
         JsonNode price = stripe.price(priceId);
-        if (!price.path("active").asBoolean() || price.path("unit_amount").asLong() != 1500 ||
+        if (!price.path("active").asBoolean() || price.path("unit_amount").asLong() != 99 ||
             !"usd".equals(price.path("currency").asText()) || !"one_time".equals(price.path("type").asText()))
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "会员价格配置不正确");
         Payment p = new Payment();
@@ -80,7 +80,7 @@ public class BillingController {
                 if (!"paid".equals(p.status)) {
                     p.sessionId = session.path("id").asText();
                     if ("paid".equals(session.path("payment_status").asText()) &&
-                        session.path("amount_total").asLong() == 1500 && "usd".equals(session.path("currency").asText())) {
+                        session.path("amount_total").asLong() == 99 && "usd".equals(session.path("currency").asText())) {
                         p.status = "paid"; p.amount = session.path("amount_total").asLong(); p.currency = session.path("currency").asText();
                     } else if ("expired".equals(session.path("status").asText())) p.status = "expired";
                     else if ("checkout.session.async_payment_failed".equals(type)) p.status = "failed";
