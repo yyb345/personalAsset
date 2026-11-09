@@ -25,7 +25,11 @@
         <div class="payment-method"><span class="card-symbol"><CreditCard :size="22" /></span><div><strong>{{ t('billing.stripePayment') }}</strong><span>{{ t('billing.methods') }}</span></div><LockKeyhole :size="15" class="method-lock" /></div>
         <div class="payment-details"><span>{{ t('billing.amount') }}</span><strong>{{ price }} <small>USD</small></strong></div>
         <div v-if="active" class="success-message" role="status"><Check :size="18" />{{ t('billing.activeMessage') }}</div>
-        <button v-else class="pay-button" :disabled="loading || paying || (authenticated && !enabled)" @click="checkout"><LockKeyhole :size="16" />{{ loading ? t('billing.loading') : paying ? t('billing.redirecting') : authenticated ? t('billing.pay', { amount: price }) : t('billing.login') }}<ArrowUpRight :size="16" /></button>
+        <button v-else-if="!hasOpenSubscription" class="pay-button" :disabled="loading || paying || (authenticated && !enabled)" @click="checkout"><LockKeyhole :size="16" />{{ loading ? t('billing.loading') : paying ? t('billing.redirecting') : authenticated ? t('billing.pay', { amount: price }) : t('billing.login') }}<ArrowUpRight :size="16" /></button>
+        <p v-if="memberUntil" class="notice">{{ t('billing.memberUntil', { date: formatDate(memberUntil) }) }}</p>
+        <p v-if="cancelAtPeriodEnd" class="notice">{{ t('billing.renewalCanceled') }}</p>
+        <p v-if="subscriptionStatus === 'past_due'" class="notice">{{ t('billing.pastDue') }}</p>
+        <button v-if="canManage" class="pay-button" :disabled="paying || loading" @click="manageSubscription">{{ t('billing.manage') }}</button>
         <p v-if="!loading && !enabled" class="notice">{{ t('billing.unavailable') }}</p>
         <p v-if="route.query.canceled" class="notice" role="status">{{ t('billing.canceled') }}</p>
         <p v-if="route.query.session_id && !active" class="notice" role="status">{{ t('billing.pendingConfirmation') }}</p>
@@ -55,6 +59,7 @@ const router = useRouter()
 const authenticated = ref(false)
 const loading = ref(true), paying = ref(false), enabled = ref(false), active = ref(false)
 const payments = ref([]), error = ref('')
+const hasOpenSubscription = ref(false), canManage = ref(false), memberUntil = ref(''), cancelAtPeriodEnd = ref(false), subscriptionStatus = ref('')
 let confirmationTimer, confirmationAttempts = 0, disposed = false
 async function load() {
   clearTimeout(confirmationTimer)
@@ -69,6 +74,11 @@ async function load() {
     const [history, membership] = await Promise.all([axios.get('/api/billing/payments'), axios.get('/api/billing/membership')])
     payments.value = history.data
     active.value = membership.data.active
+    hasOpenSubscription.value = membership.data.hasOpenSubscription
+    canManage.value = membership.data.canManage
+    memberUntil.value = membership.data.memberUntil || ''
+    cancelAtPeriodEnd.value = membership.data.cancelAtPeriodEnd
+    subscriptionStatus.value = membership.data.subscriptionStatus || ''
     if (!disposed && typeof route.query.session_id === 'string') {
       // Status and ownership come from the authenticated backend history, never the return URL.
       const confirmed = confirmedPurchase(payments.value, route.query.session_id)
@@ -89,6 +99,16 @@ async function checkout() {
     track('begin_checkout')
     window.location.assign(url.href)
   } catch { error.value = 'billing.checkoutError'; paying.value = false }
+}
+async function manageSubscription() {
+  paying.value = true
+  error.value = ''
+  try {
+    const { data } = await axios.post('/api/billing/portal')
+    const url = new URL(data.url)
+    if (url.protocol !== 'https:' || url.hostname !== 'billing.stripe.com') throw new Error('Invalid portal URL')
+    window.location.assign(url.href)
+  } catch { error.value = 'billing.portalError'; paying.value = false }
 }
 onMounted(load)
 onBeforeUnmount(() => { disposed = true; clearTimeout(confirmationTimer) })

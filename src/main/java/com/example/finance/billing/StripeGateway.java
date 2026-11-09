@@ -38,6 +38,17 @@ public class StripeGateway {
         if (!id.matches("cs_[A-Za-z0-9_]+")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         return send(HttpRequest.newBuilder(URI.create("https://api.stripe.com/v1/checkout/sessions/" + id)).GET());
     }
+    public JsonNode subscription(String id) {
+        if (!id.matches("sub_[A-Za-z0-9_]+")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        return send(HttpRequest.newBuilder(URI.create("https://api.stripe.com/v1/subscriptions/" + id + "?expand[]=latest_invoice")).GET());
+    }
+    public JsonNode portal(String customerId, String returnUrl) {
+        if (!customerId.matches("cus_[A-Za-z0-9_]+")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        String body = "customer=" + encode(customerId) + "&return_url=" + encode(returnUrl);
+        return send(HttpRequest.newBuilder(URI.create("https://api.stripe.com/v1/billing_portal/sessions"))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .POST(HttpRequest.BodyPublishers.ofString(body)));
+    }
     private JsonNode send(HttpRequest.Builder builder) {
         if (!configured()) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "支付尚未配置");
         try {

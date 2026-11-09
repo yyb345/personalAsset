@@ -13,5 +13,11 @@ public class Payment {
     public Long amount;
     public String currency;
     public Instant createdAt;
+    public String subscriptionId;
+    public String customerId;
+    public String subscriptionStatus;
+    public Instant memberUntil;
+    public Boolean cancelAtPeriodEnd = false;
+    @Version public Long version;
     public Payment() {}
 }
