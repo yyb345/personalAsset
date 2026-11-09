@@ -84,3 +84,36 @@ test('Chinese homepage keeps its canonical path and search landing attribution',
   b.window.xLearningAnalytics.startLearning('video')
   assert.equal(b.events('start_learning')[0].landing_page, '/zh/')
 })
+
+test('business events allow only categorical metadata and never forward arbitrary fields', () => {
+  const b = browser('/dashboard/youtube')
+  b.window.xLearningAnalytics.setAuthenticated(true)
+  b.window.xLearningAnalytics.event('video_selected', { content_language: 'en', content_category: 'agents', entry_point: 'learning_path', title: 'private', video_id: 'private', email: 'secret@example.com' })
+  const event = b.events('video_selected')[0]
+  assert.equal(event.auth_state, 'logged_in')
+  assert.equal(event.content_category, 'agents')
+  b.window.xLearningAnalytics.event('video_start', { content_language: 'private', content_category: 'private', entry_point: 'private' })
+  assert.equal(b.events('video_start')[0].content_language, 'unknown')
+  b.window.xLearningAnalytics.event('arbitrary_private_event', {})
+  b.window.xLearningAnalytics.event('learning_milestone', { learning_seconds: 61 })
+  assert.equal(b.events('learning_milestone').length, 0)
+  assert(!JSON.stringify(b.window.dataLayer).includes('private'))
+  assert(!JSON.stringify(b.window.dataLayer).includes('secret'))
+})
+
+test('purchase is deduplicated across calls and reloads; Stripe sessions cannot become transaction IDs', () => {
+  const storage = new Map()
+  const attach = b => { b.window.localStorage = { getItem: k => storage.get(k), setItem: (k, v) => storage.set(k, v) }; return b.window.xLearningAnalytics }
+  const b = browser('/dashboard/billing')
+  const a = attach(b)
+  const order = { transaction_id: '12345678-1234-1234-1234-123456789abc' }
+  a.event('purchase', { transaction_id: 'cs_private_session' })
+  a.event('purchase', order)
+  a.event('purchase', order)
+  assert.equal(b.events('purchase').length, 1)
+  assert.equal(b.events('purchase')[0].value, 99)
+  assert.equal(b.events('purchase')[0].currency, 'CNY')
+  const reloaded = browser('/dashboard/billing')
+  attach(reloaded).event('purchase', order)
+  assert.equal(reloaded.events('purchase').length, 0)
+})

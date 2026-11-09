@@ -79,8 +79,8 @@ export default {
 </script>
 
 <style scoped>
-.glossary-term { color: #2563a7; background: #eff6ff; border-bottom: 1px dotted #60a5fa; border-radius: 3px; cursor: help; }
-.glossary-term:hover, .glossary-term:focus-visible { background: #dbeafe; outline: 2px solid #93c5fd; outline-offset: 2px; }
+.glossary-term { color: #713f12; background: #fef08a; border: 1px dashed #eab308; border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; cursor: help; }
+.glossary-term:hover, .glossary-term:focus-visible { background: #fde047; outline: 2px solid #eab308; outline-offset: 2px; }
 .glossary-tooltip { position: fixed; z-index: 10000; padding: 14px 16px; background: #172438; color: #f8fafc; border: 1px solid #334155; border-radius: 10px; box-shadow: 0 8px 28px #0f172a33; font-size: 13px; line-height: 1.65; max-height: calc(100vh - 24px); overflow: auto; overflow-wrap: anywhere; }
 .glossary-tooltip strong { font-size: 14px; color: #bfdbfe; }
 .glossary-tooltip p { margin: 8px 0 0; }

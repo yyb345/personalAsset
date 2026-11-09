@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { checkAuth } from '@/utils/auth'
+import { loadStudyWorkspace } from '@/utils/studyWorkspaceLoader'
 import { setLocale } from '@/i18n'
 import { localeForHomePath, applyHomeMetadata } from '@/features/homepage/metadata'
 import { homeRoutes } from '@/features/homepage/routes'
@@ -47,7 +48,7 @@ const router = createRouter({
         {
           path: 'study-workspace/:videoId',
           name: 'StudyWorkspace',
-          component: () => import('@/views/dashboard/StudyWorkspace.vue'),
+          component: loadStudyWorkspace,
           meta: { requiresAuth: false }
         }
       ]

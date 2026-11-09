@@ -249,6 +249,9 @@
                   </button>
                   <button
                     class="action-btn study-btn"
+                    @mouseenter="preloadStudyWorkspace"
+                    @focus="preloadStudyWorkspace"
+                    @pointerdown="preloadStudyWorkspace"
                     @click.stop="openStudyWorkspace(video)"
                     title="Study Workspace">
                     <NotebookPen :size="16" :stroke-width="2" />
@@ -661,6 +664,9 @@
 
 <script>
 import { categories, learningPaths, enrichVideo, filterVideos, isVideoVisibleForLocale } from '@/features/video-library/catalog';
+import { selectVideo } from '@/utils/learningAnalytics'
+import { preloadStudyWorkspace } from '@/utils/studyWorkspaceLoader'
+import { loadYouTubePlayer } from '@/utils/youtubePlayer'
 import { checkAuth } from '@/utils/auth';
 import axios from '../../utils/axios';
 import { Pencil, Download, Trash2, BookOpen, NotebookPen, Pin } from 'lucide-vue-next';
@@ -817,6 +823,12 @@ export default {
     '$i18n.locale'() { this.currentPage = 0; }
   },
   mounted() {
+    // Warm the editor after the library has painted, including for touch navigation.
+    if ('requestIdleCallback' in window) {
+      this.workspacePreloadIdle = window.requestIdleCallback(preloadStudyWorkspace, { timeout: 2500 });
+    } else {
+      this.workspacePreloadTimer = setTimeout(preloadStudyWorkspace, 1500);
+    }
     // 检查 URL 参数是否包含 debug=true
     this.isDebugMode = this.$route.query.debug === 'true';
     this.checkSystemStatus();
@@ -827,6 +839,8 @@ export default {
     this.startVideoListPolling();
   },
   beforeUnmount() {
+    if (this.workspacePreloadIdle != null) window.cancelIdleCallback(this.workspacePreloadIdle);
+    clearTimeout(this.workspacePreloadTimer);
     this.clearPolling();
     if (this.noteHoverTimer) {
       clearTimeout(this.noteHoverTimer);
@@ -852,6 +866,7 @@ export default {
     }
   },
   methods: {
+    preloadStudyWorkspace,
     async initializeVideoAccess() {
       this.isAuthenticated = await checkAuth();
       this.authReady = true;
@@ -1083,6 +1098,7 @@ export default {
         return;
       }
       
+      selectVideo(video, this.filters.path ? 'learning_path' : 'library');
       // 跳转到新页面，使用数据库的 id
       this.$router.push({
         path: '/transcribe',
@@ -1143,16 +1159,7 @@ export default {
     },
     
     loadYoutubeAPI() {
-      if (window.YT) return;
-      
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      
-      window.onYouTubeIframeAPIReady = () => {
-        console.log('YouTube API Ready');
-      };
+      void loadYouTubePlayer().catch(error => console.error('Failed to load video player:', error));
     },
     
     initYoutubePlayer() {
@@ -1611,6 +1618,7 @@ export default {
     },
     
     openTranscribeRead(video) {
+      selectVideo(video, this.filters.path ? 'learning_path' : 'library');
       this.$router.push({
         path: '/transcribe',
         query: { videoId: video.videoId }
@@ -1618,6 +1626,8 @@ export default {
     },
 
     openStudyWorkspace(video) {
+      preloadStudyWorkspace();
+      selectVideo(video, this.filters.path ? 'learning_path' : 'library');
       this.$router.push(`/dashboard/study-workspace/${video.videoId}`);
     },
 
@@ -1776,6 +1786,7 @@ export default {
 
     goToVideo(videoId) {
       if (this.isVideoLocked(videoId)) return this.goToLogin();
+      selectVideo(this.catalog.find(video => video.videoId === videoId) || {}, 'search');
       this.$router.push({
         path: '/transcribe',
         query: { videoId: videoId }
@@ -1784,6 +1795,7 @@ export default {
 
     goToVideoAtTime(videoId, startTime) {
       if (this.isVideoLocked(videoId)) return this.goToLogin();
+      selectVideo(this.catalog.find(video => video.videoId === videoId) || {}, 'search');
       this.$router.push({
         path: '/transcribe',
         query: { videoId: videoId, t: Math.floor(startTime) }

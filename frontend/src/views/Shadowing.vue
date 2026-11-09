@@ -186,6 +186,7 @@
 </template>
 
 <script>
+import { trackPlayer, consumeLearningDetails } from '@/utils/learningAnalytics'
 import axios from '@/utils/axios'
 
 export default {
@@ -265,10 +266,24 @@ export default {
     // 加载视频数据
     await this.loadVideoData()
     
+    if (this.analyticsDisposed) return
+    // Count actual sentence playback across this material visit without collecting IDs.
+    let activePlayer
+    this.stopLearningAnalytics = trackPlayer({
+      getCurrentTime: () => {
+        activePlayer = [this.player, ...Object.values(this.sentencePlayers).map(item => item.player)]
+          .find(player => player && player.getPlayerState() === 1)
+        return activePlayer ? activePlayer.getCurrentTime() : 0
+      },
+      getPlayerState: () => activePlayer ? 1 : 2,
+      getPlaybackRate: () => activePlayer?.getPlaybackRate?.() || 1
+    }, consumeLearningDetails())
     // 绑定键盘事件
     window.addEventListener('keydown', this.handleKeyboard)
   },
   beforeUnmount() {
+    this.analyticsDisposed = true
+    this.stopLearningAnalytics?.()
     // 清理
     window.removeEventListener('keydown', this.handleKeyboard)
     if (this.loopInterval) {

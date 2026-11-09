@@ -131,6 +131,9 @@
 </template>
 
 <script>
+import { trackPlayer, consumeLearningDetails } from '@/utils/learningAnalytics'
+import { markRaw } from 'vue'
+import { loadYouTubePlayer } from '@/utils/youtubePlayer'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -169,12 +172,14 @@ export default {
     }
   },
   mounted() {
-    this.initEditor()
     this.loadYoutubeAPI()
     this.loadNotes()
+    this.initEditor()
     document.addEventListener('click', this.closeExport)
   },
   beforeUnmount() {
+    this.analyticsDisposed = true
+    this.stopLearningAnalytics?.()
     if (this.editor) this.editor.destroy()
     if (this.ytPlayer) this.ytPlayer.destroy()
     if (this.saveTimer) clearTimeout(this.saveTimer)
@@ -186,7 +191,7 @@ export default {
   },
   methods: {
     initEditor() {
-      this.editor = new Editor({
+      this.editor = markRaw(new Editor({
         extensions: [
           StarterKit.configure({ codeBlock: false }),
           Underline,
@@ -200,39 +205,36 @@ export default {
         onUpdate: () => {
           this.scheduleSave()
         }
-      })
+      }))
     },
 
     // YouTube Player
-    loadYoutubeAPI() {
-      if (window.YT && window.YT.Player) {
-        this.createPlayer()
-        return
-      }
-      const existing = document.querySelector('script[src*="youtube.com/iframe_api"]')
-      if (!existing) {
-        const tag = document.createElement('script')
-        tag.src = 'https://www.youtube.com/iframe_api'
-        document.head.appendChild(tag)
-      }
-      const orig = window.onYouTubeIframeAPIReady
-      window.onYouTubeIframeAPIReady = () => {
-        if (orig) orig()
-        this.createPlayer()
+    async loadYoutubeAPI() {
+      try {
+        await loadYouTubePlayer()
+        if (!this.analyticsDisposed) this.createPlayer()
+      } catch (error) {
+        console.error('Failed to load video player:', error)
       }
     },
 
     createPlayer() {
-      if (!this.videoId) return
-      this.ytPlayer = new window.YT.Player('sw-youtube-player', {
+      if (!this.videoId || this.analyticsDisposed || this.ytPlayer) return
+      this.ytPlayer = markRaw(new window.YT.Player('sw-youtube-player', {
         height: '270',
         width: '100%',
         videoId: this.videoId,
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
         events: {
-          onReady: () => { this.ytReady = true; window.xLearningAnalytics?.materialOpened('video') }
+          onReady: () => {
+            if (this.analyticsDisposed) return
+            this.ytReady = true
+            window.xLearningAnalytics?.materialOpened('video')
+            this.stopLearningAnalytics?.()
+            this.stopLearningAnalytics = trackPlayer(this.ytPlayer, consumeLearningDetails())
+          }
         }
-      })
+      }))
     },
 
     // Timestamp
@@ -261,6 +263,7 @@ export default {
       if (!this.videoId) return
       try {
         const res = await axios.get(`/api/study-notes/video/${this.videoId}`)
+        if (this.analyticsDisposed) return
         this.savedNotes = res.data.notes || []
         if (this.savedNotes.length > 0 && !this.currentNoteId) {
           this.loadNote(this.savedNotes[0])

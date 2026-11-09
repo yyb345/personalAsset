@@ -37,27 +37,37 @@
   </main>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { ArrowLeft, LockKeyhole, ArrowUpRight, Check, RefreshCw, CreditCard } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import axios from '@/utils/axios'
+import { track, confirmedPurchase } from '@/utils/learningAnalytics'
 const route = useRoute()
 const router = useRouter()
 const authenticated = ref(false)
 const loading = ref(true), paying = ref(false), enabled = ref(false), active = ref(false)
 const payments = ref([]), error = ref('')
+let confirmationTimer, confirmationAttempts = 0, disposed = false
 const labels = { pending: '等待付款确认', paid: '付款成功', failed: '付款失败', expired: '已过期' }
 async function load() {
+  clearTimeout(confirmationTimer)
   loading.value = true
   error.value = ''
   try {
     const [config, auth] = await Promise.all([axios.get('/api/billing/config'), axios.get('/api/auth/check')])
     enabled.value = config.data.enabled
     authenticated.value = auth.data.authenticated
+    window.xLearningAnalytics?.setAuthenticated(authenticated.value)
     if (!authenticated.value) return
     const [history, membership] = await Promise.all([axios.get('/api/billing/payments'), axios.get('/api/billing/membership')])
     payments.value = history.data
     active.value = membership.data.active
+    if (!disposed && typeof route.query.session_id === 'string') {
+      // Status and ownership come from the authenticated backend history, never the return URL.
+      const confirmed = confirmedPurchase(payments.value, route.query.session_id)
+      if (confirmed) track('purchase', { transaction_id: confirmed.id })
+      else if (confirmationAttempts++ < 20) confirmationTimer = setTimeout(load, 3000)
+    }
   } catch { error.value = '无法加载付款信息，请稍后重试。' }
   finally { loading.value = false }
 }
@@ -69,10 +79,12 @@ async function checkout() {
     const { data } = await axios.post('/api/billing/checkout', {}, { timeout: 30000 })
     const url = new URL(data.url)
     if (url.protocol !== 'https:' || url.hostname !== 'checkout.stripe.com') throw new Error('Invalid checkout URL')
+    track('begin_checkout')
     window.location.assign(url.href)
   } catch { error.value = '无法发起付款，请刷新记录后重试。'; paying.value = false }
 }
 onMounted(load)
+onBeforeUnmount(() => { disposed = true; clearTimeout(confirmationTimer) })
 </script>
 <style scoped>
 .checkout-page { min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; background: #fff; color: #30313d; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }

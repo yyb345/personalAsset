@@ -3,6 +3,7 @@ import axios from './axios'
 export async function checkAuth() {
   try {
     const response = await axios.get('/api/auth/check')
+    window.xLearningAnalytics?.setAuthenticated(response.data.authenticated)
     return response.data.authenticated
   } catch (error) {
     return false
@@ -21,6 +22,7 @@ export async function register(userData) {
 
 export async function logout() {
   await axios.post('/api/auth/logout')
+  window.xLearningAnalytics?.setAuthenticated(false)
 }
 
 

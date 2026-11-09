@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
-export default defineConfig(({ isSsrBuild }) => ({
+export default defineConfig(({ isSsrBuild, mode }) => ({
   plugins: [vue()],
   resolve: {
     alias: {
@@ -13,7 +13,7 @@ export default defineConfig(({ isSsrBuild }) => ({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8081',
+        target: loadEnv(mode, process.cwd(), '').DEV_API_PROXY_TARGET || 'http://localhost:8081',
         changeOrigin: true
       }
     }

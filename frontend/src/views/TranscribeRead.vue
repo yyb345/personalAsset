@@ -3,45 +3,64 @@
     <!-- Loading -->
     <div v-if="loading" class="loading-screen">
       <div class="loading-spinner"></div>
-      <p>{{ loadingMessage }}</p>
+      <p>{{ $te(loadingMessage) ? $t(loadingMessage) : loadingMessage }}</p>
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="error-screen">
       <div class="error-icon">⚠️</div>
-      <h2>Load Failed</h2>
-      <p>{{ error }}</p>
-      <button @click="retry" class="retry-btn">Retry</button>
-      <button @click="goBack" class="back-link">← Back to Library</button>
+      <h2>{{ $t('transcribe.loadFailed') }}</h2>
+      <p>{{ $te(error) ? $t(error) : error }}</p>
+      <button @click="retry" class="retry-btn">{{ $t('transcribe.retry') }}</button>
+      <button @click="goBack" class="back-link">{{ $t('transcribe.back') }}</button>
     </div>
 
     <!-- Main Layout -->
-    <div v-else-if="videoData" class="main-layout">
+    <div v-else-if="videoData" :class="['main-layout', { 'focus-reading': focusReading }]">
       <!-- Left: Video Player -->
-      <div class="left-panel">
+      <div v-show="!focusReading" class="left-panel">
         <div class="player-wrapper">
           <div id="yt-player" class="yt-player-container"></div>
         </div>
-        <p v-if="playerError" role="status">{{ playerError }} <button class="export-btn" @click="preparePlayer">Retry player</button></p>
+        <p v-if="playerError" role="status">{{ $te(playerError) ? $t(playerError) : playerError }} <button class="export-btn" @click="preparePlayer">{{ $t('transcribe.retryPlayer') }}</button></p>
         <div class="video-info">
           <h2 class="video-title">{{ videoData.videoTitle }}</h2>
           <p class="video-channel">{{ videoData.channel }}</p>
           <div class="video-meta">
             <span>{{ formatDuration(videoData.duration) }}</span>
-            <span>{{ videoData.totalSentences }} sentences</span>
+            <span>{{ $t('transcribe.sentences', { count: videoData.totalSentences }) }}</span>
           </div>
         </div>
-        <button @click="goBack" class="back-btn">← Back to Library</button>
+        <section class="keyword-panel" aria-labelledby="keyword-heading" :aria-busy="glossaryLoading">
+          <div class="keyword-heading">
+            <h2 id="keyword-heading">{{ $t('transcribe.keywords') }}</h2>
+            <span>{{ $t('transcribe.terms', { count: glossaryKeywords.length }) }}</span>
+          </div>
+          <p class="keyword-hint">{{ $t('transcribe.hint') }}</p>
+          <ul v-if="glossaryKeywords.length" class="keyword-list">
+            <li v-for="term in glossaryKeywords" :key="term.termId || term.termEn">
+              <GlossaryText :text="term.termEn" :spans="[{ ...term, start: 0, end: term.termEn.length }]" />
+            </li>
+          </ul>
+          <p v-if="glossaryLoading" class="keyword-status" role="status">{{ $t('transcribe.recognizing') }}</p>
+          <p v-else-if="glossaryError" class="keyword-status" role="status">{{ $t('transcribe.incomplete') }} <button class="glossary-retry" @click="loadGlossary">{{ $t('transcribe.retry') }}</button></p>
+          <p v-else-if="!glossaryKeywords.length" class="keyword-status">{{ $t('transcribe.empty') }}</p>
+        </section>
+        <button @click="goBack" class="back-btn">{{ $t('transcribe.back') }}</button>
       </div>
 
       <!-- Right: Transcript Reading Area -->
       <div class="right-panel">
         <div class="transcript-header">
           <div class="header-top">
-            <h1 class="transcript-title">Transcript</h1>
+            <h1 class="transcript-title">{{ $t('transcribe.transcript') }}</h1>
             <div class="header-actions">
+              <select class="export-btn" :aria-label="$t('transcribe.language')" :value="$i18n.locale" @change="changeLocale($event.target.value)">
+                <option value="en-US">English</option>
+                <option value="zh-CN">中文</option>
+              </select>
               <button class="export-btn" :disabled="summaryLoading" :aria-busy="summaryLoading" @click="generateSummary">
-                {{ summaryLoading ? 'Generating…' : 'AI Summary' }}
+                {{ $t(summaryLoading ? 'transcribe.generating' : 'transcribe.summary') }}
               </button>
               <div class="export-dropdown" ref="exportDropdown">
                 <button class="export-btn" @click="toggleExportMenu">
@@ -50,7 +69,7 @@
                     <polyline points="7 10 12 15 17 10"/>
                     <line x1="12" y1="15" x2="12" y2="3"/>
                   </svg>
-                  Export
+                  {{ $t('transcribe.export') }}
                 </button>
                 <div v-if="showExportMenu" class="export-menu">
                   <button @click="exportAs('pdf')">PDF</button>
@@ -61,23 +80,33 @@
             </div>
           </div>
           <p class="transcript-subtitle">{{ videoData.videoTitle }}</p>
+          <div class="reader-controls">
+            <div class="font-controls">
+              <button class="reader-button" :disabled="fontSize <= 12" :aria-label="$t('transcribe.smallerText')" @click="fontSize--">A−</button>
+              <span>{{ fontSize }}</span>
+              <button class="reader-button" :disabled="fontSize >= 24" :aria-label="$t('transcribe.largerText')" @click="fontSize++">A+</button>
+            </div>
+            <button class="reader-button" :aria-pressed="followPlayback" @click="toggleFollow">{{ $t('transcribe.follow') }}</button>
+            <button class="reader-button" :aria-pressed="focusReading" @click="focusReading = !focusReading">{{ $t(focusReading ? 'transcribe.exitFocus' : 'transcribe.focus') }}</button>
+            <label class="reader-toggle"><input type="checkbox" v-model="glossaryEnabled"> {{ $t('transcribe.glossary') }}</label>
+          </div>
           <div class="glossary-controls">
-            <label><input type="checkbox" v-model="glossaryEnabled"> AI 术语解释</label>
-            <span v-if="glossaryLoading" role="status">正在识别术语…</span>
-            <span v-else-if="glossaryError" role="status">术语解释暂不可用 <button class="glossary-retry" @click="loadGlossary">重试</button></span>
-            <span v-else>悬停或聚焦蓝色术语，查看中英文解释</span>
-            <span class="glossary-attribution">基础词库：<a href="https://developers.google.com/machine-learning/glossary" target="_blank" rel="noopener noreferrer">Google ML Glossary</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>）；进阶词条依据官方文档与原始论文整理，含翻译。</span>
+            <span v-if="glossaryLoading" role="status">{{ $t('transcribe.recognizing') }}</span>
+            <span v-else-if="glossaryError" role="status">{{ $t('transcribe.unavailable') }} <button class="glossary-retry" @click="loadGlossary">{{ $t('transcribe.retry') }}</button></span>
+
+            <details class="glossary-attribution"><summary>{{ $t('transcribe.aboutTerms') }}</summary><span>{{ $t('transcribe.source') }} <a href="https://developers.google.com/machine-learning/glossary" target="_blank" rel="noopener noreferrer">Google ML Glossary</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>）; {{ $t('transcribe.sourceNote') }}</span></details>
           </div>
         </div>
 
-        <section v-if="summaryVisible" class="summary-panel" aria-label="AI Summary" aria-live="polite">
-          <div class="summary-heading"><h2>AI Summary</h2><button class="export-btn" @click="summaryVisible = false" aria-label="Close summary">×</button></div>
-          <p v-if="summaryLoading" role="status">正在阅读全部字幕并生成摘要，请稍候…</p>
-          <p v-else-if="summaryError" role="alert">{{ summaryError }} <button class="export-btn" @click="generateSummary">重试</button></p>
+        <section v-if="summaryVisible" class="summary-panel" :aria-label="$t('transcribe.summary')" aria-live="polite">
+          <div class="summary-heading"><h2>{{ $t('transcribe.summary') }}</h2><button class="export-btn" @click="summaryVisible = false" :aria-label="$t('transcribe.closeSummary')">×</button></div>
+          <p v-if="summaryLoading" role="status">{{ $t('transcribe.summaryPending') }}</p>
+          <p v-else-if="summaryError" role="alert">{{ $te(summaryError) ? $t(summaryError) : summaryError }} <button class="export-btn" @click="generateSummary">{{ $t('transcribe.retry') }}</button></p>
           <div v-else class="summary-text">{{ summary }}</div>
         </section>
 
-        <div class="transcript-content" ref="transcriptContent" @click="handleTranscriptClick">
+        <div class="transcript-content" ref="transcriptContent" tabindex="0" :aria-label="$t('transcribe.transcript')" :style="{ '--reading-font-size': fontSize + 'px' }" @click="handleTranscriptClick" @wheel.passive="pauseFollowing" @touchmove.passive="pauseFollowing" @keydown="handleReadingKey" @pointerdown="handleReadingPointer">
+          <div class="reading-column">
           <div
             v-for="(paragraph, pIndex) in paragraphs"
             :key="pIndex"
@@ -94,7 +123,10 @@
               ><GlossaryText :text="sentence.text + ' '" :spans="glossaryEnabled ? (glossarySpans[sentence.id] || []) : []" :highlights="highlights.filter(h => h.sentenceId === sentence.id)" /></span>
             </p>
           </div>
+          </div>
         </div>
+
+        <button v-if="!followPlayback && currentSentenceId != null" class="return-current" @click="resumeFollowing">{{ $t('transcribe.returnCurrent') }}</button>
 
         <!-- Highlight Toolbar -->
         <div
@@ -102,25 +134,25 @@
           class="highlight-toolbar"
           :style="{ top: toolbarPosition.top + 'px', left: toolbarPosition.left + 'px' }"
         >
-          <button @click="addHighlight('yellow')" class="highlight-btn yellow" title="黄色高亮">
+          <button @click="addHighlight('yellow')" class="highlight-btn yellow" :title="$t('transcribe.yellow')">
             <span class="color-dot"></span>
           </button>
-          <button @click="addHighlight('green')" class="highlight-btn green" title="绿色高亮">
+          <button @click="addHighlight('green')" class="highlight-btn green" :title="$t('transcribe.green')">
             <span class="color-dot"></span>
           </button>
-          <button @click="addHighlight('blue')" class="highlight-btn blue" title="蓝色高亮">
+          <button @click="addHighlight('blue')" class="highlight-btn blue" :title="$t('transcribe.blue')">
             <span class="color-dot"></span>
           </button>
-          <button @click="addHighlight('pink')" class="highlight-btn pink" title="粉色高亮">
+          <button @click="addHighlight('pink')" class="highlight-btn pink" :title="$t('transcribe.pink')">
             <span class="color-dot"></span>
           </button>
         </div>
 
         <!-- Bottom floating stats -->
         <div class="reading-stats">
-          <span>{{ totalWords }} words</span>
+          <span>{{ $t('transcribe.words', { count: totalWords }) }}</span>
           <span class="dot">·</span>
-          <span>~{{ readingTime }} min read</span>
+          <span>{{ $t('transcribe.readTime', { count: readingTime }) }}</span>
         </div>
       </div>
     </div>
@@ -128,10 +160,13 @@
 </template>
 
 <script>
+import { trackPlayer, consumeLearningDetails } from '@/utils/learningAnalytics'
 import axios from '../utils/axios'
+import { setLocale } from '../i18n'
 import { loadYouTubePlayer } from '../utils/youtubePlayer'
 import { saveAs } from 'file-saver'
 import GlossaryText from '../components/GlossaryText.vue'
+import { readingParagraphs } from '../utils/readingParagraphs'
 
 export default {
   name: 'TranscribeRead',
@@ -141,7 +176,7 @@ export default {
       videoId: null,
       videoData: null,
       loading: true,
-      loadingMessage: 'Loading transcript...',
+      loadingMessage: 'transcribe.loading',
       error: null,
       player: null,
       playerReady: false,
@@ -150,6 +185,9 @@ export default {
       currentTime: 0,
       currentSentenceId: null,
       timeUpdateInterval: null,
+      fontSize: 14,
+      followPlayback: true,
+      focusReading: false,
       glossaryEnabled: true,
       glossarySpans: {},
       glossaryLoading: false,
@@ -169,19 +207,19 @@ export default {
     }
   },
   computed: {
-    paragraphs() {
-      if (!this.videoData || !this.videoData.sentences) return []
-      const sentences = this.videoData.sentences
-      const groups = []
-      for (let i = 0; i < sentences.length; i += 4) {
-        const chunk = sentences.slice(i, i + 4)
-        groups.push({
-          startTime: chunk[0].startTime,
-          endTime: chunk[chunk.length - 1].endTime,
-          sentences: chunk
-        })
+    glossaryKeywords() {
+      const terms = new Map()
+      for (const sentence of this.videoData?.sentences || []) {
+        for (const term of this.glossarySpans[sentence.id] || []) {
+          if (!term.termEn) continue
+          const key = term.termId || term.termEn.toLowerCase()
+          if (!terms.has(key)) terms.set(key, term)
+        }
       }
-      return groups
+      return [...terms.values()]
+    },
+    paragraphs() {
+      return readingParagraphs(this.videoData?.sentences || [])
     },
     totalWords() {
       if (!this.videoData || !this.videoData.sentences) return 0
@@ -197,7 +235,7 @@ export default {
     this.videoId = this.$route.query.videoId || new URLSearchParams(window.location.search).get('videoId')
 
     if (!this.videoId) {
-      this.error = 'Missing video ID parameter'
+      this.error = 'transcribe.missingId'
       this.loading = false
       return
     }
@@ -215,6 +253,7 @@ export default {
   },
   beforeUnmount() {
     this.disposed = true;
+    this.stopLearningAnalytics?.();
     this.glossaryRequest?.abort()
     if (this.timeUpdateInterval) {
       clearInterval(this.timeUpdateInterval)
@@ -226,6 +265,7 @@ export default {
     document.removeEventListener('click', this.handleDocumentClick)
   },
   methods: {
+    changeLocale: setLocale,
     async loadGlossary() {
       this.glossaryRequest?.abort()
       const request = new AbortController()
@@ -239,7 +279,7 @@ export default {
         for (let offset = 0; offset < sentences.length; offset += 80) {
           const batch = sentences.slice(offset, offset + 80)
           const { data } = await axios.post('/api/glossary/highlight', {
-            texts: batch.map(sentence => sentence.text), language: 'zh'
+            texts: batch.map(sentence => sentence.text), language: this.$i18n.locale === 'zh-CN' ? 'zh' : 'en'
           }, { signal: request.signal, timeout: 30000 })
           if (this.disposed || request.signal.aborted) return
           if (!Array.isArray(data.results) || data.results.length !== batch.length) throw new Error('Invalid glossary response')
@@ -268,18 +308,18 @@ export default {
         const { data } = await axios.post(`/api/youtube/summary/${encodeURIComponent(this.videoId)}`, null, { timeout: 0 })
         this.summary = data.summary
       } catch (err) {
-        this.summaryError = err.response?.data?.error || '摘要生成失败，请稍后重试。'
+        this.summaryError = err.response?.data?.error || 'transcribe.summaryFailed'
       } finally {
         this.summaryLoading = false
       }
     },
     async loadVideoData() {
       try {
-        this.loadingMessage = 'Checking video status...'
+        this.loadingMessage = 'transcribe.checking'
         const statusRes = await axios.get(`/api/youtube/status/${this.videoId}`)
 
         if (statusRes.data.status === 'completed') {
-          this.loadingMessage = 'Loading transcript...'
+          this.loadingMessage = 'transcribe.loading'
           const res = await axios.get(`/api/youtube/sentences/${this.videoId}`)
           if (this.disposed) return
           this.videoData = res.data
@@ -289,18 +329,18 @@ export default {
           this.initPlayer()
           this.loadGlossary()
         } else if (statusRes.data.status === 'parsing') {
-          this.error = 'Video is still being parsed. Please try again later.'
+          this.error = 'transcribe.parsing'
           this.loading = false
         } else if (statusRes.data.status === 'failed') {
-          this.error = statusRes.data.message || 'Subtitle parsing failed'
+          this.error = statusRes.data.message || 'transcribe.parseFailed'
           this.loading = false
         } else {
-          this.error = 'Subtitles not parsed yet. Please parse them first from the library.'
+          this.error = 'transcribe.notParsed'
           this.loading = false
         }
       } catch (err) {
         console.error('Failed to load video data:', err)
-        this.error = err.response?.data?.error || err.message || 'Load failed'
+        this.error = err.response?.data?.error || err.message || 'transcribe.loadError'
         this.loading = false
       }
     },
@@ -313,7 +353,7 @@ export default {
         await this.$nextTick()
         this.initPlayer()
       } catch (error) {
-        if (!this.disposed) this.playerError = 'Video player unavailable. You can still read the transcript.'
+        if (!this.disposed) this.playerError = 'transcribe.playerUnavailable'
       }
     },
 
@@ -329,6 +369,9 @@ export default {
         },
         events: {
           onReady: () => {
+            if (this.disposed) return
+            this.stopLearningAnalytics?.();
+            this.stopLearningAnalytics = trackPlayer(this.player, consumeLearningDetails());
             this.playerReady = true
             this.startTimeTracking()
           }
@@ -351,16 +394,36 @@ export default {
       if (!this.videoData || !this.videoData.sentences) return
       const t = this.currentTime
       const found = this.videoData.sentences.find(s => t >= s.startTime && t <= s.endTime)
-      this.currentSentenceId = found ? found.id : this.currentSentenceId
+      const changed = found && found.id !== this.currentSentenceId
+      if (found) this.currentSentenceId = found.id
+      if (changed && this.followPlayback) this.$nextTick(this.scrollToCurrent)
+    },
 
-      // Auto-scroll to current sentence
-      if (found) {
-        this.$nextTick(() => {
-          const el = this.$refs.transcriptContent?.querySelector('.sentence.current')
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }
-        })
+    pauseFollowing() { this.followPlayback = false },
+    handleReadingKey(event) {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) this.pauseFollowing()
+    },
+    handleReadingPointer(event) {
+      // Dragging the scrollbar is also an explicit request to browse independently.
+      if (event.target === this.$refs.transcriptContent) this.pauseFollowing()
+    },
+    toggleFollow() {
+      if (this.followPlayback) this.pauseFollowing()
+      else this.resumeFollowing()
+    },
+    resumeFollowing() {
+      this.followPlayback = true
+      this.$nextTick(() => this.scrollToCurrent(true))
+    },
+    scrollToCurrent(force = false) {
+      if (!this.followPlayback) return
+      const container = this.$refs.transcriptContent
+      const sentence = container?.querySelector('.sentence.current')
+      if (!sentence) return
+      const viewport = container.getBoundingClientRect()
+      const rect = sentence.getBoundingClientRect()
+      if (force || rect.top < viewport.top + 40 || rect.bottom > viewport.bottom - 60) {
+        container.scrollTo({ top: container.scrollTop + rect.top - viewport.top - container.clientHeight * 0.35, behavior: 'smooth' })
       }
     },
 
@@ -460,7 +523,7 @@ export default {
       const highlightEl = e.target.closest('.highlight')
       if (highlightEl) {
         const highlightId = parseInt(highlightEl.dataset.id)
-        if (highlightId && confirm('删除这个高亮？')) {
+        if (highlightId && confirm(this.$t('transcribe.deleteHighlight'))) {
           this.removeHighlight(highlightId)
         }
       }
@@ -536,7 +599,7 @@ export default {
 
     async exportAs(format) {
       this.showExportMenu = false
-      const title = this.videoData?.videoTitle || 'Transcript'
+      const title = this.videoData?.videoTitle || this.$t('transcribe.transcript')
       const safeTitle = title.replace(/[<>:"/\\|?*]/g, '_').substring(0, 100)
 
       try {
@@ -553,7 +616,7 @@ export default {
         }
       } catch (err) {
         console.error('Export failed:', err)
-        alert('导出失败: ' + err.message)
+        alert(this.$t('transcribe.exportFailed') + err.message)
       }
     },
 
@@ -798,6 +861,15 @@ export default {
   color: #137fec;
 }
 
+.keyword-panel { margin-top: 28px; padding: 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; }
+.keyword-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.keyword-heading h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.keyword-heading > span { color: #6b7280; font-size: 12px; }
+.keyword-hint, .keyword-status { margin: 10px 0 0; color: #6b7280; font-size: 12px; line-height: 1.6; }
+.keyword-list { display: flex; flex-wrap: wrap; gap: 12px 10px; margin: 16px 0 0; padding: 0; list-style: none; }
+.keyword-list li { max-width: 100%; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.keyword-list :deep(.glossary-term) { padding: 3px 7px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
 /* Right Panel */
 .right-panel {
   flex: 1;
@@ -826,7 +898,7 @@ export default {
   color: #1a1a1a;
 }
 
-.header-actions { display: flex; align-items: center; gap: 8px; }
+.header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .export-btn:disabled { opacity: .6; cursor: wait; }
 .summary-panel { margin: 16px 24px; padding: 18px; background: #f5f7ff; border: 1px solid #dce2f5; border-radius: 12px; max-height: 40vh; overflow-y: auto; flex-shrink: 0; }
 .summary-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -930,7 +1002,7 @@ export default {
 }
 
 .paragraph:hover {
-  background: #f3f4f6;
+  background: transparent;
 }
 
 .paragraph.active {
@@ -1073,7 +1145,7 @@ export default {
     min-width: unset;
     border-right: none;
     border-bottom: 1px solid #e5e7eb;
-    max-height: 50vh;
+    overflow-y: visible;
   }
 
   .right-panel {
@@ -1091,5 +1163,45 @@ export default {
   .reading-stats {
     padding: 12px 24px;
   }
+}
+</style>
+
+<style scoped>
+.right-panel { position: relative; min-width: 0; }
+.transcript-header { padding: 22px 28px 12px; }
+.transcript-title { font-size: 23px; }
+.header-top { flex-wrap: wrap; }
+.transcript-subtitle { margin-top: 8px; }
+.reader-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.reader-button { border: 1px solid #e5e7eb; border-radius: 7px; background: #fff; padding: 6px 10px; color: #475569; cursor: pointer; font: inherit; font-size: 12px; }
+.reader-button[aria-pressed="true"] { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
+.reader-button:disabled { opacity: .4; cursor: default; }
+.reader-button:focus-visible, .return-current:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+.font-controls { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #64748b; }
+.font-controls > span { min-width: 18px; text-align: center; }
+.reader-toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #64748b; cursor: pointer; }
+.glossary-controls { margin-top: 8px; gap: 6px 12px; }
+.glossary-attribution { flex-basis: auto; }
+.glossary-attribution summary { cursor: pointer; }
+.glossary-attribution > span { display: block; margin-top: 6px; max-width: 70ch; }
+.transcript-content { padding: 28px 24px 96px; scroll-behavior: smooth; }
+.reading-column { max-width: 72ch; margin: 0 auto; font-size: var(--reading-font-size, 14px); }
+.paragraph { display: block; position: relative; padding: 12px 16px 18px; margin-bottom: 12px; cursor: default; }
+.paragraph-time { display: block; width: auto; padding: 0; margin-bottom: 6px; font-size: 11px; color: #94a3b8; cursor: pointer; }
+.paragraph-text { font-size: inherit; line-height: 1.9; color: #334155; overflow-wrap: anywhere; }
+.paragraph.active { background: transparent; }
+.sentence:hover { color: inherit; }
+.sentence.current { background: #eff6ff; color: inherit; padding: 1px 0; margin: 0; }
+.transcript-content :deep(.glossary-term) { background: #fef9c3; border-bottom-color: #e7ce6c; color: inherit; }
+.transcript-content :deep(.glossary-term:hover), .transcript-content :deep(.glossary-term:focus-visible) { background: #fef08a; }
+.return-current { position: absolute; bottom: 66px; left: 50%; transform: translateX(-50%); border: 1px solid #bfdbfe; background: #fff; color: #1d4ed8; box-shadow: 0 4px 18px #0f172a14; padding: 10px 18px; border-radius: 24px; cursor: pointer; white-space: nowrap; }
+.focus-reading .right-panel { width: 100%; }
+@media (prefers-reduced-motion: reduce) { .transcript-content { scroll-behavior: auto; } }
+@media (max-width: 768px) {
+  .right-panel { height: 85dvh; min-height: 480px; flex: none; }
+  .focus-reading .right-panel { height: 100dvh; }
+  .transcript-header { padding: 18px 16px 12px; }
+  .transcript-content { padding: 18px 8px 80px; }
+  .header-actions .export-btn { font-size: 12px; padding: 7px 9px; }
 }
 </style>

@@ -69,3 +69,43 @@ GSC 与 GA 采用不同计量方法、时区、隐私处理和来源判断，放
 node --test frontend/tests/learning-analytics.test.mjs
 python3 -m unittest discover -s scripts/tests -p 'test_search_analysis.py'
 ```
+
+## 学习与付款漏斗（2026-11）
+
+沿用同一个 GA 标签。新增事件：
+
+| 事件 | 触发定义 |
+| --- | --- |
+| `video_selected` | 视频库、学习路径或字幕搜索进入学习页 |
+| `video_start` | 学习页播放器实际播放，每次材料访问一次 |
+| `learning_engaged` | 本次材料访问累计前台实际播放满 60 秒，一次 |
+| `learning_milestone` | 累计前台实际播放满 180 / 600 秒，各一次；参数 `learning_seconds` |
+| `sign_up` | 邮箱注册 API 成功后，method=email；不包含 OAuth 注册 |
+| `upgrade_clicked` | 登录用户点击 Dashboard 顶部升级入口 |
+| `begin_checkout` | Stripe checkout 创建成功且目标 URL 校验通过，即将跳转 |
+| `purchase` | 付款返回页获取当前用户后台订单，匹配返回 session 且 paid，金额 9900 分、币种 cny |
+
+原有 `start_learning` 表示入口点击，`material_opened` 表示材料/播放器加载，均不代表实际播放。
+
+播放统计覆盖 TranscribeRead、StudyWorkspace、Shadowing。每秒采样墙钟时间；暂停、后台、卡顿、明显跳转和定时器挂起不累计，倍速不使学习时长翻倍。短暂播放及状态切换有少量采样误差；刷新或重新打开材料是新访问。目前不计纯阅读停留和录音时间。句子切换保守按进度变化计数。
+
+通用参数：`ui_language`（en-US/zh-CN）、`auth_state`（guest/logged_in/unknown）。学习事件还带 `content_language`（en/zh/unknown）、`content_category`、`entry_point`（library/learning_path/search/direct）。分类上下文在 SPA 内从视频选择传递一次；直达/刷新可能为 unknown/other/direct。unknown 登录状态表示当前尚未成功获取认证结果。
+
+业务事件参数经过白名单，不发送用户 ID、邮箱、标题、字幕、笔记、搜索词、私人材料 ID 和 Stripe session。购买事件只含内部订单 UUID、currency=CNY、value=99 和固定会员 items。在内存及 localStorage 去重，并用 GA transaction_id 辅助去重。存储受限或跨设备时仍可能重复发送。
+
+付款返回页最多等待约一分钟的后台确认。用户未返回、提前关页、较晚到账或屏蔽 GA 时可能漏报，因此 GA 不代替后台财务记录。未来需要完整支付统计时，应增加服务端 Measurement Protocol 和可靠队列，不在支付 webhook 内阻塞发送。
+
+### 发布后 GA4 配置与验收
+
+1. 本地检查 `window.dataLayer`；开发域不加载生产 GA 标签。
+2. 生产使用 Google Analytics Debugger / Tag Assistant 启用调试，在 GA4 DebugView 走完整流程。购买使用独立测试 GA 属性及 Stripe 测试环境验证，不制造真实付款。
+3. 如果增强型衡量已开启自动页面历史/YouTube 视频采集，关闭对应自动采集，避免手动 page_view/video_start 重复。
+4. 创建事件范围自定义维度：ui_language、auth_state、content_language、content_category、entry_point；learning_seconds 可建自定义指标，单位秒。transaction_id 使用内建维度。
+5. 将 learning_engaged、sign_up、purchase 标为关键事件。
+6. 建漏斗：视频库 page_view → video_selected → video_start → learning_engaged；upgrade_clicked → begin_checkout → purchase。按 entry_point、语言和渠道分组；按 learning_engaged 观察后续返回学习。
+7. 按周看去重用户数和转化率，不把事件次数当用户数；新事件无法补回历史。
+
+```bash
+node --test frontend/tests/learning-analytics.test.mjs frontend/src/utils/learningAnalytics.test.js
+cd frontend && npm run build
+```

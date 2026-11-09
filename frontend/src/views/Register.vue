@@ -98,6 +98,7 @@
 </template>
 
 <script setup>
+import { track } from '@/utils/learningAnalytics'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { register, checkAuth } from '@/utils/auth'
@@ -146,6 +147,7 @@ const handleRegister = async () => {
       email: form.value.email,
       password: form.value.password
     })
+    track('sign_up')
     showAlert('Registration successful! Redirecting to login...', 'success')
     setTimeout(() => {
       router.push('/login')

@@ -97,7 +97,7 @@
 
     <main class="main-content" ref="mainContent">
       <header class="dashboard-topbar">
-        <router-link v-if="isAuthenticated" to="/dashboard/billing" class="upgrade-link">
+        <router-link v-if="isAuthenticated" to="/dashboard/billing" class="upgrade-link" @click="track('upgrade_clicked')">
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z" />
           </svg>
@@ -116,6 +116,7 @@
 </template>
 
 <script setup>
+import { track } from '@/utils/learningAnalytics'
 import BrandLogo from '@/components/BrandLogo.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
@@ -169,6 +170,7 @@ onMounted(async () => {
     const response = await axios.get('/api/auth/check')
     if (response.data.authenticated) {
       isAuthenticated.value = true
+      window.xLearningAnalytics?.setAuthenticated(true)
       userName.value = response.data.fullName || response.data.username
       userId.value = response.data.username || 'user_' + Math.random().toString(36).substr(2, 9)
       userBio.value = response.data.bio || 'Love learning, improve every day ✨'
@@ -177,6 +179,7 @@ onMounted(async () => {
       studyDays.value = Math.floor(Math.random() * 100) + 1
     } else {
       isAuthenticated.value = false
+      window.xLearningAnalytics?.setAuthenticated(false)
       userName.value = 'Guest User'
       userId.value = 'guest_' + toBase62(Date.now())
       userBio.value = ''
@@ -185,6 +188,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('Failed to fetch user info:', error)
     isAuthenticated.value = false
+    window.xLearningAnalytics?.setAuthenticated(null)
     userName.value = 'Guest User'
     userId.value = 'guest_' + toBase62(Date.now())
     userBio.value = ''
