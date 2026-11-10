@@ -317,6 +317,10 @@ public class YoutubeVideoService {
         command.add("yt-dlp");
         command.add("--ignore-config");
         command.add("--no-playlist");
+        // Subtitle metadata does not require playable media formats. Probing them can
+        // fail with HTTP 403 even when the title and caption tracks are available.
+        command.add("--no-check-formats");
+        command.add("--ignore-no-formats-error");
         
         // 检查是否有 cookies 文件
         String cookieFile = getCookieFilePath(video.getVideoId());
